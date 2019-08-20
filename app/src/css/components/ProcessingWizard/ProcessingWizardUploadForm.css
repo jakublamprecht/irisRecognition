@@ -1,0 +1,8 @@
+.wizard-form--upload {
+  display: flex;
+  flex-direction: column;
+
+  & .form-uploadField {
+    flex: 1;
+  }
+}

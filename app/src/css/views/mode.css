@@ -1,0 +1,12 @@
+.mode {
+  & .ant-menu {
+    & .nav-text {
+      text-transform: capitalize;
+    }
+  }
+
+  &-content {
+    padding: 10px;
+    height: 100%;
+  }
+}

@@ -1,0 +1,21 @@
+.home {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  & .home-icon {
+    margin-bottom: 30px;
+    font-size: 8rem;
+  }
+
+  & .home-title {
+    margin-bottom: 60px;
+    font-size: 1.4em;
+  }
+
+  & .home-start {
+    font-size: 1.3em;
+  }
+}
