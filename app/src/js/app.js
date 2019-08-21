@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import Home from './views/Home';
 import { SideMenu } from './components/SideMenu';
 import { modeMachine } from './stateMachine/modeMachine';
+import { ModeMachineContext } from './helpers/modeMachineContext';
 import * as STATES from './stateMachine/stateNames';
 
 const { Sider, Content } = Layout;
@@ -18,12 +19,12 @@ const AppWrapper = styled(Layout)`
 
 const App = () => {
   const [isMenuCollapsed, setMenuCollapsed] = useState(true);
-  const [currentAutomataState, transition, modeAutomataService] = useMachine(modeMachine);
+  const [currentModeState, transitionMode] = useMachine(modeMachine);
 
   const onCollapse = (isCollapsed) => { setMenuCollapsed(isCollapsed); };
 
   const renderView = () => {
-    switch (currentAutomataState.value) {
+    switch (currentModeState.value) {
       case STATES.HOME:
         return <Home/>;
       case STATES.HISTORY_MODE:
@@ -37,19 +38,24 @@ const App = () => {
     }
   }
   return (
-    <AppWrapper>
-      <Sider
-        collapsible
-        collapsed={isMenuCollapsed}
-        onCollapse={onCollapse}>
-        <SideMenu modeAutomataService={modeAutomataService}/>
-      </Sider>
-      <Layout>
-        <Content>
-          { renderView() }
-        </Content>
-      </Layout>
-    </AppWrapper>
+    <ModeMachineContext.Provider value={{ currentModeState, transitionMode }}>
+      <AppWrapper>
+        {
+          currentModeState !== STATES.HOME &&
+          <Sider
+            collapsible
+            collapsed={isMenuCollapsed}
+            onCollapse={onCollapse}>
+            <SideMenu/>
+          </Sider>
+        }
+        <Layout>
+          <Content>
+            { renderView() }
+          </Content>
+        </Layout>
+      </AppWrapper>
+    </ModeMachineContext.Provider>
   );
 }
 
