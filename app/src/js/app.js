@@ -1,35 +1,56 @@
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { useState } from 'react';
+import { useMachine } from '@xstate/react';
+import { Layout } from 'antd';
+import styled from 'styled-components';
+
 import Home from './views/Home';
-import Mode from './views/Mode';
-import ModeSelection from './views/ModeSelection';
+import { SideMenu } from './components/SideMenu';
+import { modeMachine } from './stateMachine/modeMachine';
 import * as STATES from './stateMachine/stateNames';
 
-const mapStateToProps = (state) => ({
-  currentMode: state.machine.value && state.machine.value.currentMode,
-});
+const { Sider, Content } = Layout;
 
-const renderView = (currentMode) => {
-  switch (currentMode) {
-    case STATES.HOME:
-      return <Home/>;
-    case STATES.MODE_SELECTION:
-      return <ModeSelection/>;
-    case STATES.HISTORY_PREVIEW:
-    case STATES.STEP_MODE: // TODO: change stepModeStates and batchModeStates to have nested states
-    case STATES.BATCH_MODE:
-      return <Mode/>;
-    default:
-      return <Home/>;
+const AppWrapper = styled(Layout)`
+  height: 100vh;
+  width: 100vw;
+  color: rgba(0, 0, 0, 0.85);
+`;
+
+const App = () => {
+  const [isMenuCollapsed, setMenuCollapsed] = useState(true);
+  const [currentAutomataState, transition, modeAutomataService] = useMachine(modeMachine);
+
+  const onCollapse = (isCollapsed) => { setMenuCollapsed(isCollapsed); };
+
+  const renderView = () => {
+    switch (currentAutomataState.value) {
+      case STATES.HOME:
+        return <Home/>;
+      case STATES.HISTORY_MODE:
+        return <div>History</div>
+      case STATES.STEP_MODE:
+        return <div>Step</div>;
+      case STATES.BATCH_MODE:
+        return <div>Batch</div>;
+      default:
+        return <div>Undefined state</div>;
+    }
   }
-}
-
-const App = ({ currentMode }) => {
   return (
-    <>
-      { renderView(currentMode) }
-    </>
+    <AppWrapper>
+      <Sider
+        collapsible
+        collapsed={isMenuCollapsed}
+        onCollapse={onCollapse}>
+        <SideMenu modeAutomataService={modeAutomataService}/>
+      </Sider>
+      <Layout>
+        <Content>
+          { renderView() }
+        </Content>
+      </Layout>
+    </AppWrapper>
   );
 }
 
-export default connect(mapStateToProps)(App);
+export default App;

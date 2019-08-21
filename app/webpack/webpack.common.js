@@ -1,6 +1,5 @@
 const path = require('path');
 const CleanPlugin = require('clean-webpack-plugin');
-const ExtractPlugin = require('mini-css-extract-plugin'); // is it needed for electron tho
 const HtmlPlugin = require('html-webpack-plugin');
 
 const resolve = (dir) => path.join(__dirname, '..', dir);
@@ -40,19 +39,8 @@ const config = {
       {
         test: /\.css$/,
         use: [
-          ExtractPlugin.loader,
-          {
-            loader: 'css-loader',
-            options: {
-              sourceMap: true,
-            },
-          },
-          {
-            loader: 'postcss-loader',
-            options: {
-              sourceMap: true,
-            },
-          },
+          'style-loader',
+          'css-loader',
         ],
       },
       {
@@ -67,9 +55,6 @@ const config = {
   },
   plugins: [
     new CleanPlugin(),
-    new ExtractPlugin({
-      filename: '[name].css',
-    }),
     new HtmlPlugin({
       template: resolve('src/template.html'),
       title: 'Iris recognition',

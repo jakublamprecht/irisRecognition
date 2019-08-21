@@ -1,7 +1,0 @@
-.fill-height {
-  display: flex;
-
-  & > *:first-child {
-    flex: 1;
-  }
-}

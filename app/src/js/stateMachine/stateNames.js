@@ -1,9 +1,8 @@
 // Modes
 export const HOME = 'HOME';
-export const MODE_SELECTION = 'MODE_SELECTION';
 export const STEP_MODE = 'STEP_MODE';
 export const BATCH_MODE = 'BATCH_MODE';
-export const HISTORY_PREVIEW = 'HISTORY_PREVIEW';
+export const HISTORY_MODE = 'HISTORY_MODE';
 
 // Common state names
 export const MODE_INACTIVE = 'MODE_INACTIVE';

@@ -3,4 +3,8 @@ module.exports = {
     '@babel/preset-env',
     '@babel/preset-react',
   ],
+  plugins: [
+    'babel-plugin-styled-components',
+    ["import", { "libraryName": "antd", "libraryDirectory": "es", "style": "css" }]
+  ],
 };
