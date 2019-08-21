@@ -41,7 +41,7 @@ const App = () => {
     <ModeMachineContext.Provider value={{ currentModeState, transitionMode }}>
       <AppWrapper>
         {
-          currentModeState !== STATES.HOME &&
+          currentModeState.value !== STATES.HOME &&
           <Sider
             collapsible
             collapsed={isMenuCollapsed}
