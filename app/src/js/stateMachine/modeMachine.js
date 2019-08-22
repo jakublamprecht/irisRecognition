@@ -1,34 +1,39 @@
 import { Machine } from 'xstate';
-import * as STATES from './stateNames';
-import * as TRANSITIONS from './transitions';
+import { batchModeStates } from './batchModeStates';
+import { MODE_STATES } from './stateNames';
+import { MODE_TRANSITIONS } from './transitions';
 
 export const modeMachine = Machine({
-  initial: [STATES.HOME],
+  initial: [MODE_STATES.HOME],
   states: {
-    [STATES.HOME]: {
+    [MODE_STATES.HOME]: {
       on: {
-        [TRANSITIONS.STEP_MODE_SELECTED]: STATES.STEP_MODE,
-        [TRANSITIONS.BATCH_MODE_SELECTED]: STATES.BATCH_MODE,
+        [MODE_TRANSITIONS.STEP_MODE_SELECTED]: MODE_STATES.STEP_MODE,
+        [MODE_TRANSITIONS.BATCH_MODE_SELECTED]: MODE_STATES.BATCH_MODE,
       },
     },
-    [STATES.HISTORY_MODE]: {
-      [TRANSITIONS.STEP_MODE_SELECTED]: STATES.STEP_MODE,
-      [TRANSITIONS.BATCH_MODE_SELECTED]: STATES.BATCH_MODE,
-    },
-    [STATES.STEP_MODE]: {
+    // Might need to move it to the Step mode and add a history state to go back to the right step
+    [MODE_STATES.HISTORY_MODE]: {
       on: {
-        [TRANSITIONS.BATCH_MODE_SELECTED]: STATES.BATCH_MODE,
-        [TRANSITIONS.HISTORY_MODE_SELECTED]: STATES.HISTORY_MODE,
+        [MODE_TRANSITIONS.STEP_MODE_SELECTED]: MODE_STATES.STEP_MODE,
+        [MODE_TRANSITIONS.BATCH_MODE_SELECTED]: MODE_STATES.BATCH_MODE,
       },
     },
-    [STATES.BATCH_MODE]: {
+    [MODE_STATES.STEP_MODE]: {
       on: {
-        [TRANSITIONS.STEP_MODE_SELECTED]: STATES.STEP_MODE,
-        [TRANSITIONS.HISTORY_MODE_SELECTED]: STATES.HISTORY_MODE,
+        [MODE_TRANSITIONS.BATCH_MODE_SELECTED]: MODE_STATES.BATCH_MODE,
+        [MODE_TRANSITIONS.HISTORY_MODE_SELECTED]: MODE_STATES.HISTORY_MODE,
       },
+    },
+    [MODE_STATES.BATCH_MODE]: {
+      on: {
+        [MODE_TRANSITIONS.STEP_MODE_SELECTED]: MODE_STATES.STEP_MODE,
+        [MODE_TRANSITIONS.HISTORY_MODE_SELECTED]: MODE_STATES.HISTORY_MODE,
+      },
+      ...batchModeStates,
     },
   },
   on: {
-    [TRANSITIONS.RETURN_HOME]: STATES.HOME,
+    [MODE_TRANSITIONS.RETURN_HOME]: MODE_STATES.HOME,
   },
 });

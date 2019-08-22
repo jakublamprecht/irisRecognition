@@ -1,86 +1,54 @@
-import * as STATES from './stateNames';
-import * as TRANSITIONS from './transitions';
+import { STEP_STEPS } from './stateNames';
+import { WIZARD_TRANSITIONS } from './transitions';
 
 export const stepModeStates = {
-  [STATES.STEP_MODE]: {
-    initial: [STATES.MODE_INACTIVE],
-    states: {
-      [STATES.MODE_INACTIVE]: {
-        on: {
-          [TRANSITIONS.STEP_MODE_SELECTED]: {
-            target: [STATES.IMAGE_SELECTION],
-            actions: ['initStepMode'],
-          },
-        },
-      },
-      [STATES.IMAGE_SELECTION]: {
-        on: {
-          [TRANSITIONS.NEXT_STEP]: STATES.STEP_PREPROCESSING,
-        },
-      },
-      [STATES.STEP_PREPROCESSING]: {
-
-      },
-      [STATES.STEP_SEGMENTATION]: {
-
-      },
-      [STATES.STEP_NORMALIZATION]: {
-
-      },
-      [STATES.STEP_ENCODING]: {
-
-      },
-      [STATES.MATCHING_SELECTION]: {
-
-      },
-      [STATES.STEP_MATCHING]: {
-
-      },
-      [STATES.STEP_RESULTS]: {
-
+  initial: [STEP_STEPS.IMAGE_SELECTION],
+  states: {
+    [STEP_STEPS.IMAGE_SELECTION]: {
+      on: {
+        [WIZARD_TRANSITIONS.NEXT]: STEP_STEPS.PREPROCESSING,
       },
     },
-    on: {
-      [TRANSITIONS.RETURN_HOME]: {
-        target: STATES.MODE_INACTIVE,
-        actions: ['flushStepModeState'],
+    [STEP_STEPS.PREPROCESSING]: {
+      on: {
+        [WIZARD_TRANSITIONS.PREVIOUS]: STEP_STEPS.IMAGE_SELECTION,
+        [WIZARD_TRANSITIONS.NEXT]: STEP_STEPS.STEP_SEGMENTATION,
+      },
+    },
+    [STEP_STEPS.STEP_SEGMENTATION]: {
+      on: {
+        [WIZARD_TRANSITIONS.PREVIOUS]: STEP_STEPS.PREPROCESSING,
+        [WIZARD_TRANSITIONS.NEXT]: STEP_STEPS.STEP_NORMALIZATION,
+      },
+    },
+    [STEP_STEPS.STEP_NORMALIZATION]: {
+      on: {
+        [WIZARD_TRANSITIONS.PREVIOUS]: STEP_STEPS.STEP_SEGMENTATION,
+        [WIZARD_TRANSITIONS.NEXT]: STEP_STEPS.STEP_ENCODING,
+      },
+    },
+    [STEP_STEPS.STEP_ENCODING]: {
+      on: {
+        [WIZARD_TRANSITIONS.PREVIOUS]: STEP_STEPS.STEP_NORMALIZATION,
+        [WIZARD_TRANSITIONS.NEXT]: STEP_STEPS.MATCHING_SELECTION,
+      },
+    },
+    [STEP_STEPS.MATCHING_SELECTION]: {
+      on: {
+        [WIZARD_TRANSITIONS.PREVIOUS]: STEP_STEPS.STEP_ENCODING,
+        [WIZARD_TRANSITIONS.NEXT]: STEP_STEPS.STEP_MATCHING,
+      },
+    },
+    [STEP_STEPS.STEP_MATCHING]: {
+      on: {
+        [WIZARD_TRANSITIONS.PREVIOUS]: STEP_STEPS.MATCHING_SELECTION,
+        [WIZARD_TRANSITIONS.NEXT]: STEP_STEPS.STEP_RESULTS,
+      },
+    },
+    [STEP_STEPS.STEP_RESULTS]: {
+      on: {
+        [WIZARD_TRANSITIONS.PREVIOUS]: STEP_STEPS.STEP_MATCHING,
       },
     },
   },
 };
-
-/*
-  This could be rewritten to sth like this:
-
-  export const stepModeStates = {
-  [STATES.STEP_MODE]: {
-    initial: STATES.STEP_IMAGE_SELECTION,
-    states: {
-      [STATES.STEP_IMAGE_SELECTION]: {
-
-      },
-      [STATES.STEP_PREPROCESSING]: {
-
-      },
-      [STATES.STEP_SEGMENTATION]: {
-
-      },
-      [STATES.STEP_NORMALIZATION]: {
-
-      },
-      [STATES.STEP_ENCODING]: {
-
-      },
-      [STATES.STEP_MATCHING]: {
-
-      },
-      [STATES.STEP_RESULTS]: {
-
-      },
-    },
-    on: {
-      [TRANSITIONS.RETURN_HOME]: STATES.HOME,
-    }
-  },
-};
-*/

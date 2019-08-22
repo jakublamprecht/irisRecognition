@@ -14,7 +14,7 @@ export const CardModeName = styled.p`
   text-transform: uppercase;
   font-size: 20px;
   font-weight: bold;
-  color: #595959;
+  color: #40a9ff;
 `;
 
 export const CardWrapper = styled.div`
@@ -26,7 +26,7 @@ export const CardWrapper = styled.div`
   height: 150px;
   padding: 25px;
   margin: 20px;
-  border: 1px solid #40a9ff;
+  background-color: #001529;
   border-radius: 10px;
   cursor: pointer;
 
