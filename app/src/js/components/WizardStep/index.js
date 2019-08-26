@@ -1,30 +1,38 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Icon } from 'antd';
+import { ModeMachineContext } from '../../helpers/modeMachineContext';
 import { WIZARD_TRANSITIONS } from '../../stateMachine/transitions';
+import {
+  WizardStepWrapper,
+  WizardStepContentWrapper,
+  WizardButtonsWrapper,
+  WizardButton,
+} from './styles';
 
-export const WizardStep = ({ children, isFirst, isLast }) => {
+export const WizardStep = ({ children, isFirst, isLast, onNextTransition, onPreviousTransition }) => {
+  const { transitionMode } = useContext(ModeMachineContext);
   const goToNextStep = () => transitionMode(WIZARD_TRANSITIONS.NEXT);
   const goToPreviousStep = () => transitionMode(WIZARD_TRANSITIONS.PREVIOUS);
 
   // TODO: add guards on next clicks
   const onNextClick = () => {
-    if (config[currentStep].onNextClick) {
-      config[currentStep].onNextClick();
+    if (onNextTransition) {
+      onNextTransition();
     }
 
     goToNextStep();
   };
 
   const onPrevClick = () => {
-    if (config[currentStep].onNextClick) {
-      config[currentStep].onPrevClick();
+    if (onPreviousTransition) {
+      onPreviousTransition();
     }
 
     goToPreviousStep();
   };
 
   return (
-    <>
+    <WizardStepWrapper>
       <WizardStepContentWrapper>
         { children }
       </WizardStepContentWrapper>
@@ -42,6 +50,6 @@ export const WizardStep = ({ children, isFirst, isLast }) => {
           </WizardButton>
         }
       </WizardButtonsWrapper>
-    </>
+    </WizardStepWrapper>
   );
 };

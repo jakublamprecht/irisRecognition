@@ -8,14 +8,14 @@ const UploadWrapper = styled(Upload)`
   };
 `;
 
-export const MultipleImageUpload = ({ buttonLabel }) => {
+export const MultipleUpload = ({ buttonLabel, fileList, onFilesChange }) => {
   const uploadConfig = {
     accept: '.png,.bmp,.tiff,.jpg,.jpeg',
     multiple: true,
     listType: 'picture',
-    beforeUpload: (file) => {
-      return false;
-    }
+    fileList: fileList,
+    onChange: onFilesChange,
+    beforeUpload: () => false,
   };
 
   return (

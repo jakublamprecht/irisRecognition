@@ -9,6 +9,8 @@ const initialState = {
 
 export const batchModeReducer = (state = initialState, action) => {
   switch (action.type) {
+    case BATCH_MODE_ACTION_TYPES.FLUSH_STATE:
+      return initialState;
     case BATCH_MODE_ACTION_TYPES.SET_PROCESSING_IMAGES:
       return {
         ...state,

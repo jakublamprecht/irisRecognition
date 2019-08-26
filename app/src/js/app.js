@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
+import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
 import { useMachine } from '@xstate/react';
 import { Layout } from 'antd';
-import styled from 'styled-components';
 
 import { Home } from './views/Home';
 import { BatchMode } from './views/BatchMode';
@@ -11,8 +12,10 @@ import { SideMenu } from './components/SideMenu';
 import { modeMachine } from './stateMachine/modeMachine';
 import { ModeMachineContext } from './helpers/modeMachineContext';
 import { MODE_STATES } from './stateMachine/stateNames';
+import { flushBatchModeState } from './actions/batchModeActions';
+import { flushStepModeState } from './actions/stepModeActions';
 
-const { Sider, Content } = Layout;
+const { Content } = Layout;
 
 const AppWrapper = styled(Layout)`
   height: 100vh;
@@ -29,10 +32,14 @@ const FullHeightContent = styled(Content)`
 `
 
 const App = () => {
-  const [isMenuCollapsed, setMenuCollapsed] = useState(true);
-  const [currentModeState, transitionMode] = useMachine(modeMachine);
-
-  const onCollapse = (isCollapsed) => { setMenuCollapsed(isCollapsed); };
+  const dispatch = useDispatch();
+  const [currentModeState, transitionMode] = useMachine(modeMachine, {
+    actions: {
+      /* This will cause the state to be flushed if we move to history mode unless history mode is moved to step mode */
+      flushStepModeState: () => dispatch(flushStepModeState()),
+      flushBatchModeState: () => dispatch(flushBatchModeState()),
+    },
+  });
 
   const renderView = () => {
     switch (true) {
@@ -54,12 +61,7 @@ const App = () => {
       <AppWrapper>
         {
           !currentModeState.matches(MODE_STATES.HOME) &&
-          <Sider
-            collapsible
-            collapsed={isMenuCollapsed}
-            onCollapse={onCollapse}>
-            <SideMenu/>
-          </Sider>
+          <SideMenu/>
         }
         <FullHeightLayout>
           <FullHeightContent>

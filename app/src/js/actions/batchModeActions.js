@@ -1,6 +1,6 @@
 import { BATCH_MODE_ACTION_TYPES } from '../constants/actionTypes';
 
-export const batchFlushState = () => ({
+export const flushBatchModeState = () => ({
   type: BATCH_MODE_ACTION_TYPES.FLUSH_STATE,
 });
 

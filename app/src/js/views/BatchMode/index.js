@@ -2,27 +2,24 @@ import React from 'react';
 import { Mode } from '../../components/Mode';
 import { Wizard } from '../../components/Wizard';
 import { BATCH_STEPS } from '../../stateMachine/stateNames';
-import { ProcessedImageSelection } from './steps/ProcessedImageSelection';
-import { MatchingImageSelection } from './steps/MatchingImageSelection';
-import { ConfigSelection } from './steps/ConfigSelection';
-import { Processing } from './steps/Processing';
+import { stepComponents } from './steps';
 
 const batchWizardConfig = {
   [BATCH_STEPS.PROCESSED_IMAGE_SELECTION]: {
     title: 'Processed Images',
-    content: <ProcessedImageSelection/>,
+    content: stepComponents.ProcessingImagesSelection,
   },
   [BATCH_STEPS.MATCH_IMAGE_SELECTION]: {
     title: 'Matched images',
-    content: <MatchingImageSelection/>,
+    content: stepComponents.MatchingImagesSelection,
   },
   [BATCH_STEPS.CONFIGURATION_SELECTION]: {
     'title': 'Configuration',
-    content: <ConfigSelection/>,
+    content: stepComponents.ConfigSelection,
   },
   [BATCH_STEPS.PROCESSING]: {
     title: 'Processing',
-    content: <Processing/>,
+    content: stepComponents.Processing,
   },
   [BATCH_STEPS.RESULTS_PREVIEW]: {
     title: 'Results',
