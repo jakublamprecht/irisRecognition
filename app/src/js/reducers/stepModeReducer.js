@@ -5,7 +5,7 @@ const initialState = {
   [STEP_STEPS.IMAGE_SELECTION]: {
     processingImage: '',
   },
-  [STEP_STEPS.PREPROCESSING]: {},
+  [STEP_STEPS.PREPROCESSING]: [],
   historyImages: {},
 };
 

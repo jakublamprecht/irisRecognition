@@ -1,42 +1,86 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Col } from 'antd';
+import { Icon } from 'antd';
 
 import { getStepData } from '../../../../helpers/stepModeHelpers';
 import { WizardStep } from '../../../../components/WizardStep';
 import { ImagePreview } from '../../../../components/StepMode/ImagePreview';
-import { MethodSelector } from '../../../../components/StepMode/MethodSelector';
+import { setStepData } from '../../../../actions/stepModeActions';
 import { METHOD_IDS, methodConfigs } from './methods';
+import { ButtonsWrapper, ActionButton, Column, MethodSwitcher } from './styles';
 
 export const Preprocessing = (props) => {
+  const DEFAULT_METHOD = METHOD_IDS.GAUSS;
   const { stepId } = props;
   const dispatch = useDispatch();
-  const preprocessingData = useSelector(getStepData(stepId));
-  // The question is whether we need a local state to keep track or we can just keep everything in the redux
-  // If we keep everything in the redux we won't know whether the processing happened
-  // in this case i think redux should be the place where history data is kept (like params of already performed actions)
-  // but shouldn't the defaults be within forms/components and they will be saved into the redux on confirmation? Then we don't need the local state i guess
-  const [currentData, setCurrentData] = useState({
-    method: '',
+  const preprocessingSavedData = useSelector(getStepData(stepId));
+  const lastSavedData = preprocessingSavedData.slice(-1)[0] || {};
+
+  const defaultData = {
+    method: DEFAULT_METHOD,
     methodParams: {},
-  });
+  };
 
-  const onMethodChange = () => {
+  const initialData = {
+    method: lastSavedData.method || defaultData.method,
+    methodParams: lastSavedData.methodParams || defaultData.methodParams,
+  };
 
+  const [data, setData] = useState(initialData);
+
+  const onMethodChange = (methodId) => {
+    setData({
+      method: methodId,
+      methodParams: {},
+    });
+  };
+
+  const onParamsChange = (newParams) => {
+    setData({
+      method: data.method,
+      methodParams: newParams,
+    });
+  };
+
+  const revertLastProcess = () => {
+    const newSavedData = preprocessingSavedData.slice(0, -1);
+    const newLastSavedData = newSavedData.slice(-1)[0] || defaultData;
+
+    dispatch(setStepData(stepId, newSavedData));
+    setData(newLastSavedData);
+  };
+
+  const addNewProcess = () => {
+    const newSavedData = [...preprocessingSavedData, data];
+
+    dispatch(setStepData(stepId, newSavedData));
   };
 
   return (
     <WizardStep {...props}>
-      <Col span={10}>
+      <Column span={10}>
         <ImagePreview/>
-      </Col>
-      <Col span={14}>
-        <MethodSelector
+      </Column>
+      <Column span={14}>
+        <MethodSwitcher
+          selectorTitle='Select preprocessing method:'
           methods={methodConfigs}
-          defaultMethod={METHOD_IDS.GAUSS}
+          methodData={data}
           onMethodChange={onMethodChange}
+          onParamsChange={onParamsChange}
         />
-      </Col>
+        <ButtonsWrapper>
+          {
+            lastSavedData.method &&
+            <ActionButton onClick={revertLastProcess}>
+              Revert last <Icon type='rollback'/>
+            </ActionButton>
+          }
+          <ActionButton type='primary' onClick={addNewProcess}>
+            Add new <Icon type='plus'/>
+          </ActionButton>
+        </ButtonsWrapper>
+      </Column>
     </WizardStep>
   );
 };

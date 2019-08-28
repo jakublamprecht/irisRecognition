@@ -20,3 +20,20 @@ export const gaussianBlur = (filePath, { kernelWidth, kernelHeight, sigmaX, sigm
     },
   })
 );
+
+export const medianBlur = (filePath, { kernelSize }) => (
+  API.get('/median', {
+    params: {
+      filePath,
+      kernelSize,
+    },
+  })
+);
+
+export const normalizeHistogram = (filePath) => (
+  API.get('/histnorm', {
+    params: {
+      filePath,
+    },
+  })
+);
