@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { uploadFile } from '../../../../api';
 import { WizardStep } from '../../../../components/WizardStep';
 import { SingleUpload, MODE } from '../../../../components/Upload/SingleUpload';
 import { UploadImagePreview, UploadIcon, MainText } from '../../../../components/Upload/styles';
@@ -10,11 +11,13 @@ export const ImageSelection = (props) => {
   const { stepId } = props;
   const dispatch = useDispatch();
   const imageSelectionData = useSelector((state) => state.stepMode[stepId]);
-  const { processingImage } = imageSelectionData;
+  const { selectedImage, proxyImage } = imageSelectionData;
 
   const onFileChange = ({ file }) => {
-    dispatch(setStepData(stepId, { processingImage: file.path }));
-    dispatch(addHistoryImage(stepId, file.path));
+    dispatch(setStepData(stepId, {
+      selectedImage: file.path,
+      proxyImage: '',
+    }));
   };
 
   const renderNoFile = () => (
@@ -41,11 +44,34 @@ export const ImageSelection = (props) => {
     </>
   );
 
+  const isFileSelected = () => {
+    const canTransition = !!selectedImage;
+    const description = canTransition ? 'Success' : 'Please select a file before going to the next step.';
+
+    return {
+      canTransition,
+      description,
+    };
+  };
+
+  const saveUploadFile = async () => {
+    if (selectedImage && !proxyImage) {
+      return uploadFile(selectedImage).then(({ data }) => {
+        dispatch(setStepData(stepId, {
+          selectedImage: selectedImage,
+          proxyImage: data.image,
+        }));
+      });
+    }
+  };
+
   return (
-    <WizardStep {...props}>
+    <WizardStep {...props}
+      nextTransitionGuard={isFileSelected}
+      onNextTransition={saveUploadFile}>
       <SingleUpload
         mode={MODE.IMAGE}
-        file={processingImage}
+        file={selectedImage}
         onFileChange={onFileChange}
         renderNoFile={renderNoFile}
         renderFileSelected={renderFileSelected}

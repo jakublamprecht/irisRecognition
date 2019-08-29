@@ -1,13 +1,29 @@
+import * as path from 'path';
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { Button, Icon } from 'antd';
+import { Image, PreviewWrapper, ButtonsWrapper } from './styles';
 
-import { Image } from './styles';
+export const ImagePreview = ({ srcImage }) => {
+  const saveImage = () => {
+    const fileName = path.basename(srcImage);
+    const link = document.createElement('a');
 
-export const ImagePreview = () => {
-  // Will this preserve the required order of the images? Also keep in mind that the value of the object can also be an array like in preprocessing
-  const previewImage = useSelector((state) => Object.values(state.stepMode.historyImages).slice(-1)[0]);
+    link.setAttribute('download', fileName);
+    link.setAttribute('href', srcImage);
+    link.click();
+  }
 
   return (
-    <Image src={previewImage}/>
+    <PreviewWrapper>
+      <Image src={srcImage}/>
+      {
+        srcImage &&
+        <ButtonsWrapper>
+          <Button type='primary' onClick={saveImage}>
+            Save <Icon type='save'/>
+          </Button>
+        </ButtonsWrapper>
+      }
+    </PreviewWrapper>
   );
 };

@@ -3,7 +3,8 @@ import { STEP_MODE_ACTION_TYPES } from '../constants/actionTypes';
 
 const initialState = {
   [STEP_STEPS.IMAGE_SELECTION]: {
-    processingImage: '',
+    selectedImage: '',
+    proxyImage: '',
   },
   [STEP_STEPS.PREPROCESSING]: [],
   historyImages: {},
@@ -20,6 +21,11 @@ export const stepModeReducer = (state = initialState, action) => {
           ...state.historyImages,
           [action.stepId]: action.image,
         },
+      };
+    case STEP_MODE_ACTION_TYPES.CLEAR_STEP_DATA:
+      return {
+        ...state,
+        [action.stepId]: initialState[action.stepId],
       };
     case STEP_MODE_ACTION_TYPES.SET_STEP_DATA:
       return {

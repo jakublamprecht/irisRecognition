@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from processing.gauss import gauss
+from processing.preprocessing.gauss import gauss
 import cv2
 from os import path
 
@@ -16,7 +16,7 @@ class Gauss(Resource):
 
         srcPath = args['filePath']
         sigmaX = args['sigmaX']
-        srcFile = cv2.imread(srcPath)
+        srcFile = cv2.imread(srcPath, cv2.CV_8UC1)
         processedImage = gauss(srcFile, 5, 5, sigmaX, 0)
 
         fileNameWithExt = path.basename(srcPath)
@@ -25,4 +25,7 @@ class Gauss(Resource):
         finalImagePath = path.join(filePath, 'gauss{}'.format(fileExt))
         cv2.imwrite(finalImagePath, processedImage)
 
-        return {'filePath': finalImagePath}
+        return {
+            'workingImage': filePath,
+            'processedImage': finalImagePath
+        }

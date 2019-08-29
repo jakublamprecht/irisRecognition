@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Icon } from 'antd';
 
+import { STEP_STEPS } from '../../../../stateMachine/stateNames';
 import { getStepData } from '../../../../helpers/stepModeHelpers';
 import { WizardStep } from '../../../../components/WizardStep';
 import { ImagePreview } from '../../../../components/StepMode/ImagePreview';
-import { setStepData } from '../../../../actions/stepModeActions';
+import { setStepData, clearStepData } from '../../../../actions/stepModeActions';
 import { METHOD_IDS, methodConfigs } from './methods';
 import { ButtonsWrapper, ActionButton, Column, MethodSwitcher } from './styles';
 
@@ -16,20 +17,26 @@ export const Preprocessing = (props) => {
   const preprocessingSavedData = useSelector(getStepData(stepId));
   const lastSavedData = preprocessingSavedData.slice(-1)[0] || {};
 
+  const { proxyImage } = useSelector((state) => state.stepMode[STEP_STEPS.IMAGE_SELECTION]);
+
   const defaultData = {
     method: DEFAULT_METHOD,
     methodParams: {},
+    image: proxyImage,
   };
 
   const initialData = {
     method: lastSavedData.method || defaultData.method,
     methodParams: lastSavedData.methodParams || defaultData.methodParams,
+    image: lastSavedData.image || defaultData.image,
   };
 
   const [data, setData] = useState(initialData);
+  const currentMethodHandler = methodConfigs[data.method].handler || function(){};
 
   const onMethodChange = (methodId) => {
     setData({
+      ...data,
       method: methodId,
       methodParams: {},
     });
@@ -37,7 +44,7 @@ export const Preprocessing = (props) => {
 
   const onParamsChange = (newParams) => {
     setData({
-      method: data.method,
+      ...data,
       methodParams: newParams,
     });
   };
@@ -51,15 +58,28 @@ export const Preprocessing = (props) => {
   };
 
   const addNewProcess = () => {
-    const newSavedData = [...preprocessingSavedData, data];
+    return currentMethodHandler(data.image, data.methodParams)
+      .then((response) => {
+        const { processedImage } = response.data;
+        const newCurrentData = {
+          ...data,
+          image: processedImage,
+        };
+        const newSavedData = [...preprocessingSavedData, newCurrentData];
 
-    dispatch(setStepData(stepId, newSavedData));
+        setData(newCurrentData);
+        dispatch(setStepData(stepId, newSavedData));
+      });
+  };
+
+  const onPreviousTransition = () => {
+    dispatch(clearStepData(stepId));
   };
 
   return (
-    <WizardStep {...props}>
+    <WizardStep {...props} onPreviousTransition={onPreviousTransition}>
       <Column span={10}>
-        <ImagePreview/>
+        <ImagePreview srcImage={data.image}/>
       </Column>
       <Column span={14}>
         <MethodSwitcher

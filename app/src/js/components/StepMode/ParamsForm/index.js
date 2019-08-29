@@ -68,8 +68,7 @@ export const ParamsForm = Form.create({
   },
   mapPropsToFields(props) {
     // Two way binding between the Step methodData and the form
-    const { methodData, onParamsChange, fields } = props;
-    const { methodParams } = methodData;
+    const { methodParams, onParamsChange, fields } = props;
 
     // Checks the methodParams and if it's empty changes it to initial values
     if (Object.entries(methodParams).length === 0 && methodParams.constructor === Object) {

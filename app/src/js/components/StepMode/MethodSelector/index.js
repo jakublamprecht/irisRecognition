@@ -4,7 +4,7 @@ import { MethodSelect, Title } from './styles';
 const { Option } = MethodSelect;
 
 export const MethodSelector = ({ className, methods, selectorTitle, methodData, onMethodChange, onParamsChange }) => {
-  const { method } = methodData;
+  const { method, methodParams } = methodData;
 
   const renderMethods = () => {
     return Object.entries(methods).map(([methodId, methodData]) => (
@@ -21,7 +21,7 @@ export const MethodSelector = ({ className, methods, selectorTitle, methodData, 
         !methods[method].noParams &&
         <>
           <Title>Select parameters:</Title>
-          <CurrentMethodForm onParamsChange={onParamsChange} methodData={methodData}/>
+          <CurrentMethodForm onParamsChange={onParamsChange} methodParams={methodParams}/>
         </>
         } {
           methods[method].noParams &&

@@ -15,3 +15,8 @@ export const setStepData = (stepId, data) => ({
   stepId,
   data,
 });
+
+export const clearStepData = (stepId) => ({
+  type: STEP_MODE_ACTION_TYPES.CLEAR_STEP_DATA,
+  stepId,
+});
