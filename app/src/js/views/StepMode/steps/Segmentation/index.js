@@ -1,35 +1,37 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Icon } from 'antd';
+import { Icon, Tooltip } from 'antd';
 
-import { STEP_STEPS } from '../../../../stateMachine/stateNames';
 import { getStepData } from '../../../../helpers/stepModeHelpers';
+import { STEP_STEPS } from '../../../../stateMachine/stateNames';
 import { WizardStep } from '../../../../components/WizardStep';
 import { ImagePreview } from '../../../../components/StepMode/ImagePreview';
-import { setStepData, clearStepData } from '../../../../actions/stepModeActions';
 import { ButtonsWrapper, ActionButton, Column, MethodSwitcher } from '../../../../components/WizardStep/styles';
-
+import { setStepData, clearStepData } from '../../../../actions/stepModeActions';
 import { METHOD_IDS, methodConfigs } from './methods';
 
-export const Preprocessing = (props) => {
-  const DEFAULT_METHOD = METHOD_IDS.GAUSS;
+export const Segmentation = (props) => {
+  const DEFAULT_METHOD = METHOD_IDS.HOUGH;
   const { stepId } = props;
   const dispatch = useDispatch();
-  const preprocessingSavedData = useSelector(getStepData(stepId));
-  const lastSavedData = preprocessingSavedData.slice(-1)[0] || {};
+  const segmentationSavedData = useSelector(getStepData(stepId)) || {};
 
-  const { proxyImage } = useSelector((state) => state.stepMode[STEP_STEPS.IMAGE_SELECTION]);
+  const lastSavedPreprocessing = useSelector(getStepData(STEP_STEPS.PREPROCESSING)).slice(-1)[0] || {}
+  const lastSavedImage = lastSavedPreprocessing.image || useSelector(getStepData(STEP_STEPS.IMAGE_SELECTION)).proxyImage;
 
   const defaultData = {
     method: DEFAULT_METHOD,
     methodParams: {},
-    image: proxyImage,
+    image: lastSavedImage,
+    // should result data be kept here also? or just in redux somwhere else?
+    // If only in redux in a separate place, then what about onPreviousTransition
+    // Maybe something like "stepData" and "resultData" in redux and they would have a key for each of the steps
   };
 
   const initialData = {
-    method: lastSavedData.method || defaultData.method,
-    methodParams: lastSavedData.methodParams || defaultData.methodParams,
-    image: lastSavedData.image || defaultData.image,
+    method: segmentationSavedData.method || defaultData.method,
+    methodParams: segmentationSavedData.methodParams || defaultData.methodParams,
+    image: segmentationSavedData.image || defaultData.image,
   };
 
   const [data, setData] = useState(initialData);
@@ -51,11 +53,8 @@ export const Preprocessing = (props) => {
   };
 
   const revertLastProcess = () => {
-    const newSavedData = preprocessingSavedData.slice(0, -1);
-    const newLastSavedData = newSavedData.slice(-1)[0] || defaultData;
-
-    dispatch(setStepData(stepId, newSavedData));
-    setData(newLastSavedData);
+    setData(defaultData);
+    dispatch(setStepData(stepId, defaultData));
   };
 
   const addNewProcess = () => {
@@ -66,10 +65,9 @@ export const Preprocessing = (props) => {
           ...data,
           image: processedImage,
         };
-        const newSavedData = [...preprocessingSavedData, newCurrentData];
 
         setData(newCurrentData);
-        dispatch(setStepData(stepId, newSavedData));
+        dispatch(setStepData(stepId, newCurrentData));
       });
   };
 
@@ -84,7 +82,7 @@ export const Preprocessing = (props) => {
       </Column>
       <Column span={14}>
         <MethodSwitcher
-          selectorTitle='Select preprocessing method:'
+          selectorTitle='Select segmentation method:'
           methods={methodConfigs}
           methodData={data}
           onMethodChange={onMethodChange}
@@ -92,14 +90,16 @@ export const Preprocessing = (props) => {
         />
         <ButtonsWrapper>
           {
-            lastSavedData.method &&
+            segmentationSavedData.method &&
             <ActionButton onClick={revertLastProcess}>
-              Revert last <Icon type='rollback'/>
+              Reset <Icon type='rollback'/>
             </ActionButton>
           }
-          <ActionButton type='primary' onClick={addNewProcess}>
-            Add new <Icon type='plus'/>
-          </ActionButton>
+          <Tooltip placement='topRight' title='This will override previous segmentation process.'>
+            <ActionButton type='primary' onClick={addNewProcess}>
+              Process <Icon type='plus'/>
+            </ActionButton>
+          </Tooltip>
         </ButtonsWrapper>
       </Column>
     </WizardStep>

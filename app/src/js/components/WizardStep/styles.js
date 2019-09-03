@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { Row, Button } from 'antd';
+import { Row, Button, Col } from 'antd';
+import { MethodSelector } from '../StepMode/MethodSelector';
 
 export const WizardStepWrapper = styled(Row)`
   flex: 1;
@@ -21,5 +22,27 @@ export const WizardButtonsWrapper = styled.div`
 `;
 
 export const WizardButton = styled(Button)`
+  margin-left: 5px;
+`;
+
+// Common styling for Content of steps
+
+export const Column = styled(Col)`
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100%;
+`;
+
+export const MethodSwitcher = styled(MethodSelector)`
+  flex: 1;
+`;
+
+export const ButtonsWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 15px;
+`;
+
+export const ActionButton = styled(Button)`
   margin-left: 5px;
 `;

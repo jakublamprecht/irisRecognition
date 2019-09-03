@@ -1,5 +1,6 @@
 from flask_restful import Resource, reqparse
 from processing.preprocessing.histogramNorm import histogramNorm
+from utils.getNewFilePath import getNewFilePath
 import cv2
 from os import path
 
@@ -10,16 +11,14 @@ class HistogramNorm(Resource):
         args = parser.parse_args()
 
         srcPath = args['filePath']
+
         srcFile = cv2.imread(srcPath, cv2.CV_8UC1)
         processedImage = histogramNorm(srcFile)
+        newFilePath = getNewFilePath(srcPath, 'preprocessing-histogram')
 
-        fileNameWithExt = path.basename(srcPath)
-        fileName, fileExt = path.splitext(fileNameWithExt)
-        filePath, dump = path.split(srcPath)
-        finalImagePath = path.join(filePath, 'histogramNorm{}'.format(fileExt))
-        cv2.imwrite(finalImagePath, processedImage)
+        cv2.imwrite(newFilePath, processedImage)
 
         return {
-            'workingImage': filePath,
-            'processedImage': finalImagePath
+            'workingImage': srcPath,
+            'processedImage': newFilePath
         }

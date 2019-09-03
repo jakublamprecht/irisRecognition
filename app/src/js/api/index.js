@@ -30,6 +30,15 @@ export const medianBlur = (filePath, { kernelSize }) => (
   })
 );
 
+export const filter2D = (filePath, { kernelSize }) => (
+  API.get('/filter2D', {
+    params: {
+      filePath,
+      kernelSize,
+    },
+  })
+);
+
 export const normalizeHistogram = (filePath) => (
   API.get('/histnorm', {
     params: {

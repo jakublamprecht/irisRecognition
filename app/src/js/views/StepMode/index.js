@@ -16,24 +16,31 @@ const stepWizardConfig = {
   },
   [STEP_STEPS.SEGMENTATION]: {
     'title': 'Segmentation',
+    content: stepComponents.Segmentation,
   },
   [STEP_STEPS.NORMALIZATION]: {
     title: 'Normalization',
+    content: <></>,
   },
   [STEP_STEPS.ENCODING]: {
     title: 'Encoding',
+    content: <></>,
   },
   [STEP_STEPS.MATCHING_IMAGE_SELECTION]: {
     title: 'Matched Images',
+    content: <></>,
   },
   [STEP_STEPS.MATCHING]: {
     title: 'Matching',
+    content: <></>,
   },
   [STEP_STEPS.PROCESSING]: {
     title: 'Processing',
+    content: <></>,
   },
   [STEP_STEPS.RESULTS_PREVIEW]: {
     title: 'Results',
+    content: <></>,
   },
 };
 
