@@ -20,27 +20,27 @@ const stepWizardConfig = {
   },
   [STEP_STEPS.NORMALIZATION]: {
     title: 'Normalization',
-    content: <></>,
+    content: stepComponents.Normalization,
   },
   [STEP_STEPS.ENCODING]: {
     title: 'Encoding',
-    content: <></>,
+    content: stepComponents.Encoding,
   },
   [STEP_STEPS.MATCHING_IMAGE_SELECTION]: {
     title: 'Matched Images',
-    content: <></>,
+    content: stepComponents.MatchingImagesSelection,
   },
   [STEP_STEPS.MATCHING]: {
     title: 'Matching',
-    content: <></>,
+    content: stepComponents.Matching,
   },
   [STEP_STEPS.PROCESSING]: {
     title: 'Processing',
-    content: <></>,
+    content: stepComponents.MatchingProcessing,
   },
   [STEP_STEPS.RESULTS_PREVIEW]: {
     title: 'Results',
-    content: <></>,
+    content: stepComponents.Results,
   },
 };
 

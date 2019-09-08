@@ -1,9 +1,9 @@
 import * as path from 'path';
 import React from 'react';
 import { Button, Icon } from 'antd';
-import { Image, PreviewWrapper, ButtonsWrapper } from './styles';
+import { Image, PreviewWrapper, ButtonsWrapper, EmptyImage, EmptyContent } from './styles';
 
-export const ImagePreview = ({ srcImage }) => {
+export const ImagePreview = ({ className, srcImage }) => {
   const saveImage = () => {
     const fileName = path.basename(srcImage);
     const link = document.createElement('a');
@@ -14,15 +14,26 @@ export const ImagePreview = ({ srcImage }) => {
   }
 
   return (
-    <PreviewWrapper>
-      <Image src={srcImage}/>
+    <PreviewWrapper className={className}>
       {
         srcImage &&
-        <ButtonsWrapper>
-          <Button type='primary' onClick={saveImage}>
-            Save <Icon type='save'/>
-          </Button>
-        </ButtonsWrapper>
+        <>
+          <Image src={srcImage}/>
+          <ButtonsWrapper>
+            <Button type='primary' onClick={saveImage}>
+              Save <Icon type='save'/>
+            </Button>
+          </ButtonsWrapper>
+        </>
+      }
+      {
+        !srcImage &&
+        <EmptyImage>
+          <EmptyContent>
+            <Icon type='file-image'/>
+            <p>Image not available</p>
+          </EmptyContent>
+        </EmptyImage>
       }
     </PreviewWrapper>
   );

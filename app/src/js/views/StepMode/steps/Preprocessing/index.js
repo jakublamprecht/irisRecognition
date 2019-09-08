@@ -7,7 +7,7 @@ import { getStepData } from '../../../../helpers/stepModeHelpers';
 import { WizardStep } from '../../../../components/WizardStep';
 import { ImagePreview } from '../../../../components/StepMode/ImagePreview';
 import { setStepData, clearStepData } from '../../../../actions/stepModeActions';
-import { ButtonsWrapper, ActionButton, Column, MethodSwitcher } from '../../../../components/WizardStep/styles';
+import { ButtonsWrapper, ActionButton, Column, PaddedColumn, MethodSwitcher } from '../../../../components/WizardStep/styles';
 
 import { METHOD_IDS, methodConfigs } from './methods';
 
@@ -79,9 +79,9 @@ export const Preprocessing = (props) => {
 
   return (
     <WizardStep {...props} onPreviousTransition={onPreviousTransition}>
-      <Column span={10}>
+      <PaddedColumn span={10}>
         <ImagePreview srcImage={data.image}/>
-      </Column>
+      </PaddedColumn>
       <Column span={14}>
         <MethodSwitcher
           selectorTitle='Select preprocessing method:'

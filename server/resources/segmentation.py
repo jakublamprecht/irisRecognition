@@ -1,31 +1,32 @@
 from flask_restful import Resource, reqparse
-from processing.preprocessing.gauss import gauss
+from processing.segmentation.segmentacja_teczowki import segmentation
 from utils.getNewFilePath import getNewFilePath
 import cv2
 
-class Gauss(Resource):
+class Segmentation(Resource):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('filePath', type=str)
-        parser.add_argument('kernelWidth', type=int)
-        parser.add_argument('kernelHeight', type=int)
-        parser.add_argument('sigmaX', type=int)
-        parser.add_argument('sigmaY', type=int)
+        parser.add_argument('segmentationMethod', type=str)
+        parser.add_argument('noiseMethod', type=str)
         args = parser.parse_args()
 
         srcPath = args['filePath']
-        kernelWidth = args['kernelWidth']
-        kernelHeight = args['kernelHeight']
-        sigmaX = args['sigmaX']
-        sigmaY = args['sigmaY']
+        segmentationMethod = args['segmentationMethod']
+        noiseMethod = args['noiseMethod']
 
         srcImage = cv2.imread(srcPath, cv2.CV_8UC1)
-        processedImage = gauss(srcImage, kernelWidth, kernelHeight, sigmaX, sigmaY)
-        newFilePath = getNewFilePath(srcPath, 'preprocessing-gauss')
+        segmentationResults, mask, maskPreview = segmentation(srcImage, segmentationMethod, noiseMethod)
 
-        cv2.imwrite(newFilePath, processedImage)
+        maskFilePath = getNewFilePath(srcPath, 'segmentation-mask')
+        maskedImagePath = getNewFilePath(srcPath, 'segmentation-mask-prev')
+
+        cv2.imwrite(maskFilePath, mask)
+        cv2.imwrite(maskedImagePath, maskPreview)
 
         return {
             'workingImage': srcPath,
-            'processedImage': newFilePath
+            'mask': maskFilePath,
+            'imageMasked': maskedImagePath,
+            **segmentationResults,
         }

@@ -5,7 +5,7 @@ import { uploadFile } from '../../../../api';
 import { WizardStep } from '../../../../components/WizardStep';
 import { SingleUpload, MODE } from '../../../../components/Upload/SingleUpload';
 import { UploadImagePreview, UploadIcon, MainText } from '../../../../components/Upload/styles';
-import { setStepData, addHistoryImage } from '../../../../actions/stepModeActions';
+import { setStepData } from '../../../../actions/stepModeActions';
 
 export const ImageSelection = (props) => {
   const { stepId } = props;

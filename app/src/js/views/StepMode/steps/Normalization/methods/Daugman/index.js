@@ -4,10 +4,17 @@ import { FWInputNumber } from '../../../../../../components/Form/styles';
 import { ParamsForm } from '../../../../../../components/StepMode/ParamsForm';
 
 const daugmanFieldsConfig = {
-  kernelWidth: {
-    label: 'Kernel width',
+  width: {
+    label: 'Angular resolution (width)',
     config: {
-      initialValue: 3,
+      initialValue: 240,
+    },
+    renderInput: () => <FWInputNumber min={0}/>
+  },
+  height: {
+    label: 'Radial resolution (height)',
+    config: {
+      initialValue: 20,
     },
     renderInput: () => <FWInputNumber min={0}/>
   },

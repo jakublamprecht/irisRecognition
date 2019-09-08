@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 import scipy.ndimage
@@ -6,12 +5,12 @@ import glob
 import os
 import time
 
-import processing.segmentation.morphsnakes
-import processing.segmentation.cutoff
-import processing.segmentation.parabolas
-import processing.segmentation.lines
-import processing.segmentation.daugman
-import processing.segmentation.hough
+import processing.segmentation.morphsnakes as morphsnakes
+import processing.segmentation.cutoff as cutoff
+import processing.segmentation.parabolas as parabolas
+import processing.segmentation.lines as lines
+import processing.segmentation.daugman as daugman
+import processing.segmentation.hough as hough
 
 #####   Funkcja skalująca  #####
 #       przyjmuje argumenty:
@@ -48,8 +47,8 @@ def imageScale(imgEyeIris, imgEyePupil, scale):
 #       xIrisCenter,yIrisCenter - punkty środka tęczówki
 #       RIris - promień tęczówki
 def imageMask(imgSrcMask, center, radius, yIrisCenter, xIrisCenter, RIris):
-    cols, rows = imgSrcMask.shape[:2] #zdjecie wymiarów obrazu wejsciowego
-    mask = np.full((cols, rows), 0, dtype=np.uint8)  #stworzenie maski
+    rows, cols = imgSrcMask.shape[:2] #zdjecie wymiarów obrazu wejsciowego
+    mask = np.full((rows, cols), 0, dtype=np.uint8)  #stworzenie maski
 
     #rysowanie teczowki
     cv2.circle(mask, (yIrisCenter, xIrisCenter), RIris, (255, 255, 255), -1)
@@ -87,7 +86,7 @@ def onePhotoExecution(imgEye, params):
     rminScaled = int(rmin * scale)
     rmaxScaled = int(rmax * scale)
 
-    imgEyeGrey = cv2.cvtColor(imgEye, cv2.COLOR_BGR2GRAY) #konwersja obrazu do odcieni szarosci
+    imgEyeGrey = imgEye.copy() #konwersja obrazu do odcieni szarosci
     imgSrc = imgEye.copy() #wykonanie kopii oryginalnego obrazu
     imgIrisPupil = imgEye.copy() #wykonanie kopii oryginalnego obrazu
     imgSrcMask = imgEye.copy() #wykonanie kopii oryginalnego obrazu
@@ -157,10 +156,14 @@ def onePhotoExecution(imgEye, params):
 
     # Ladowanie obrazow
         img = imgEye.copy()
-        img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+
+        if img.ndim == 3:
+            img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        else:
+            img_gray = img
 
         raw_img = imgEye.copy()
-        raw_img_gray = cv2.cvtColor(raw_img,cv2.COLOR_BGR2GRAY)
+        raw_img_gray = img_gray.copy()
         # kopie obrazu oryginalnego
 
         cx,cy,max_t = morphsnakes.findPupilBoundary_AverageDarkPix(img_gray)
@@ -208,7 +211,8 @@ def onePhotoExecution(imgEye, params):
         #cv2.imshow("okno",mask)
         #cv2.waitKey(0)
     #obraz koncowy
-        seg = cv2.bitwise_and(mask, raw_img_gray)
+        seg = mask
+        segPreview = cv2.bitwise_and(mask, raw_img_gray)
 
         xIrisCenter = cx
         yIrisCenter = cy
@@ -231,30 +235,12 @@ def onePhotoExecution(imgEye, params):
 
     #metoda punktów przecinających
     if(noiseMethod == 'commonPoints'):
-        pkt0, pkt1, pkt2, pkt3 = lines.eyelidDetection(imgEyeGrey,xIrisCenter,yIrisCenter,RIris,100)
-        rows, cols = imgSrc.shape[:2]
-
-        #dodwanie otrzymanych wartosci na obraz
-        cv2.circle(imgSrc, pkt0, 3, (0, 0, 0), -1) #rysowanie punktu przecinajacego granice teczowki z powieka
-        cv2.circle(imgSrc, pkt1, 3, (0, 0, 0), -1) #rysowanie punktu przecinajacego granice teczowki z powieka
-        cv2.circle(imgSrc, pkt2, 3, (0, 0, 0), -1) #rysowanie punktu przecinajacego granice teczowki z powieka
-        cv2.circle(imgSrc, pkt3, 3, (0, 0, 0), -1) #rysowanie punktu przecinajacego granice teczowki z powieka
-
-        #odciecie powiek prosta linia
-        cv2.line(imgSrc, pkt0, pkt1, (0,0,0), thickness=2, lineType=8, shift=0)
-        cv2.line(imgSrc, pkt2, pkt3, (0,0,0), thickness=2, lineType=8, shift=0)
-
-        #tworzenie maski dla punktow przeciec granicy teczowki z powieka
-        upperLid = np.array( [[[0,0],[pkt1[0],pkt1[1]],[pkt0[0],pkt0[1]],[cols,0]]], dtype=np.int32 )
-        downLid = np.array( [[[0,rows],[pkt2[0],pkt2[1]],[pkt3[0],pkt3[1]],[cols,rows]]], dtype=np.int32 )
-
-        cv2.fillPoly( imgSrc, upperLid, (0,0,0) )
-        cv2.fillPoly( imgSrc, downLid, (0,0,0))
+        commonPointsMask = lines.eyelidDetection(imgEyeGrey,xIrisCenter,yIrisCenter,RIris,100)
 
         if(segMethod == 'Daugman'or segMethod == 'Hough'):
-            maska = imageMask(imgSrc,center,radius,yIrisCenter,xIrisCenter,RIris)
+            maska = imageMask(commonPointsMask,center,radius,yIrisCenter,xIrisCenter,RIris)
         if(segMethod == 'ActiveContours'):
-            maska = cv2.bitwise_or(imgSrc,imgSrc,mask=seg)
+            maska = cv2.bitwise_or(commonPointsMask,commonPointsMask,mask=seg)
 
     #metoda przybliżenia powiek za pomocą funkcji parabolicznych
     elif(noiseMethod == 'parabolicApproximation'):
@@ -283,10 +269,15 @@ def onePhotoExecution(imgEye, params):
             maska = cv2.bitwise_or(wynik,wynik,mask=seg)
 
     elif(noiseMethod == 'none'):
+        rows, cols = imgSrc.shape[:2]
+        emptyMask = np.full((rows, cols), 255, dtype=np.uint8)
+
         if(segMethod == 'Daugman' or segMethod == 'Hough'):
-            maska = imageMask(imgSrc,center,radius,yIrisCenter,xIrisCenter,RIris)
+            maska = imageMask(emptyMask,center,radius,yIrisCenter,xIrisCenter,RIris)
         if(segMethod == 'ActiveContours'):
             maska = seg
+
+    maskaPreview = cv2.bitwise_and(imgSrc, maska)
 
     irisCenterX = xIrisCenter
     irisCenterY = yIrisCenter
@@ -296,7 +287,7 @@ def onePhotoExecution(imgEye, params):
     pupilCenterY = center[1]
     pupilR = radius
 
-    return irisCenterX, irisCenterY, irisR, pupilCenterX, pupilCenterY, pupilR, mask
+    return irisCenterX, irisCenterY, irisR, pupilCenterX, pupilCenterY, pupilR, maska, maskaPreview
 
 ###########################################################
 ###########################################################
@@ -312,7 +303,18 @@ def segmentation(filePath, segmentationMethod, noiseMethod):
     integralPoints = 400 #liczba punktów które wyznaczaja granicę tęczówki
     searchingRange = 4 #granice przeszukiwania punktu środka tęczówki od znalezionego środka źrenicy +- na osi x i y
 
-    return onePhotoExecution(
+    irisCenterX, irisCenterY, irisR, pupilCenterX, pupilCenterY, pupilR, maska, maskaPreview = onePhotoExecution(
         filePath,
-        [scale, rmin, rmax, filePath, integralPoints, searchingRange, noiseMethod, segmentationMethod]
+        [scale, rmin, rmax, integralPoints, searchingRange, noiseMethod, segmentationMethod]
     )
+
+    segmentationResults = {
+        'irisCenterX': irisCenterX,
+        'irisCenterY': irisCenterY,
+        'irisR': irisR,
+        'pupilCenterX': pupilCenterX,
+        'pupilCenterY': pupilCenterY,
+        'pupilR': pupilR,
+    }
+
+    return segmentationResults, maska, maskaPreview

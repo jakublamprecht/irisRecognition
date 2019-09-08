@@ -1,7 +1,5 @@
 from flask_restful import Resource, reqparse
-from shutil import copyfile
-from uuid import uuid4
-from os import path, makedirs
+from utils.generateNewProxyImagePath import generateNewProxyImagePath
 import cv2
 
 class Upload(Resource):
@@ -14,14 +12,7 @@ class Upload(Resource):
         filePath = args['filePath']
 
         image = cv2.imread(filePath, cv2.CV_8UC1)
-
-        dump, extension = path.splitext(filePath)
-        currentDir = path.dirname(__file__)
-        id = str(uuid4())
-        idDirectory = path.abspath(path.join(currentDir, '..', 'temp', id))
-        makedirs(idDirectory)
-        fileName = '{}-0{}'.format(id, extension)
-        newFilePath = path.join(idDirectory, fileName)
+        newFilePath = generateNewProxyImagePath(filePath)
 
         cv2.imwrite(newFilePath, image)
 

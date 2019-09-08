@@ -14,8 +14,8 @@ class Median(Resource):
         srcPath = args['filePath']
         kernelSize = args['kernelSize']
 
-        srcFile = cv2.imread(srcPath, cv2.CV_8UC1)
-        processedImage = median(srcFile, kernelSize)
+        srcImage = cv2.imread(srcPath, cv2.CV_8UC1)
+        processedImage = median(srcImage, kernelSize)
         newFilePath = getNewFilePath(srcPath, 'preprocessing-median')
 
         cv2.imwrite(newFilePath, processedImage)

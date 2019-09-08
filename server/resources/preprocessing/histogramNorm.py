@@ -12,8 +12,8 @@ class HistogramNorm(Resource):
 
         srcPath = args['filePath']
 
-        srcFile = cv2.imread(srcPath, cv2.CV_8UC1)
-        processedImage = histogramNorm(srcFile)
+        srcImage = cv2.imread(srcPath, cv2.CV_8UC1)
+        processedImage = histogramNorm(srcImage)
         newFilePath = getNewFilePath(srcPath, 'preprocessing-histogram')
 
         cv2.imwrite(newFilePath, processedImage)

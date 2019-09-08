@@ -1,4 +1,5 @@
 import axios from 'axios';
+import qs from 'qs';
 import { API_PATH } from '../constants/api';
 
 const API = axios.create({
@@ -43,6 +44,55 @@ export const normalizeHistogram = (filePath) => (
   API.get('/histnorm', {
     params: {
       filePath,
+    },
+  })
+);
+
+export const segmentation = (filePath, segmentationMethod, noiseMethod) => (
+  API.get('/segmentation', {
+    params: {
+      filePath,
+      segmentationMethod,
+      noiseMethod,
+    },
+  })
+);
+
+export const normalizeDaugman = (filePath, mask, { irisCenterX, irisCenterY, irisR, pupilCenterX, pupilCenterY, pupilR, width, height }) => (
+  API.get('/normDaugman', {
+    params: {
+      filePath,
+      mask,
+      irisCenterX,
+      irisCenterY,
+      irisR,
+      pupilCenterX,
+      pupilCenterY,
+      pupilR,
+      width,
+      height,
+    },
+  })
+);
+
+export const encodeLogGabor = (normalizedImage, normalizedMask, { minWaveLength, sigmaOnf }) => (
+  API.get('/loggabor', {
+    params: {
+      normalizedImage,
+      normalizedMask,
+      minWaveLength,
+      sigmaOnf,
+    },
+  })
+);
+
+export const performMatching = (irisTemplate, maskTemplate, matchingImages, processConfig) => (
+  API.get('/matching', {
+    params: {
+      irisTemplate,
+      maskTemplate,
+      matchingImages: qs.parse(matchingImages),
+      processConfig: qs.parse(processConfig),
     },
   })
 );

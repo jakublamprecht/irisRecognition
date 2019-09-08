@@ -33,6 +33,10 @@ export const Column = styled(Col)`
   height: 100%;
 `;
 
+export const PaddedColumn = styled(Column)`
+  padding-right: 30px !important;
+`;
+
 export const MethodSwitcher = styled(MethodSelector)`
   flex: 1;
 `;

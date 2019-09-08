@@ -2,6 +2,8 @@ import React from 'react';
 import { Form } from 'antd';
 import { FormItem } from '../../Form/styles';
 
+import { isEmptyObject } from '../../../helpers/stepModeHelpers';
+
 const mapParamsToFields = (params) => (
   Object.entries(params).reduce((acc, [paramName, paramData]) => ({
     ...acc,
@@ -71,7 +73,7 @@ export const ParamsForm = Form.create({
     const { methodParams, onParamsChange, fields } = props;
 
     // Checks the methodParams and if it's empty changes it to initial values
-    if (Object.entries(methodParams).length === 0 && methodParams.constructor === Object) {
+    if (isEmptyObject(methodParams)) {
       const initialParams = getFormFieldsInitialParams(fields);
 
       onParamsChange(initialParams);

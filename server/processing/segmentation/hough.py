@@ -1,7 +1,5 @@
 import numpy as np
 import cv2
-from matplotlib import pyplot as plt
-import matplotlib.gridspec as gridspec
 import math
 from itertools import chain
 
@@ -13,7 +11,11 @@ def detect_inner_circle(image, canny_param=20, hough_param=20):
     :param hough_param: threshold parameter for Hough circle transform
     :return: one cirlcle
     """
-    cimg = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    if image.ndim == 3:
+        cimg = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    else:
+        cimg = image
+
     ret,thresh = cv2.threshold(cimg,0.41*255,255,cv2.THRESH_BINARY)
     h,w = thresh.shape
     mask = np.zeros((h+2, w+2), np.uint8)
@@ -69,7 +71,11 @@ def detect_outer_circle(image,pupil_center,pupil_radius):
     #    cv2.imshow('o',sobel_done)
     #    cv2.waitKey(0)
 
-    cimg = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    if image.ndim == 3:
+        cimg = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    else:
+        cimg = image
+
     hist_equalized=cv2.equalizeHist(cimg)
     blurred = cv2.GaussianBlur(hist_equalized,(3,3),0.5)
     alpha = 2.5

@@ -2,6 +2,29 @@ import cv2
 import numpy as np
 import scipy.ndimage
 
+def generateMask(img, pkt0, pkt1, pkt2, pkt3):
+    rows, cols = img.shape[:2]
+    mask = np.full((rows, cols), 255, dtype=np.uint8)  #stworzenie maski
+
+    #dodwanie otrzymanych wartosci na obraz
+    cv2.circle(mask, pkt0, 3, (0, 0, 0), -1) #rysowanie punktu przecinajacego granice teczowki z powieka
+    cv2.circle(mask, pkt1, 3, (0, 0, 0), -1) #rysowanie punktu przecinajacego granice teczowki z powieka
+    cv2.circle(mask, pkt2, 3, (0, 0, 0), -1) #rysowanie punktu przecinajacego granice teczowki z powieka
+    cv2.circle(mask, pkt3, 3, (0, 0, 0), -1) #rysowanie punktu przecinajacego granice teczowki z powieka
+
+    #odciecie powiek prosta linia
+    cv2.line(mask, pkt0, pkt1, (0,0,0), thickness=2, lineType=8, shift=0)
+    cv2.line(mask, pkt2, pkt3, (0,0,0), thickness=2, lineType=8, shift=0)
+
+    #tworzenie maski dla punktow przeciec granicy teczowki z powieka
+    upperLid = np.array( [[[0,0],[pkt1[0],pkt1[1]],[pkt0[0],pkt0[1]],[cols,0]]], dtype=np.int32 )
+    downLid = np.array( [[[0,rows],[pkt2[0],pkt2[1]],[pkt3[0],pkt3[1]],[cols,rows]]], dtype=np.int32 )
+
+    cv2.fillPoly( mask, upperLid, (0,0,0) )
+    cv2.fillPoly( mask, downLid, (0,0,0))
+
+    return mask
+
 #####   Funkcja znajdująca i odcinająca powieki (linia prosta)  #####
 #       przyjmuje argumenty:
 #       img  - obraz wejsciowy
@@ -37,8 +60,9 @@ def eyelidDetection(img,x,y,r,circlePoints):
     pkt2 = (int(yPoints[i2]),int(xPoints[i2]))
     pkt3 = (int(yPoints[i3]),int(xPoints[i3]))
 
-    return pkt0, pkt1, pkt2, pkt3
+    mask = generateMask(img, pkt0, pkt1, pkt2, pkt3)
 
+    return mask
 
 ## ??
 #####   Funkcja sortująca  #####

@@ -15,7 +15,7 @@ class Filter2D(Resource):
         kernelSize = args['kernelSize']
 
         srcImage = cv2.imread(srcPath, cv2.CV_8UC1)
-        processedImage = filter2D(srcFile, kernelSize)
+        processedImage = filter2D(srcImage, kernelSize)
         newFilePath = getNewFilePath(srcPath, 'preprocessing-filter2D')
 
         cv2.imwrite(newFilePath, processedImage)

@@ -1,27 +1,39 @@
-import { Hough } from './Hough';
-import { Daugman } from './Daugman';
-import { ActiveContours } from './ActiveContours';
-
-export const METHOD_IDS = {
-  DAUGMAN: 'DAUGMAN',
-  HOUGH: 'HOUGH',
-  ACTIVE_CONTOURS: 'ACTIVE_CONTOURS',
+export const SEGM_METHOD_IDS = {
+  DAUGMAN: 'Daugman',
+  HOUGH: 'Hough',
+  ACTIVE_CONTOURS: 'ActiveContours',
 };
 
-export const methodConfigs = {
-  [METHOD_IDS.DAUGMAN]: {
+export const NOISE_METHOD_IDS = {
+  RADIAL_CUTOFF: 'radialCutoff',
+  COMMON_POINTS: 'commonPoints',
+  PARABOLIC_APPROXIMATION: 'parabolicApproximation',
+  NONE: 'none',
+};
+
+export const segmentationMethodConfigs = {
+  [SEGM_METHOD_IDS.DAUGMAN]: {
     title: 'Daugman',
-    form: Daugman,
-    handler: function(){},
   },
-  [METHOD_IDS.HOUGH]: {
+  [SEGM_METHOD_IDS.HOUGH]: {
     title: 'Hough',
-    form: Hough,
-    handler: function(){},
   },
-  [METHOD_IDS.ACTIVE_CONTOURS]: {
+  [SEGM_METHOD_IDS.ACTIVE_CONTOURS]: {
     title: 'Active contours',
-    form: ActiveContours,
-    handler: function(){},
+  },
+};
+
+export const noiseMethodConfigs = {
+  [NOISE_METHOD_IDS.RADIAL_CUTOFF]: {
+    title: 'Radial cutoff',
+  },
+  [NOISE_METHOD_IDS.COMMON_POINTS]: {
+    title: 'Common points',
+  },
+  [NOISE_METHOD_IDS.PARABOLIC_APPROXIMATION]: {
+    title: 'Parabolic approximation',
+  },
+  [NOISE_METHOD_IDS.NONE]: {
+    title: 'None',
   },
 };

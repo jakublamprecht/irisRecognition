@@ -1,74 +1,94 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Icon, Tooltip } from 'antd';
+import { Icon, Tooltip, Tabs, Spin } from 'antd';
+import { Title, Wrapper, MethodSelect } from './styles';
 
-import { getStepData } from '../../../../helpers/stepModeHelpers';
-import { STEP_STEPS } from '../../../../stateMachine/stateNames';
+const { Option } = MethodSelect;
+const { TabPane } = Tabs;
+
+import { segmentation } from '../../../../api';
+import { getStepData, isEmptyObject, getWorkingImage } from '../../../../helpers/stepModeHelpers';
 import { WizardStep } from '../../../../components/WizardStep';
 import { ImagePreview } from '../../../../components/StepMode/ImagePreview';
-import { ButtonsWrapper, ActionButton, Column, MethodSwitcher } from '../../../../components/WizardStep/styles';
+import { ButtonsWrapper, ActionButton, Column, PaddedColumn } from '../../../../components/WizardStep/styles';
 import { setStepData, clearStepData } from '../../../../actions/stepModeActions';
-import { METHOD_IDS, methodConfigs } from './methods';
+import { SEGM_METHOD_IDS, NOISE_METHOD_IDS, segmentationMethodConfigs, noiseMethodConfigs } from './methods';
 
 export const Segmentation = (props) => {
-  const DEFAULT_METHOD = METHOD_IDS.HOUGH;
+  const SEGM_DEFAULT_METHOD = SEGM_METHOD_IDS.DAUGMAN;
+  const NOISE_DEFAULT_METHOD = NOISE_METHOD_IDS.PARABOLIC_APPROXIMATION;
+
   const { stepId } = props;
   const dispatch = useDispatch();
   const segmentationSavedData = useSelector(getStepData(stepId)) || {};
 
-  const lastSavedPreprocessing = useSelector(getStepData(STEP_STEPS.PREPROCESSING)).slice(-1)[0] || {}
-  const lastSavedImage = lastSavedPreprocessing.image || useSelector(getStepData(STEP_STEPS.IMAGE_SELECTION)).proxyImage;
+  const lastSavedImage = useSelector(getWorkingImage);
 
   const defaultData = {
-    method: DEFAULT_METHOD,
-    methodParams: {},
     image: lastSavedImage,
-    // should result data be kept here also? or just in redux somwhere else?
-    // If only in redux in a separate place, then what about onPreviousTransition
-    // Maybe something like "stepData" and "resultData" in redux and they would have a key for each of the steps
+    mask: '',
+    imageMasked: '',
+    segmentationMethod: SEGM_DEFAULT_METHOD,
+    noiseMethod: NOISE_DEFAULT_METHOD,
+    results: {},
   };
 
   const initialData = {
-    method: segmentationSavedData.method || defaultData.method,
-    methodParams: segmentationSavedData.methodParams || defaultData.methodParams,
     image: segmentationSavedData.image || defaultData.image,
+    mask: segmentationSavedData.mask || defaultData.mask,
+    imageMasked: segmentationSavedData.imageMasked || defaultData.imageMasked,
+    segmentationMethod: segmentationSavedData.segmentationMethod || defaultData.segmentationMethod,
+    noiseMethod: segmentationSavedData.noiseMethod || defaultData.noiseMethod,
+    results: segmentationSavedData.results || defaultData.results,
   };
 
   const [data, setData] = useState(initialData);
-  const currentMethodHandler = methodConfigs[data.method].handler || function(){};
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const onMethodChange = (methodId) => {
+  const setSegmentationMethod = (method) => {
     setData({
       ...data,
-      method: methodId,
-      methodParams: {},
+      segmentationMethod: method,
     });
   };
 
-  const onParamsChange = (newParams) => {
+  const setNoiseMethod = (method) => {
     setData({
       ...data,
-      methodParams: newParams,
+      noiseMethod: method,
     });
   };
 
-  const revertLastProcess = () => {
+  const renderMethodOptions = (methodConfigs) => (
+    Object.entries(methodConfigs).map(([methodId, methodData]) => (
+      <Option key={methodId} value={methodId}>{methodData.title}</Option>
+    ))
+  );
+
+  const revertProcess = () => {
     setData(defaultData);
     dispatch(setStepData(stepId, defaultData));
   };
 
-  const addNewProcess = () => {
-    return currentMethodHandler(data.image, data.methodParams)
-      .then((response) => {
-        const { processedImage } = response.data;
-        const newCurrentData = {
-          ...data,
-          image: processedImage,
-        };
+  const addProcess = () => {
+    setIsProcessing(true);
 
-        setData(newCurrentData);
-        dispatch(setStepData(stepId, newCurrentData));
-      });
+    return segmentation(data.image, data.segmentationMethod, data.noiseMethod).then((response) => {
+      const { workingImage, mask, imageMasked, ...results } = response.data;
+
+      const newData = {
+        ...data,
+        mask,
+        imageMasked,
+        results,
+      };
+
+      setData(newData);
+      dispatch(setStepData(stepId, newData));
+    })
+    .finally(() => {
+      setIsProcessing(false);
+    });
   };
 
   const onPreviousTransition = () => {
@@ -76,27 +96,50 @@ export const Segmentation = (props) => {
   };
 
   return (
-    <WizardStep {...props} onPreviousTransition={onPreviousTransition}>
-      <Column span={10}>
-        <ImagePreview srcImage={data.image}/>
-      </Column>
+    <WizardStep {...props} onPreviousTransition={onPreviousTransition} transitionsDisabled={isProcessing}>
+      <PaddedColumn span={10}>
+        <Spin size='large' spinning={isProcessing}>
+          <Tabs defaultActiveKey='image'>
+            <TabPane tab='Image' key='image'>
+              <ImagePreview srcImage={data.image}/>
+            </TabPane>
+            <TabPane tab='Mask' key='mask'>
+              <ImagePreview srcImage={data.mask}/>
+            </TabPane>
+            <TabPane tab='Mask Preview' key='maskPrev'>
+              <ImagePreview srcImage={data.imageMasked}/>
+            </TabPane>
+          </Tabs>
+        </Spin>
+      </PaddedColumn>
       <Column span={14}>
-        <MethodSwitcher
-          selectorTitle='Select segmentation method:'
-          methods={methodConfigs}
-          methodData={data}
-          onMethodChange={onMethodChange}
-          onParamsChange={onParamsChange}
-        />
+        <Wrapper>
+          <Title>Select segmentation method:</Title>
+          <MethodSelect
+            value={data.segmentationMethod}
+            onChange={setSegmentationMethod}>
+            {
+              renderMethodOptions(segmentationMethodConfigs)
+            }
+          </MethodSelect>
+          <Title>Select noise removal method:</Title>
+          <MethodSelect
+            value={data.noiseMethod}
+            onChange={setNoiseMethod}>
+            {
+              renderMethodOptions(noiseMethodConfigs)
+            }
+          </MethodSelect>
+        </Wrapper>
         <ButtonsWrapper>
           {
-            segmentationSavedData.method &&
-            <ActionButton onClick={revertLastProcess}>
+            !isEmptyObject(data.results) &&
+            <ActionButton onClick={revertProcess} disabled={isProcessing}>
               Reset <Icon type='rollback'/>
             </ActionButton>
           }
           <Tooltip placement='topRight' title='This will override previous segmentation process.'>
-            <ActionButton type='primary' onClick={addNewProcess}>
+            <ActionButton type='primary' onClick={addProcess} disabled={isProcessing}>
               Process <Icon type='plus'/>
             </ActionButton>
           </Tooltip>

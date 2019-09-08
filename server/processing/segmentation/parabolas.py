@@ -266,6 +266,8 @@ def parabolicCurveBottom(img,xCenter,yCenter,r, pntsParabola, indNums):
 #       ab,bb,cb - parametry paraboli dolnej (dolna powieka)
 def rysujParaboleMask(img,at,bt,ct,ab,bb,cb):
     rows, cols = img.shape[:2] #zdjecie wymiarów obrazu wejsciowego
+    mask = np.full((rows, cols), 255, dtype=np.uint8)  #stworzenie maski
+
     xcord = [] # wektor na wsp. x
     ycordTop = [] # wektor na wsp. y górnej paraboli
     ycordBottom = [] # wektor na wsp. y dolnej paraboli
@@ -280,12 +282,12 @@ def rysujParaboleMask(img,at,bt,ct,ab,bb,cb):
     # stworzenie maski - ustawienie wartosci pikseli w górę od górnej paraboli i w dół od dolnej paraboli na 0.
     for x in range(0,cols):
         for y in range(0,ycordTop[x]):
-            img[y,x] = 0
+            mask[y,x] = 0
 
         for y in range(ycordBottom[x],rows):
-            img[y,x] = 0
+            mask[y,x] = 0
 
-    return img
+    return mask
 
 
 #####   Funkcja licząca sumę wartości pikseli funkcji parabolicznej #####

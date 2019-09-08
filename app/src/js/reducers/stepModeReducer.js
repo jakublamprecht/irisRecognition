@@ -7,21 +7,19 @@ const initialState = {
     proxyImage: '',
   },
   [STEP_STEPS.PREPROCESSING]: [],
-  historyImages: {},
+  [STEP_STEPS.SEGMENTATION]: {},
+  [STEP_STEPS.NORMALIZATION]: {},
+  [STEP_STEPS.ENCODING]: {},
+  [STEP_STEPS.MATCHING_IMAGE_SELECTION]: {},
+  [STEP_STEPS.MATCHING]: {},
+  [STEP_STEPS.PROCESSING]: {},
+  [STEP_STEPS.RESULTS_PREVIEW]: {},
 };
 
 export const stepModeReducer = (state = initialState, action) => {
   switch (action.type) {
     case STEP_MODE_ACTION_TYPES.FLUSH_STATE:
       return initialState;
-    case STEP_MODE_ACTION_TYPES.ADD_HISTORY_IMAGE_ENTRY:
-      return {
-        ...state,
-        historyImages: {
-          ...state.historyImages,
-          [action.stepId]: action.image,
-        },
-      };
     case STEP_MODE_ACTION_TYPES.CLEAR_STEP_DATA:
       return {
         ...state,

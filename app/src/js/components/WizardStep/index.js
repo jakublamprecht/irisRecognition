@@ -9,7 +9,7 @@ import {
   WizardButton,
 } from './styles';
 
-export const WizardStep = ({ children, isFirst, isLast, onNextTransition, nextTransitionGuard, onPreviousTransition }) => {
+export const WizardStep = ({ children, isFirst, isLast, onNextTransition, nextTransitionGuard, onPreviousTransition, transitionsDisabled }) => {
   const { transitionMode } = useContext(ModeMachineContext);
   const goToNextStep = () => transitionMode(WIZARD_TRANSITIONS.NEXT);
   const goToPreviousStep = () => transitionMode(WIZARD_TRANSITIONS.PREVIOUS);
@@ -31,7 +31,20 @@ export const WizardStep = ({ children, isFirst, isLast, onNextTransition, nextTr
     }
 
     if (onNextTransition) {
-      await onNextTransition();
+      try {
+        await onNextTransition();
+      } catch (err) {
+        console.log(err);
+
+        notification.error({
+          message: 'Transition failed',
+          placement: 'bottomLeft',
+          duration: 3,
+          description: 'Transition failed',
+        });
+
+        return false;
+      }
     }
 
     goToNextStep();
@@ -53,13 +66,13 @@ export const WizardStep = ({ children, isFirst, isLast, onNextTransition, nextTr
       <WizardButtonsWrapper>
         {
           !isFirst &&
-          <WizardButton onClick={onPrevClick}>
+          <WizardButton onClick={onPrevClick} disabled={transitionsDisabled}>
             <Icon type='caret-left'/>Previous Step
           </WizardButton>
         }
         {
           !isLast &&
-          <WizardButton onClick={onNextClick} type='primary'>
+          <WizardButton onClick={onNextClick} type='primary' disabled={transitionsDisabled}>
             Next Step<Icon type='caret-right'/>
           </WizardButton>
         }
