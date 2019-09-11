@@ -86,13 +86,23 @@ export const encodeLogGabor = (normalizedImage, normalizedMask, { minWaveLength,
   })
 );
 
-export const performMatching = (irisTemplate, maskTemplate, matchingImages, processConfig) => (
-  API.get('/matching', {
+export const performStepMatching = (irisTemplate, maskTemplate, matchingImages, processConfig) => (
+  API.get('/matchingStep', {
     params: {
       irisTemplate,
       maskTemplate,
       matchingImages: qs.parse(matchingImages),
       processConfig: qs.parse(processConfig),
+    },
+  })
+);
+
+export const performBatchMatching = (processingImages, matchingImages, processConfigFilePath) => (
+  API.get('/matchingBatch', {
+    params: {
+      processingImages: qs.parse(processingImages),
+      matchingImages: qs.parse(matchingImages),
+      processConfigFilePath,
     },
   })
 );

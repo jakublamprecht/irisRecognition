@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { MatchingResult } from '../MatchingResult';
 import { ResultsWrapper, ToggleButton, ToggleButtonContent, ToggleButtonIcon, ContentWrapper } from './styles';
 
-// imageData - information about image that was tested
-// matchingData - information about images that were trying to be matched
-export const MatchingResults = ({ initiallyCollapsed, imageData, matchingData }) => {
+// processingImageData - information about image that was tested/processed
+// matchingEntries - array with info about images matched and results of matching
+export const MatchingResults = ({ initiallyCollapsed, processingImageData, matchingEntries }) => {
   const [isCollapsed, setIsCollapsed] = useState(initiallyCollapsed || true);
 
   const toggleCollapsed = () => {
@@ -13,8 +13,11 @@ export const MatchingResults = ({ initiallyCollapsed, imageData, matchingData })
   };
 
   const renderResults = () => (
-    matchingData.map((singleResultData) => (
-      <MatchingResult imageData={imageData} matchingData={singleResultData}/>
+    Object.values(matchingEntries).map(({ matchingImageData, matchingResults }) => (
+      <MatchingResult
+        processingImageData={processingImageData}
+        matchingImageData={matchingImageData}
+        matchingResults={matchingResults}/>
     ))
   );
 
@@ -22,7 +25,7 @@ export const MatchingResults = ({ initiallyCollapsed, imageData, matchingData })
     <ResultsWrapper>
       <ToggleButton onClick={toggleCollapsed}>
         <ToggleButtonContent>
-          Matching results for: { imageData.imagePaths.originalImage }
+          Matching results for: { processingImageData.imagePaths.originalImage }
         </ToggleButtonContent>
         <ToggleButtonIcon type={ isCollapsed ? 'down' : 'up' }/>
       </ToggleButton>

@@ -8,15 +8,7 @@ export const ProcessingImagesSelection = (props) => {
   const dispatch = useDispatch();
   const processingImages = useSelector((state) => state.batchMode.processingImages);
 
-  const onFilesChange = ({ fileList }) => {
-    /*
-     IMPORTANT: Might need to keep the whole array of objects and then destructure it
-     so that we can set the Upload component defaultFileList to what it was before transition
-     */
-    // const filePaths = fileList.map((fileObject) => (
-    //   fileObject.originFileObj.path
-    // ));
-
+  const onFilesChange = ({ file, fileList }) => {
     dispatch(setProcessingImages(fileList));
   };
 

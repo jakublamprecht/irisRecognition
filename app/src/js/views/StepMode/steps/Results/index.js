@@ -35,7 +35,7 @@ export const Results = (props) => {
   }
 
   const processConfig = useSelector(getStepData(STEP_STEPS.PROCESSING));
-  const matchingData = useSelector(getStepData(stepId));
+  const matchingEntries = useSelector(getStepData(stepId));
 
   const saveProcessConfig = () => {
     const a = document.createElement("a");
@@ -67,8 +67,8 @@ export const Results = (props) => {
         </Button>
       </Tooltip>
       <MatchingResults
-        imageData={uploadedImageData}
-        matchingData={matchingData}
+        processingImageData={uploadedImageData}
+        matchingEntries={matchingEntries}
         initiallyCollapsed={false}/>
     </WizardStep>
   )

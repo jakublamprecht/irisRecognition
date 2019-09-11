@@ -5,7 +5,7 @@ import cv2
 import json
 from os import path
 
-class Matching(Resource):
+class MatchingStep(Resource):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('irisTemplate', type=str)

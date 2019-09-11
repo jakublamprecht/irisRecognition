@@ -2,11 +2,12 @@ import React, { useContext } from 'react';
 import { notification } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { performMatching } from '../../../../api';
+import { performStepMatching } from '../../../../api';
 import { ModeMachineContext } from '../../../../helpers/modeMachineContext';
 import { STEP_STEPS } from '../../../../stateMachine/stateNames';
 import { WIZARD_TRANSITIONS } from '../../../../stateMachine/transitions';
 import { getStepData } from '../../../../helpers/stepModeHelpers';
+import { fileTofilePath } from '../../../../helpers/antdHelpers';
 import { setStepData } from '../../../../actions/stepModeActions';
 
 import { MatchingProcessingWrapper, ProcessingIcon } from './styles';
@@ -48,10 +49,10 @@ export const MatchingProcessing = (props) => {
   const processConfig = generateProcessConfig();
 
   const startProcessing = () => {
-    const matchingImagesPaths = matchingImages.map((imgObj) => imgObj.originFileObj.path);
+    const matchingImagesPaths = matchingImages.map(fileTofilePath);
 
     // Passes all data from params and segmentation results, which are then extracted by destructing on API call level
-    return performMatching(imageTemplate, maskTemplate, matchingImagesPaths, processConfig)
+    return performStepMatching(imageTemplate, maskTemplate, matchingImagesPaths, processConfig)
       .then((response) => {
         const { data: results } = response;
 
