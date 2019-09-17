@@ -26,6 +26,32 @@ export const MatchingProcessing = (props) => {
     return { method, methodParams };
   };
 
+  const generateProcessingImageData = () => {
+    const { selectedImage: originalImage } = useSelector(getStepData(STEP_STEPS.IMAGE_SELECTION));
+    const { mask, imageMasked, results: segmentationResults } = useSelector(getStepData(STEP_STEPS.SEGMENTATION));
+    const { normalizedImage, normalizedMask, normalizedImageMasked } = useSelector(getStepData(STEP_STEPS.NORMALIZATION));
+    const { results: { imageTemplate: irisTemplate, maskTemplate } } = useSelector(getStepData(STEP_STEPS.ENCODING));
+
+    const preprocessingImages = useSelector(getStepData(STEP_STEPS.PREPROCESSING)).map((entry) => entry.image);
+
+    const uploadedImageData = {
+      imagePaths: {
+        originalImage,
+        preprocessingImages,
+        mask,
+        imageMasked,
+        normalizedImage,
+        normalizedMask,
+        normalizedImageMasked,
+        irisTemplate,
+        maskTemplate,
+      },
+      segmentationResults,
+    };
+
+    return uploadedImageData;
+  };
+
   const generateProcessConfig = () => {
     const preprocessingData = useSelector(getStepData(STEP_STEPS.PREPROCESSING));
 
@@ -46,6 +72,7 @@ export const MatchingProcessing = (props) => {
     };
   }
 
+  const processingImageData = generateProcessingImageData();
   const processConfig = generateProcessConfig();
 
   const startProcessing = () => {
@@ -54,7 +81,11 @@ export const MatchingProcessing = (props) => {
     // Passes all data from params and segmentation results, which are then extracted by destructing on API call level
     return performStepMatching(imageTemplate, maskTemplate, matchingImagesPaths, processConfig)
       .then((response) => {
-        const { data: results } = response;
+        const { data: matchingEntries } = response;
+        const results = {
+          'imageData': processingImageData,
+          matchingEntries,
+        }
 
         dispatch(setStepData(stepId, processConfig));
         dispatch(setStepData(STEP_STEPS.RESULTS_PREVIEW, results));

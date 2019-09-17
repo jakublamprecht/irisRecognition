@@ -5,6 +5,10 @@ const initialState = {
   matchingImages: [],
   configFile: '',
   results: {},
+  resultPreview: {
+    processingImageOriginalPath: '',
+    matchingImageOriginalPath: '',
+  },
 };
 
 initialState.results = {

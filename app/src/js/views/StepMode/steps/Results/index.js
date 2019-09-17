@@ -12,30 +12,8 @@ export const Results = (props) => {
   const { stepId } = props;
   const dispatch = useDispatch;
 
-  const { selectedImage: originalImage } = useSelector(getStepData(STEP_STEPS.IMAGE_SELECTION));
-  const { mask, imageMasked, results: segmentationResults } = useSelector(getStepData(STEP_STEPS.SEGMENTATION));
-  const { normalizedImage, normalizedMask, normalizedImageMasked } = useSelector(getStepData(STEP_STEPS.NORMALIZATION));
-  const { results: { imageTemplate: irisTemplate, maskTemplate } } = useSelector(getStepData(STEP_STEPS.ENCODING));
-
-  const preprocessingImages = useSelector(getStepData(STEP_STEPS.PREPROCESSING)).map((entry) => entry.image);
-
-  const uploadedImageData = {
-    imagePaths: {
-      originalImage,
-      preprocessingImages,
-      mask,
-      imageMasked,
-      normalizedImage,
-      normalizedMask,
-      normalizedImageMasked,
-      irisTemplate,
-      maskTemplate,
-    },
-    segmentationResults,
-  }
-
   const processConfig = useSelector(getStepData(STEP_STEPS.PROCESSING));
-  const matchingEntries = useSelector(getStepData(stepId));
+  const { imageData: processingImageData, matchingEntries} = useSelector(getStepData(stepId));
 
   const saveProcessConfig = () => {
     const a = document.createElement("a");
@@ -67,9 +45,9 @@ export const Results = (props) => {
         </Button>
       </Tooltip>
       <MatchingResults
-        processingImageData={uploadedImageData}
+        processingImageData={processingImageData}
         matchingEntries={matchingEntries}
-        initiallyCollapsed={false}/>
+        noCollapseAction={true}/>
     </WizardStep>
   )
 };

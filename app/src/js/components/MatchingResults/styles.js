@@ -6,6 +6,10 @@ export const ResultCard = styled(Card)`
   padding-bottom: 30px !important;
   margin-bottom: 10px !important;
 
+  .ant-card-body {
+    padding-bottom: 0;
+  }
+
   .ant-card-actions {
     position: absolute;
     bottom: 2px;
@@ -20,7 +24,8 @@ export const ResultCard = styled(Card)`
 `;
 
 export const ContentWrapper = styled.div`
-  padding-top: 24px;
+  margin-top: 24px;
+  border-top: 1px solid #e8e8e8;
 `;
 
 export const ResultCardTitle = styled.p`
