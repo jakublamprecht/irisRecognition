@@ -46,12 +46,12 @@ def imageScale(imgEyeIris, imgEyePupil, scale):
 #       circlePoints - liczba punktów zbierana z granicy
 #       xIrisCenter,yIrisCenter - punkty środka tęczówki
 #       RIris - promień tęczówki
-def imageMask(imgSrcMask, center, radius, yIrisCenter, xIrisCenter, RIris):
+def imageMask(imgSrcMask, center, radius, xIrisCenter, yIrisCenter, RIris):
     rows, cols = imgSrcMask.shape[:2] #zdjecie wymiarów obrazu wejsciowego
     mask = np.full((rows, cols), 0, dtype=np.uint8)  #stworzenie maski
 
     #rysowanie teczowki
-    cv2.circle(mask, (yIrisCenter, xIrisCenter), RIris, (255, 255, 255), -1)
+    cv2.circle(mask, (xIrisCenter, yIrisCenter), RIris, (255, 255, 255), -1)
 
     #rysowanie źrenicy
     cv2.circle(mask, center, radius, (0, 0, 0), -1)
@@ -133,7 +133,7 @@ def onePhotoExecution(imgEye, params):
 
 
         #szukanie parametrów opisujących tęczówkę
-        xIrisCenterScaled, yIrisCenterScaled, RIrisScaled = daugman.searchIrisBoundary(imgResizedIris, rminScaled, rmaxScaled, int(y_pup_center),
+        yIrisCenterScaled, xIrisCenterScaled, RIrisScaled = daugman.searchIrisBoundary(imgResizedIris, rminScaled, rmaxScaled, int(y_pup_center),
                                 int(x_pup_center),numberOfPoints,searchPixels,0.5)
 
 
@@ -226,8 +226,8 @@ def onePhotoExecution(imgEye, params):
         radius = pupil_circle[2]
 
         iris_circle = hough.detect_outer_circle(imgEye,center,radius)
-        yIrisCenter = iris_circle[0]
-        xIrisCenter = iris_circle[1]
+        yIrisCenter = iris_circle[1]
+        xIrisCenter = iris_circle[0]
         RIris = iris_circle[2]
 
 
@@ -238,7 +238,7 @@ def onePhotoExecution(imgEye, params):
         commonPointsMask = lines.eyelidDetection(imgEyeGrey,xIrisCenter,yIrisCenter,RIris,100)
 
         if(segMethod == 'Daugman'or segMethod == 'Hough'):
-            maska = imageMask(commonPointsMask,center,radius,yIrisCenter,xIrisCenter,RIris)
+            maska = imageMask(commonPointsMask,center,radius,xIrisCenter,yIrisCenter,RIris)
         if(segMethod == 'ActiveContours'):
             maska = cv2.bitwise_or(commonPointsMask,commonPointsMask,mask=seg)
 
@@ -255,7 +255,7 @@ def onePhotoExecution(imgEye, params):
         imgSrcParabole = parabolas.rysujParaboleMask(imgSrcParabole,aTop,bTop,cTop,aBot,bBot,cBot)
 
         if(segMethod == 'Daugman' or segMethod == 'Hough'):
-            maska = imageMask(imgSrcParabole,center,radius,yIrisCenter,xIrisCenter,RIris)
+            maska = imageMask(imgSrcParabole,center,radius,xIrisCenter,yIrisCenter,RIris)
         if(segMethod == 'ActiveContours'):
             maska = cv2.bitwise_or(imgSrcParabole,imgSrcParabole,mask=seg)
 
@@ -264,7 +264,7 @@ def onePhotoExecution(imgEye, params):
         wynik = cutoff.radialCutoff(imgEyeGrey,radius,RIris,center[0],center[1],60)
 
         if(segMethod == 'Daugman' or segMethod == 'Hough'):
-            maska = imageMask(wynik,center,radius,yIrisCenter,xIrisCenter,RIris)
+            maska = imageMask(wynik,center,radius,xIrisCenter,yIrisCenter,RIris)
         if(segMethod == 'ActiveContours'):
             maska = cv2.bitwise_or(wynik,wynik,mask=seg)
 
@@ -273,7 +273,7 @@ def onePhotoExecution(imgEye, params):
         emptyMask = np.full((rows, cols), 255, dtype=np.uint8)
 
         if(segMethod == 'Daugman' or segMethod == 'Hough'):
-            maska = imageMask(emptyMask,center,radius,yIrisCenter,xIrisCenter,RIris)
+            maska = imageMask(emptyMask,center,radius,xIrisCenter,yIrisCenter,RIris)
         if(segMethod == 'ActiveContours'):
             maska = seg
 

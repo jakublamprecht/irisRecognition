@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { notification } from 'antd';
 
+import { isEmptyObject } from '../../../../helpers/stepModeHelpers';
 import { setResults } from '../../../../actions/batchModeActions';
 import { performBatchMatching } from '../../../../api';
 import { WIZARD_TRANSITIONS } from '../../../../stateMachine/transitions';
@@ -23,7 +24,8 @@ export const Processing = () => {
   const matchingImages = batchData.matchingImages.map(fileTofilePath);
   const { configFile: processConfigFilePath } = batchData;
 
-  performBatchMatching(processingImages, matchingImages, processConfigFilePath)
+  if (isEmptyObject(batchData.results)) {
+    performBatchMatching(processingImages, matchingImages, processConfigFilePath)
     .then((response) => {
       const { data: results } = response;
 
@@ -40,6 +42,7 @@ export const Processing = () => {
 
       transitionMode(WIZARD_TRANSITIONS.PROCESSING_FAILED);
     });
+  }
 
   return (
     <ProcessingWrapper>

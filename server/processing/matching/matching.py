@@ -34,14 +34,20 @@ def matchMultipleToMultiple(processingImages, matchingImages, processConfig):
 
     processingResults = {}
 
+    indexFullProcess = 1
+    indexFullMatching = 1
+
     for processingImage in processingImages:
+        print('Processing {}/{} of processing images'.format(indexFullProcess, len(processingImages)))
         if processingImage in processingData['processingImages']:
             pass
         else:
             result = processSingleImage(processingImage, processConfig)
             processingData['processingImages'][processingImage] = result
+        indexFullProcess = indexFullProcess + 1
 
     for matchingImage in matchingImages:
+        print('Processing {}/{} of matching images'.format(indexFullMatching, len(matchingImages)))
         if matchingImage in processingData['processingImages']:
             processingData['matchingImages'][matchingImage] = processingData['processingImages'][matchingImage]
         elif matchingImage in processingData['matchingImages']:
@@ -49,8 +55,12 @@ def matchMultipleToMultiple(processingImages, matchingImages, processConfig):
         else:
             result = processSingleImage(matchingImage, processConfig)
             processingData['matchingImages'][matchingImage] = result
+        indexFullMatching = indexFullMatching + 1
 
     matchingMethod, matchingParams = getMethodHandlerAndMethodParams(processSteps.MATCHING, processConfig[processSteps.MATCHING])
+
+    indexHDProcessing = 1
+    indexHDMatching = 1
 
     for pKey, singleProcessingData in processingData['processingImages'].items():
         irisTemplate = singleProcessingData['images']['irisTemplate']
@@ -65,11 +75,16 @@ def matchMultipleToMultiple(processingImages, matchingImages, processConfig):
             matchingIrisTemplate = singleMatchingData['images']['irisTemplate']
             matchingMaskTemplate = singleMatchingData['images']['maskTemplate']
 
+            print('Matching {}/{} processing image with {}/{} matching image'.format(indexHDProcessing, len(processingData['processingImages']), indexHDMatching, len(processingData['matchingImages'])))
             matchingResults = matchingMethod(irisTemplate, maskTemplate, matchingIrisTemplate, matchingMaskTemplate, **matchingParams)
+            indexHDMatching = indexHDMatching + 1
 
             processingResults[pKey]['matchingEntries'][mKey] = {
                 'matchingImageData': singleMatchingData,
                 'matchingResults': matchingResults
             }
+
+        indexHDMatching = 1
+        indexHDProcessing = indexHDProcessing + 1
 
     return processingResults

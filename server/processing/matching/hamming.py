@@ -38,7 +38,12 @@ def calcHammingDistance(testedSeq, testedMask, modelSeq, modelMask):
     matches = np.count_nonzero(np.bitwise_and(np.bitwise_xor(testedSeq, modelSeq), mask))
 
     hd = matches / numberOfCheckedBits
-    return hd
+
+    # Temporary fix for NaN HD - caused by faulty segmentation when mask if totally black
+    if (np.isnan(hd)):
+        hd = 2.0
+
+    return float(hd)
 
 # From image to Boolean (+ reshape to vector, but im not sure if required)
 # Add shifting logic

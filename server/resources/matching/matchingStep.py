@@ -28,7 +28,8 @@ class MatchingStep(Resource):
         results = matchSingleToMultiple(irisTemplate, maskTemplate, matchingImagesPaths, processConfig)
 
         # Getting rid of numpy arrays from the results dictionary
-        for result in results:
-            result.pop('images')
+        for dump, result in results.items():
+            if 'images' in result['matchingImageData']:
+                result['matchingImageData'].pop('images')
 
         return results

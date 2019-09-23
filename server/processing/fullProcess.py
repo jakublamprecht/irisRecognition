@@ -6,7 +6,6 @@ from utils.processConfig import getMethodHandlerAndMethodParams
 import cv2
 
 def processSingleImage(imagePath, processConfig):
-    # Original image
     orgImage = cv2.imread(imagePath, cv2.CV_8UC1)
     image = orgImage.copy()
 

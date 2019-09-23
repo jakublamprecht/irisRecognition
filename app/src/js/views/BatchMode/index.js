@@ -7,8 +7,8 @@ import { stepComponents } from './steps';
 const batchWizardConfig = {
   [BATCH_STEPS.PROCESSED_IMAGE_SELECTION]: {
     title: 'Processed Images',
-    // content: stepComponents.ProcessingImagesSelection,
-    content: stepComponents.Results,
+    content: stepComponents.ProcessingImagesSelection,
+    // content: stepComponents.Results,
   },
   [BATCH_STEPS.MATCH_IMAGE_SELECTION]: {
     title: 'Matched images',

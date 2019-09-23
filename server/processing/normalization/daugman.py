@@ -1,4 +1,6 @@
 import numpy as np
+from scipy.interpolate import interp2d
+import math as math
 
 """
 Description:
@@ -22,25 +24,57 @@ Returns:
 """
 
 def normalize_image(image, irisCenterX, irisCenterY, irisR, pupilCenterX, pupilCenterY, pupilR, width, height):
-    thetas = np.arange(0, 2*np.pi, 2*np.pi / width)
-    normImage = np.zeros((height, width), np.uint8)
+    realHeight = height + 2
+    angledivisions = width - 1
+    rows, cols = image.shape
 
-    for i in range(width):
-        for j in range(height):
-            theta = thetas[i]
-            rNorm = j / height
+    r = np.arange(0, realHeight, 1)
+    thetas = np.arange(0, 2*np.pi + 2*np.pi / angledivisions, 2*np.pi / angledivisions)
 
-            # Coordinates of points on the intersetion of pupil and iris circle and line r with theta angle
-            xp = pupilCenterX + pupilR * np.cos(theta)
-            yp = pupilCenterY + pupilR * np.sin(theta)
-            xi = irisCenterX + irisR * np.cos(theta)
-            yi = irisCenterY + irisR * np.sin(theta)
+    ox = pupilCenterX - irisCenterX
+    oy = pupilCenterY - irisCenterY
 
-            x = (1 - rNorm) * xp + rNorm * xi
-            y = (1 - rNorm) * yp + rNorm * yi
+    if ox <= 0:
+        sgn = -1
+    elif ox > 0:
+        sgn = 1
 
-            val = image.item(int(x), int(y))
-            normImage[j][i] = val
+    if ox == 0 and oy > 0:
+        sgn = 1
+
+    a = np.ones((1,width)) * (ox*ox + oy*oy)
+
+    if ox == 0:
+        phi = np.pi/2
+    else:
+        phi = math.atan(oy/ox)
+
+    b = sgn * np.cos(np.pi - phi - thetas)
+
+    r = np.multiply(np.sqrt(a), b) + np.sqrt(np.multiply(a, np.power(b, 2)) - (a - np.power(irisR, 2)))
+    r = r - pupilR
+
+    rMatrix = np.transpose(np.ones((1, realHeight))) * r
+    rMatrix = np.multiply(rMatrix, np.transpose(np.ones((angledivisions+1, 1))*np.arange(0, 1, 1/realHeight)))
+    rMatrix = rMatrix + pupilR
+
+    rMatrix = rMatrix[1:(realHeight - 1), :]
+
+    xcosMat = np.ones((height, 1)) * np.cos(thetas)
+    xsinMat = np.ones((height, 1)) * np.sin(thetas)
+
+    xo = np.multiply(rMatrix, xcosMat)
+    yo = np.multiply(rMatrix, xsinMat)
+
+    xo = pupilCenterX + xo
+    yo = pupilCenterY - yo
+
+    xo = xo.astype(int)
+    yo = yo.astype(int)
+
+    normImage = np.empty((0, width), np.uint8)
+    for i, j in zip(xo, yo):
+        normImage = np.vstack((normImage, image[j, i]))
 
     return normImage
 

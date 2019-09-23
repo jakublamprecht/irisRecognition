@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Avatar, Icon, List, Modal } from 'antd';
+import * as path from 'path';
 
 import { MatchingResult } from '../MatchingResult';
 import { MatchingResultPreview } from '../MatchingResultPreview';
 import { ResultCard, ContentWrapper, FilePathText, ResultCardTitle, CardTitleWrapper } from './styles';
+import { downloadObjectAsJson } from '../../helpers/download';
 
 const { Meta } = ResultCard;
 
@@ -46,6 +48,17 @@ export const MatchingResults = ({ noCollapseAction, processingImageData, matchin
     );
   };
 
+  const saveMatchingData = () => {
+    const matchingData = {
+      processingImageData,
+      matchingEntries,
+    };
+    const fileExt = path.extname(processingImageOriginalPath);
+    const fileName = path.basename(processingImageOriginalPath, fileExt);
+
+    downloadObjectAsJson(matchingData, fileName);
+  }
+
   // extracted so that it can be hidden if results is not collapsable
   const cardActions = noCollapseAction
     ? []
@@ -61,6 +74,9 @@ export const MatchingResults = ({ noCollapseAction, processingImageData, matchin
   return (
     <ResultCard
       key={`resultList${processingImageOriginalPath}`}
+      extra={
+        <a href="#" onClick={saveMatchingData}>Download...</a>
+      }
       actions={cardActions}>
       <Meta
         avatar={
