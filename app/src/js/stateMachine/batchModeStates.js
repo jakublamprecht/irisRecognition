@@ -32,8 +32,5 @@ export const batchModeStates = {
         [WIZARD_TRANSITIONS.PREVIOUS]: BATCH_STEPS.CONFIGURATION_SELECTION,
       },
     },
-    [BATCH_STEPS.RESULT_PREVIEW]: {
-      on: {},
-    },
   },
 };

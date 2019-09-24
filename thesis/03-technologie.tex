@@ -1,444 +1,324 @@
+\chapter{Opis technologii i aplikacji}
 
-\chapter{Wybrane metody tworzenia tablic sufiksów}
+Częśc wymagań wobec tej pracy dotyczyła nie tylko algorytmów i procesu rozpoznawania
+tęczówki, ale także sposobu w jaki aplikacja została stworzona i w jaki sposób jest
+ona użytkowana. Aplikacja miała by przyjazna dla użytkowników i pozwala\'c na działanie
+w trybie krokowym. Miała pozwala\'c również na proste rozszerzanie jej o kolejne
+metody. Wymagania te w duży sposób wpłynęły na wybór technologii użytych w tej pracy,
+które opisane zostaną w dalszej części tego rozdziału.
 
-W~poniższym rozdziale omówione są wybrane metody tworzenia tablic sufiksów.
-Algorytmy wybrane zostały na podstawie wyników testów wydajnościowych
-zaprezentowanych w~pracach \cite{taxonomy} i~\cite{schurmann-phd} oraz
-publikowanych na stronach [\ref{msufsort}] i~[\ref{mori-benchmark}].
-Algorytmy uzyskujące dobre wyniki na dużych zbiorach danych -- szybkie \emph{w
-praktyce} pochodzą z~rodziny algorytmów wykorzystujących \emph{polepszanie
-wszerz}. W~poniższym zestawieniu opisane zostały również algorytmy
-reprezentujące inne grupy metod tworzenia tablic sufiksów: \emph{polepszanie
-wgłąb} i~\emph{sortowanie zredukowanych ciągów znaków}.
+\section{Użyte technologie}
 
+Ponieważ praca jest ściśle związana z przetwarzaniem obrazu, w tym wypadku obrazu oka
+w celu analizy tęczówki, zdecydowano się na użycie biblioteki OpenCV. Upraszcza ona pracę
+z obrazem oraz operacje na nim w znacznym stopniu, a także dostarcza wiele gotowych
+funkcji, które przyspieszają tempo tworzenia eplikacji.\newline
 
-\section{Algorytm \emph{skew}}
+Dużą wagę w pracy należało poświęci\'c części klienckiej, w celu stworzenia przejrzystego i
+przyjaznego interfejsu użytkownika. Wiele aplikacji zaniedbuje ten aspekt, w wyniku czego
+użytkownicy często gubią się w trakcie korzystania z aplikacji. Problem ten najczęściej próbuje
+się maskowa\'c przygotowaniem rozległej dokumentacji aplikacji i jej widoków, co nie poprawia
+w żaden sposób jakości korzystania z niej. Problemy te prowadzą do zniechęcenia i gorszej jakości
+doświadczenia użytkownika, co końcowo prowadzi do zaprzestania korzystania z aplikacji. Aby
+unikną\'c tych problemów postanowiono wykorzysta\'c technologie pozwalające na tworzenie
+zachęcających i interaktywnych interfejsów. Najlepiej w tym obszarze sprawdzają się technologie
+internetowe takie jak HTML (HyperText Markup Language), CSS (Cascading Style Sheets) oraz JS
+(JavaScript).
 
-Algorytm \emph{skew} został opracowany przez Petera Sandersa i~Juhę
-K\"arkk\"ainena \cite{KS}. Dostępna jest
-również implementacja tego algorytmu ich autorstwa [\ref{KScode}]. Opisywana
-metoda pochodzi z~rodziny algorytmów wykorzystujących
-\emph{sortowanie zredukowanych ciągów znaków}. 
-Algorytm wykonuje 3 główne kroki:
-\begin{enumerate}
-  \item Tworzenie tablicy sufiksów zbudowanej z~sufiksów $S_i$ o~indeksach $i
-  \bmod{3} \neq 0$. Problem jest redukowany do tworzenia tablicy sufiksów ciągu długości $2/3$ 
-  rozmiaru ciągu wejściowego, a~następnie rozwiązywany rekurencyjne.
-  \item Tworzenie tablicy sufiksów zbudowanej z~sufiksów pominiętych w~pierwszym kroku z~wykorzystaniem tablic sufiksów z~kroku 1.
-  \item Połączenie zbudowanych tablic w~jedną.
-\end{enumerate}
+Technologie te nie dają bezpośredniej możliwości użycia w nich bilbioteki OpenCV, nastomiast
+możliwe jest stworzenie dodatkowej warstwy, która wykonywałaby przetwarzanie obrazu z
+użyciem OpenCV, a następnie komunikowałaby się z interfejsem i przekazywała do niego
+wymagane dane. W związku z tym w pracy postanowiono uży\'c języka Python, który dostarcza wielu
+rozwiązań umożliwiających taką komunikację.\newline
 
-\noindent
-Pierwszy (i najbardziej czasochłonny) krok algorytmu polega na posortowaniu
-sufiksów $S_i$ dla $i \bmod{3} \neq 0$, czyli utworzeniu tablicy sufiksów
-$\textit{SA}^{12}$. Jeżeli w~wyniku \emph{h-sortowania} dla $h=3$ wszystkie
-grupy są jednoelementowe, to ten etap algorytmu się kończy. W~przeciwnym przypadku
-każdemu sufiksowi $S_i$ nadawany jest identyfikator $x^{'}_i
-\in [ 1, 2n/3]$ będący identyfikatorem jego \emph{3-grupy} powstałej po 
-\emph{3-sortowaniu}. Następnie tworzony jest ciąg $x^{12} = [x^{'}_i : i
-\bmod{3} = 1] \circ [x^{'}_i : i \bmod{3} = 2]$, którego tablica sufiksów
-$\textit{SA}_{x^{12}}$ obliczana jest rekurencyjnie. Tablica $\textit{SA}^{12}$
-wypełniana jest zgodnie z~poniższym wzorem ($n_1$ oznacza liczbę sufiksów o~etykietach $i$ takich, że $i \bmod{3} = 1$):  
-\begin{displaymath}
-\textit{SA}^{12}[i] = \left\{ 
-    \begin{array}{l l}
-    1 + 3k          & \textit{jeżeli } k = \textit{SA}_{x^{12}}[i] <  n_1, \\
-    2 + 3(k - n_1)  & \textit{w przeciwnym wypadku}.
-    \end{array} 
-    \right.
-\end{displaymath}
+Zaprojektowanie aplikacji w ten sposób pozwala na rozdzielenie jej na warstwę prezentacyjną
+oraz warstwę logiki aplikacyjnej, co jest zgodne z dobrymi praktykami tworzenia oprogramowania.
+Pozwala to również na uniezależnienie tych warstw od siebie, dzięki czemu możliwe
+byłoby stworzenie wielu interfejsów korzystających z tego samego procesu przetwarzania obrazu.
 
-Drugi krok algorytmu polega na utworzeniu tablicy sufiksów $\textit{SA}^0$
-złożonej z~sufiksów $S_i$, gdzie $i \bmod{3} = 0$. Tablica ta powstaje w~wyniku
-sortowania par $(x[i], S_{i+1})$. Ponieważ porządek sufiksów $S_{i+1}$ jest
-zawarty w~$\textit{SA}^{12}$, do znalezienia $\textit{SA}^0$ wystarczy posortować
-stabilnie elementy $\textit{SA}^{12}[j]$ reprezentujące sufiksy
-$\textit{SA}_{i+1}, i \bmod{3} = 0$ według wartości $x[i]$. Można tego dokonać
-w~czasie liniowym jednym krokiem sortowania kubełkowego.
+\subsection{Warstwa logiki aplikacji}
 
-Trzeci krok algorytmu polega na połączeniu tablic $\textit{SA}^{12}$ i~$\textit{SA}^0$ w~jedną 
-tablicę sufiksów. Porównywanie sufiksów $S_j$, gdzie $j\bmod{3}=0$ i~$S_i, i \bmod{3} \neq 0$ 
-odbywa się na jeden z~dwóch sposobów:
+Tak jak wcześniej wspomniano jako główny język programowania odpowiedzialny za warstwę logiki
+aplikacji, przetwarzanie obrazu oraz komunikację z interfejsem użytkownika wybrany został język
+Python w parze z biblioteką OpenCV.
+
+Tworzenie aplikacji internetowych z wykorzystaniem języka Python bez żadnej dodatkowej
+biblioteki byłoby zadaniem żmudnym oraz nie dostarczajacym żadnej dodatkowej wartości. W związaku
+z tym zdecydowano się na użycie biblioteki \textbf{Flask}, która dostarcza gotowych rozwiązań
+w świecie aplikacji internetowych, upraszcza projetkowanie systemu oraz dostarcza prosty w obsłudze
+sposób na komunikację z interfejsem użytkownika. Dodatkowo razem z biblioteką dostarczany jest
+deweloperski serwer WWW, dzięki czemu nie trzeba instalowa\'c i konfigurowa\'c żadnych innych zależności.
+\newline
+
+Najpopularniejszym sposobem komunikacji między serwerem a interfejsem użytkownika jest zaprojektowanie
+interfejsu programistycznego wykorzystującego protokół HTTP w architekturze REST (Representational State Transfer).
+Jego zadaniem jest zapewnienie aplikacji klienckiej zestawu usług wykonujących ściśle określone
+operacje zależne od użytej metody protokołu HTTP. REST zakłada, że każda z takich usług jest bezstanowa, a wynik jej działania jest w całości
+oparty o dane przychodzące wraz z zapytaniem. Każda z usług ma swój unikalny identyfikator w postaci
+adresu URL (Uniform Resource Locator) pod który aplikacja kliencka może wysyła\'c zapytania.
+
+Korzystanie z architektury REST wymusza dobre praktyki projektowania interfejsów programistycznych
+i jest lubianym wzorcem wśród programistów aplikacji internetowych ze względu na przejrzystoś\'c
+tworzonego kodu oraz poniekąd samodokumentujący się kod.
+W konteście aplikacji tworzonej w ramach niniejszej pracy, zastosowanie architektury REST pozwala
+na rozbicie całego procesu rozpoznawania tęczówki na mniejsze kroki odpowiadające poszczególnym
+etapom procesu lub nawet poszczególnym algorytmom. Takie rozbicie można uzyska\'c przez zdefiniowanie
+osobnej usługi dla każdego z zaimplementowanych algorytmów. Takie rozwiązanie zapewnia prostą skalowalnoś\'c,
+ponieważ dodanie kolejnego algorytmu wymaga jedynie dodania nowej usługi oraz zmiany adresu pod który
+wysyłane jest zapytanie.
+
+Biorąc pod uwagę te zalety w pracy zdecydowano
+się na użycie \textbf{Flask-RESTful}, które jest rozszerzeniem dla biblioteki Flask. Dostarcza
+ono szereg metod i uproszczeń w tworzeniu interfejsów w architekturze REST.\newline
+
+Oprócz wyżej wymienionych bibliotek należy zainstalowa\'c również wszelkie ich zależności, takie jak
+przykładowo biblioteka \textbf{Numpy} w przypadku OpenCV. Wraz z rozwojem aplikacji iloś\'c użytych
+bibliotek i zależności będzie tylko rosną\'c, co w dłuższym czasie spowoduje problemy z utrzymaniem
+informacji o tym jakie biblioteki i które ich wersje są wymagane do uruchomienia aplikacji. Często
+informacje te przechowywane są w postaci pliku tekstowego w katalogu projektu, jednak rozwiązanie to
+jest mało odporne na błąd ludzki, ponieważ nie trudno zapomnie\'c o aktualizacji takiego pliku.
+
+Dodatkowo pracując jednocześnie przy kilku projektach w języku Python może okaza\'c się, że kilka z
+nich wymaga dokładnie tej samej biblioteki, ale w różnych wersjach. Problem ten można rozwiąza\'c
+używając wirtualnych środowisk. Są to środowiska Pythona, które są odizolowane i niezależne od głównej
+instalacji Pythona. W rzeczywistości są to osobne foldery, w których instalowana jest odpowiednia wersja
+Pythona oraz wymagane biblioteki w odpowiednich wersjach.
+
+W celu rozwiązania tych problemów w pracy zdecydowano się na użycie narzędzia \textbf{Pipenv}.
+Umożliwia ono automatyczną generację writualnego środowiska wewnątrz projektu oraz automatyczne
+śledzenie zależności projektu i ich wersji. Informacje te przechowywane są w dwóch plikach
+\textit{Pipfile} oraz \textit{Pipfile.lock}, które są generowane, czytane oraz utrzymywane automatycznie.
+Poniżej przestawiono podstawowe komendy narzędzia Pipenv:
+
+\begin{description}
+  \item[pipenv install] - uruchomienie w katalogu projektu inicjalizuje środowisko wirtualne oraz pliki
+  \textit{Pipfile} i \textit{Pipfile.lock}
+
+  \item[pipenv install <packageName>] - instaluje paczkę wewnątrz środowiska wirtualnego
+
+  \item[pipenv shell] - uruchamia powłokę w której dostępny jest python oraz biblioteki zainstalowane
+  w środowisku wirutalnym
+\end{description}
+
+\subsection{Warstwa prezentacyjna}
+
+Tak jak wcześniej wspomniano, aplikacja kliencka napisana została z wykorzystaniem technologii
+internetowych takich jak HTML, CSS oraz JS. Aplikacje korzystające z tych technologii historycznie
+zwykle używane były wewnątrz przeglądarek. W ostatnich czasach technologie internetowe zyskują
+coraz większą popularnoś\'c, co przełożyło się również na rozwój dostępnych bibliotek oraz zwiększenie
+zasięgu problemów rozwiązywanych tymi technologiami.
+
+Obecnie aplikacje internetowe mogą przyjmowa\'c nie tylko posta\'c stron internetowych, ale także
+zwyczajnych, wieloplatformowych aplikacji desktopowych dzięki takim narzędziom jak użyty w niniejszej
+pracy \textbf{Electron}. Jest to biblioteka, która używa NodeJS oraz Chromium do stworzenia jednolitego
+środowiska uruchomieniowego. Dzięki takiemu połączeniu możliwe jest wygenerowanie okna aplikacji, które
+w rzeczywistości jest procesem Chromium przedstawiającym konkretną stronę internetową. Dodatkowo wykorzystanie
+NodeJS pozwala na dostęp oraz modyfikację systemu plików użytkownika aplikacji, dzięki czemu możliwe przetwarzanie,
+usuwanie i modyfikowanie plików bez potrzeby przeysłania ich na jakikolwiek serwer. Jest to nieosiągalne
+przy użyciu przeglądarkowej implementacji języka JavaScript.\newline
+
+Tworzenie aplikacji korzystając z podstawowych możliwości HTML, CSS oraz JS zapewne zajęłoby
+bardzo dużo czasu, dlatego w świecie technologii internetowych powstaje wiele bibliotek
+ułatwiających tworzenie skomplikowanych i interaktywnych aplikacji. Jedną z nich jest
+\textbf{React}, który został użyty w tej pracy. Jest to biblioteka JavaScript umożliwiająca
+tworzenie interfejsów użytkownika. Każdy interfejs można rozłoży\'c na poszczególne bloki
+odpowiadające za pewną funkcjonalnoś\'c np. wyświetlenie obrazu, zebranie danych od użytkownika,
+czy przełączenie między dwoma widokami. Bloki te nazywa się komponentami i mogą by\'c one wykorzystywane
+wielokrotnie w różnych miejscach aplikacji. Tworzenie reużywalnych komponentów jest podstawą
+biblioteki React, co sprawia, że jest ona idealnym kandydatem do zbudowania interfejsu aplikacji
+niniejszej pracy.\newline
+
+Komponenty powinny by\'c w miarę możliwości od siebie niezależne, a ich implementacja powinna
+dokonywa\'c jedynie operacji wymaganych właśnie przez ten komponent. Każdy z komponentów cechuje
+pojęcie stanu - informacji opisujących stan komponentu w danym momencie. W momencie, gdy komponent
+nie jest wyświetlany, jest on niszczony, a wraz z nim jego stan, co pozwala na zwolnienie
+zajętej pamięci. Istnieją natomiast informacje, które są ważne dla działania całej aplikacji, z których
+korzysta wiele różnych komponentów w celu wyświetlenia danych, w związku z czym muszą by\'c przechowywane
+przez cały cykl życia aplikacji. Dokładnie taki przypadek można zaobserwowa\'c w niniejszej pracy, np.
+informacje o segmentacji obrazu tęczówki potrzebne będą nie tylko w celu wyświetlenia tych danych,
+ale także w celu wykorzystania ich w kolejnych etapach procesu przetwarzania. Do przechowywania danych
+poza komponentami użyta została biblioteka \textbf{Redux}.
+
+Jednym z wymogów postawionych przed aplikacją jest działanie w dwóch trybach: krokowym oraz wsadowym.
+Każdy z tych trybów składa się z kilku kroków, np. tryb krokowy składa się z następujących kroków:
+
 \begin{itemize}
-    \item Jeżeli $i \bmod{3} = 1$, to porządek sufiksów $S_i$ i~$S_j$ można
-  ustalić porównując pary $(x[i], S_{i+1})$ oraz $(x[j], S_{j+1})$. Ponieważ $i+1
-  \bmod{3} = 2$ i~$j+1 \bmod 3 = 1$ porządek sufiksów $S_{i+1}$ i~$S_{j+1}$
-  można ustalić na podstawie ich pozycji w~$\textit{SA}_{x^{12}}$. Ta pozycja może
-  być ustalana w~czasie stałym, jeżeli obliczona zostanie tablica
-  $\textit{ISA}_{x^{12}}$.
-  
-    \item Analogicznie, jeżeli $i \bmod{3} =
-  2$, to porównywane są trójki $(x[i], x[i+1], S_{i+2})$ i~$(x[j], x[j+1], S_{j+2})$, przy czym 
-  sufiksy $S_{i+2}$ i~$S_{j+2}$ są zastępowane odpowiednimi wpisami z~tablicy  $\textit{ISA}_{x^{12}}$.
+  \item wybór przetwarzanego obrazu,
+  \item przetwarzanie wstępne,
+  \item segmentacja,
+  \item normalizacja,
+  \item kodowanie,
+  \item wybór obrazów do procesu dopasowania,
+  \item dopasowanie,
+  \item prezentacja wyników.
 \end{itemize}
 
+Dla każdego z tych kroków konieczne będzie stworzenie innego widoku, ponieważ każdy z nich będzie wyglądał
+nieco inaczej. W aplikacji złożonej z tak wielu widoków prosto o problemy związane z przejściami między nimi,
+które mogą skutkowa\'c nieprzewidywalnymi błędami, np. załadowanie widoku normalizacji przed widokiem segmentacji
+może skutkowa\'c błędem krytycznym aplikacji. W celu uniknięcia takich błędów interfejs użytkownika można
+opisa\'c w postaci automatu skończonego, w którym stanami są poszczególne widoki, a zmiana widoku definiowana
+jest przez odpowiednie przejścia. Zapewnia to przewidywalnoś\'c działania systemu i uodparnia go na
+błedy podobne do tych wspomnianych wcześniej. W celu opisu interfejsu aplikacji za pomocą automatu skończonego
+wykorzystana została biblioteka \textbf{xState}.\newline
 
-\begin{figure}[t]
-        \begin{center} \small
-            \begin{tabular}{r c c c c c c c c c c c c l}                           
-                                  & 0  & 1    & 2    & 3  & 4    & 5     & 6  & 7    & 8    & 9  & 10   & 11            \\ \cmidrule{2-13} 
-                 $x$ =          [ & b  & a    & d    & d  & a    & d     & d  & a    & c    & c  & a    & $\dollar$ & ] \\ 
-$S_i, i \bmod{3} = 0$ =         [ & 0  &      &      & 3  &      &       & 6  &      &      & 9  &      &      & ]      \\ 
-$S_i, i \bmod{3} \neq 0$ =      [ &    & 1    & 2    &    & 4    & 5     &    & 7    & 8    &    & 10   & 11   & ]      \\ 
-$x[i..i+2], i\bmod{3} \neq 0$ = [ &    & add  & dda  &    & add  & dda   &    & acc  & cca  &    & a\$- & \$--  & ]     \\ \addlinespace[1em]
+Częś\'c komponentów, która tworzy aplikację jest bardzo uniwersalna i powszechna w wielu innych zastosowaniach.
+Są to komponentu typu \textit{przycisk, link, lista elementów, tabela, ikona}. W związku z ich powszechnością
+powstało wiele bibliotek gotowych komponentów, dzięki czemu tworząc aplikację można skupi\'c się na logice
+biznesowej stojącej za aplikacją, zamiast na nowo implementowa\'c przykładowo działanie przycisku. Większoś\'c
+z tych bibliotek dodatkowo zapewnia podstawowe style, dzięki czemu aplikacje tworzone z ich wykorzystaniem
+wymagają mniejszego nakładu pracy, by aplikacja wyglądała zachęcająco. Aby zmniejszy\'c potrzebny nakład
+pracy do wytworzenia interfejsu użytkownika, w pracy użyta została biblioteka komponentów \textbf{Ant Design}.
+\newline
 
-             \multicolumn{14}{c}{\emph{3-sortowanie} sufiksów o etykietach $i \bmod{3} \neq 0$ (wartości są indeksami po posortowaniu).} \\
-                         $x'$ = [ &    & 3    & 5    &    & 3    & 5     &    & 2    & 4    &    & 1    & 0     & ]     \\ \addlinespace[1em]
+Podobnie jak w przypadku Pythona, iloś\'c bibliotek i narzędzi używanych w ramach aplikacji jest bardzo duża,
+a manualne utrzymywanie informacji o nich oraz ich wersjach byłoby niemożliwe. W związku z tym wykorzystany
+został menadżer pakietów \textbf{Yarn} umożliwiający prostą instalację bibliotek i narzędzi, który automatycznie
+zapisuje zainstalowane paczki oraz ich wersje jako zależności projektu w plikach \textit{package.json} oraz
+\textit{yarn.lock}. Dzięki korzystaniu z Yarna wszystkie zależności i biblioteki można zainstalowa\'c wywołując
+w folderze zawierającym plik \textit{package.json} komendę \texttt{yarn install}.
 
-             \multicolumn{14}{c}{Tworzenie ciągu $x^{12} = [x^{'}_i : i \bmod{3} = 1] \circ [x^{'}_i : i \bmod{3} = 2]$.} \\
-                     $x^{12}$ = [ & 3  & 3    & 2    & 1  & 5    & 5     & 4  & 0    &  ] \\ \addlinespace[1em]
+W ramach pracy wykorzystane zostały również inne narzędzia, do których wyboru przyczyniła się wyłącznie
+osobista preferencja:
 
-             \multicolumn{14}{c}{Obliczanie $\textit{SA}_{x^{12}}$ i $\textit{SA}^{12}$.} \\
-       $\textit{SA}_{x^{12}}$ = [ & 7  & 3    & 2    & 1  & 0    & 6     & 5  & 4    &  ] \\ 
-      $\textit{ISA}_{x^{12}}$ = [ & 4  & 3    & 2    & 1  & 7    & 6     & 5  & 0    &  ] \\ 
-           $\textit{SA}^{12}$ = [ & 11 & 10   & 7    & 4  & 1    & 8     & 5  & 2    &  ] \\ \addlinespace[1em]
+\begin{description}
+  \item[Babel] - kompiler JavaScript, pozwalający na korzystanie z najnowszych oraz testowych funkcjonalności
+  JavaScript przez transformację kodu \'zródłowego w nowszej wersji do kodu wynikowego w starszej wersji.
+  \item[Styled Components] - biblioteka pozwalająca na definiowanie styli CSS dla poszczególnych komponentów
+  w plikach \'zródłowych o rozszerzeniu \textit{*.js}.
+  \item[Webpack] - narzędzie uruchamiające kompilatory kodu \'zródłowego przekształcające go do postaci rozumianej
+  przez przeglądarki oraz łączące wiele plików w pojedyńczy plik wynikowy.
+  \item[Axios] - biblioteka ułatwiająca wysyłanie zapytań do serwera.
+\end{description}
 
-             \multicolumn{14}{c}{Sufiksy $S_i$, $i \bmod{3} = 1$ oraz $S_j$, $j = i - 1$ zgodnie z kolejnością w $\textit{SA}^{12}$.} \\
-                        ~       [ & 10 & 7    & 4    & 1  & ] \\ 
-                        ~       [ & 9  & 6    & 3    & 0  & ] \\ 
-                       $x[j]$ = [ & c  & d    & d    & b  & ] \\ \addlinespace[1em]
+\subsection{Inne technologie}
 
-             \multicolumn{14}{c}{Stabilne \emph{1-sortowanie} sufiksów $S_j$.} \\
-              $\textit{SA}^0$ = [ & 0  & 9    & 6    & 3  & ] \\ \addlinespace[1em]
+Podczas pracy nad projektem używany był system kontroli wersji Git. W trakcie programowania
+często zachodzi potrzeba zmiany istniejącego i działającego kodu w celu dodania nowych funkcjonalności.
+Niezapisanie poprzedniej wersji kodu może skutkowa\'c niemożliwością powrotu do wersji przed
+wprowadzeniem zmian, tym samym generując dodatkową pracę wymaganą do naprawienia powstałych
+problemów. System kontroli wersji Git pozwala na zapisanie aktualnego stanu pracy w dowolnym momencie.
+Dzięki temu wprowadzanie zmian w działającym kodzie jest znacznie mniej ryzykowne, ze względu na
+możliwoś\'c powrotu do dowolnej poprzedniej wersji. Korzystając z tego systemu kontroli wersji uzyskujemy
+również dostęp do historii poszczególnych plików, a także możliwoś\'c dodawania komentarzy podczas zapisywania nowych wersji,
+dzięki czemu łatwiej zrozumie\'c co dane zmiany robią i dlaczego zostały wprowadzone.
 
-             \multicolumn{14}{c}{Scalanie tablic $\textit{SA}^0$ i $\textit{SA}^{12}$.} \\
-                $\textit{SA}$ = [ & 11 & 10   & 7    & 4  & 1    &  0    & 9  & 8    &  6    & 3   &  5    &  2     & ] \\ 
-            \end{tabular}            
-        \end{center}                         
-        \caption{Przykład tworzenia tablicy sufiksów według algorytmu \emph{skew}.
-        Źródło: opracowanie własne.}%
-        \label{rys:ks}
-\end{figure}
+Dodatkowym atutem jest możliwoś\'c przechowywania całości projektu w zewnętrznym serwisie. Dzięki
+temu w razie awarii sprzętu, na którym tworzony jest projekt, w najgorszym wypadku stracona
+zostanie jedynie częś\'c pracy, a nie jej całoś\'c.
 
+\section{Struktura kodu}
 
-\section{Algorytm \emph{qsufsort}}
+Struktura projektu podzielona została na trzy główne foldery:
 
-Algorytm \emph{qsufsort} został przedstawiony w~pracy \cite{LS} autorstwa
-Jespera Larrsona i~Kunihiko Sadakane. Autorzy pracę udostępniają również
-implementację w~języku \texttt{C} [\ref{LScode}]. Opisywana metoda należy do
-rodziny algorytmów wykonujących polepszanie wgłąb, opiera się na algorytmie
-\emph{prefix-doubling}.
-
-Sortowanie sufiksów wykonywane jest algorytmem \emph{ternary split
-quicksort} \cite{bentley-sort}. Algorytm \emph{qsufsort} wykorzystuje
-również twierdzenie opublikowane w~pracy \cite{karp}: dla obliczonych \SA{h} i~\ISA{h} posortowanie sufiksów $S_i$ według par (\ISA{h}$[i]$, \ISA{h}$[i+h]$),
-$i+h \leq n$ tworzy \emph{2h-porządek} sufiksów, czyli
-porządek według prefiksów długości $2h$.\footnote{Sufiksy $S_i, i > n - h$ są
-zawsze w~pełni uporządkowane.}
-Wynika to z~tego, że do ustalenia porządku sufiksów o~wspólnym prefiksie
-długości $h$ wykorzystujemy porządek ich $\textit{h-następców}$, którzy są
-również posortowani według h pierwszych znaków, co daje w~konsekwencji porządek
-sufiksów według prefiksów długości $2h$.
-
-Na początku działania algorytm wykonuje \emph{1-sort}, w~wyniku którego
-powstają \SA{1} i~\ISA{1}. Numery grup w~odwróconej tablicy sufiksów
-przypisywane są poprzez wybór ogona (pozycji ostatniego sufiksu w~tablicy
-\SA{h}) danej grupy. Algorytm \emph{qsufsort} utrzymuje również tablicę $L$
-długości $n$ używaną w~celu określania rozmiarów grup.
-Wartość $L[j] = d$ oznacza, że grupa rozpoczynająca się na pozycji $j$ ma $d$
-elementów. Wartości ujemne w~tablicy $L$ oznaczają ciągi jednoelementowych
-grup (na przykład $-2$ oznacza dwie jednoelementowe grupy). 
-
-Przeglądanie tablicy $L$ od lewej do prawej umożliwia omijanie grup
-jednoelementowych w~procesie polepszania kubełków. Każda \emph{h-grupa}
-sortowana jest osobno, jej sufiksy $S_i$ porównywane są na podstawie wartości
-\ISA{h}$[i+h]$. Po posortowaniu wszystkich grup otrzymujemy \emph{2h-porządek}. 
-Algorytm kończy swoje działanie, gdy wszystkie
-{h-grupy} są jednoelementowe, czyli gdy $L[0] = -n$. W~przeciwnym wypadku $h$
-jest podwajane, a~proces polepszania kubełków wykonywany po raz kolejny.
-
- \begin{figure}[t]
-        \begin{center} \small
-            \begin{tabular}{ r c c c c c c c c c c c c l}                           
-                 & 0  & 1  & 2  & 3  & 4  & 5   & 6  & 7  & 8  & 9  & 10 & 11       \\\cmidrule{2-13} 
-         $x$ = [ & a  & b  & e  & a  & c  & a   & d  & a  & b  & e  & a  &
-         $\dollar$ & ] \\ \SA{1} = [ & 11 & (0 & 3  & 5  & 7  & 10) & (1 & 8) & 4  & 6  & (2 & 9)   & ] \\ 
-     \ISA{1} = [ & 5  & 7  & 11 & 5  & 8  &  5  & 9  & 5  & 7  & 11 & 5  & 0    &] \\ 
-	$L$  = [ & -1 & 5  &    &    &    &     & 2  &    & -2 &    & 2  &      &] \\ \cmidrule{2-13}
-      \SA{2} = [ & 11 & 10 & (0 & 7) & 3  & 5   & (1 & 8) & 4  & 6  & (2 & 9)   & ] \\ 
-     \ISA{2} = [ & 3  & 7  & 11 & 4  & 8  & 5   & 9  & 3  & 7  & 11 & 2  & 0    &] \\ 
-	$L$  = [ & -2 &    & 2  &    & -2 &     & 2  &    & -2 &    & 2  &      &] \\ \cmidrule{2-13}
-      \SA{4} = [ & 11 & 10 & (0 & 7) & 3  & 5   & 8  & 1  & 4  & 6  & 9  & 2   & ] \\ 
-     \ISA{4} = [ & 3  & 7  & 11 & 4  & 8  & 5   & 9  & 3  & 6  & 10 & 1  & 0    &] \\ 
-	$L$  = [ & -2 &    & 2  &    & -8 &     &    &    &    &    &    &      &] \\ \cmidrule{2-13}
-      \SA{8} = [ & 11 & 10 & 7  & 0  & 3  & 5   & 8  & 1  & 4  & 6  & 9  & 2   & ] \\ 
-     \ISA{8} = [ & 3  & 7  & 11 & 4  & 8  & 5   & 9  & 2  & 6  & 10 & 1  & 0    &] \\ 
-	$L$  = [ & -12 &   &    &    &    &     &    &    &    &    &    &      &] \\ 
-
-            \end{tabular}            
-        \end{center}                         
-    \caption{Przebieg algorytmu \emph{qsufsort} dla słowa ,,abeacadabea''.
-    Źródło: opracowanie własne na podstawie \cite{taxonomy}.}%
-    \label{rys:ls}
-    \end{figure}
-
-Algorytm \emph{qsufsort} da się optymalizować pod kątem redukcji zużycia
-pamięci. Możliwe jest kompletne wyeliminowanie tablicy $L$. Do wyznaczania \emph{h-grup} zawierających więcej niż 1 element można wykorzystać tablicę
-\ISA{}, rozmiar grupy wyznacza się wtedy na podstawie jej pierwszego elementu.
-Jeżeli $j$ oznacza pozycję pierwszego elementu grupy w~\SA{}, a~$i=$\SA{h}$[j]$, to jej rozmiar wynosi \ISA{h}$[i] - j + 1$.
-Złożoność pamięciowa algorytmu może również zostać zredukowana poprzez
-nadpisanie ciągu wejściowego i~wykorzystanie tego obszaru pamięci do
-przechowywania \ISA{} po obliczeniu \SA{1}.
-
-
-\section{Algorytm \emph{deep shallow}}
-
-Algorytm \emph{deep shallow} jest rozwinięciem algorytmu \emph{copy}
-opracowanym przez Paolo Ferraginę i~Giovanniego Manziniego. Opublikowany został
-w~pracy \cite{MF}. Kod algorytmu w~języku \texttt{C} dostępny jest pod adresem
-[\ref{MFcode}], jego autorem jest Giovanni Manzini.
-
-Pierwszym krokiem algorytmu jest uporządkowanie sufiksów według dwóch
-pierwszych znaków (\emph{2-sortowanie}). Każdy z~utworzonych w~ten
-sposób kubełków sortowany jest algorytmem \emph{multikey quicksort}
-\cite{bentley}, który jest przerywany po osiągnięciu poziomu rekurencji równemu
-$L$, czyli jeżeli wewnątrz kubełka istnieje grupa sufiksów o~wspólnym prefiksie
-długości $L$. Podejście to nosi nazwę sortowania płytkiego (\english{shallow
-sorting}).
-
-Sortowanie znajdowanych sufiksów o~wspólnym prefiksie długości $L$
-nazwane zostało przez autorów algorytmu \emph{deep shallow} sortowaniem
-głębokim (\english{deep sort}). Przebieg działania głębokiego sortowania zależy
-od wielkości zbioru sortowanych sufiksów. Jeżeli liczność zbioru nie przekracza
-zadanej wartości $B$, to sufiksy są sortowane algorytmem \emph{blind sort}. W~przeciwnym przypadku do posortowania sufiksów wykorzystane zostanie zmodyfikowany algorytm
-\emph{ternary split quicksort} \cite{bentley-sort}. Autorzy sugerują użycie
-wartości $B = n \times 0.0005$ jako progu wielkości zbioru.
-
-Algorytm \emph{blind sort} opiera swoje działanie na strukturze danych
-nazywanej \definicja{blind trie} \cite{btree}, która jest typem skompresowanego
-drzewa którego węzły wewnętrzne przechowują liczby określające długość wspólnego
-prefiksu węzłów potomnych (jeżeli węzeł zawiera liczbę $k$, to jego węzły
-potomne różnią się na pozycji $k+1$). Przykładowe drzewo \emph{blind trie}
-znajduje się na rysunku \ref{rys:blind-trie}. 
-
-Algorytm \emph{blind sort} tworzy drzewo \emph{blind trie}, a~następnie
-przegląda je od lewej do prawej uzyskując w~ten sposób porządek leksykograficzny
-sekwencji podanych na wejściu (w drzewie \emph{blind trie} węzły potomne danego
-węzła są uporządkowane). Poważną wadą metody \emph{blind sort} jest jej
-złożoność pamięciowa, sięgająca nawet $36m$, gdzie $m$ oznacza liczbę ciągów do
-posortowania.
-
-\begin{figure}[t]
-    \begin{center}
-       \includegraphics[width=.9\linewidth]{figures/blindtrie.pdf}
-    \end{center}
-    \caption{Drzewo skompresowane oraz odpowiadające mu drzewo \emph{blind trie}
-    zbudowane na zbiorze sekwencji \emph{abaaba, abaabb, abac, bcbcaba, bcbcabb, bcbcbba, bcbcbbba}. 
-    Źródło: \cite{MF}.}\label{rys:blind-trie}
-\end{figure}
-
-Do sortowania zbiorów większych niż $B$ autorzy algorytmu \emph{deep shallow}
-użyli zmodyfikowanego algorytmu \emph{ternary split quicksort}, opisanego w~pracy \cite{bentley-sort}. Dokonali oni następujących zmian:
-\begin{enumerate}
-  \item Jeżeli na dowolnym etapie rekursji zbiór sufiksów jest mniejszy niż
-  $B$, to do jego sortowania użyty zostaje algorytm \emph{blind sort}.
-  \item Podczas fazy podziału sufiksów obliczane są $L_S$ i~$L_L$, czyli
-  długość najdłuższego wspólnego prefiksu elementu osiowego (\english{pivot}) i~zbioru elementów mniejszych ($L_S$) oraz większych ($L_L$) od elementu
-  osiowego. Dzięki temu podczas sortowania sufiksów w~tych zbiorach można
-  pomijać prefiksy długości $L_S$ lub $L_L$.
-\end{enumerate}
-
-Paolo Ferragina i~Giovanni Manzini w~pracy \cite{MF} wymieniają trzy zalety
-dwuetapowego podejścia do problemu sortowania sufiksów zastosowanego w~algorytmie \emph{deep shallow}:
-\begin{enumerate}
-  \item Szybkie wykrywanie grup sufiksów o~długim wspólnym prefiksie.
-  \item Rozmiar stosu użytego podczas rekurencji w~fazie sortowania płytkiego
-  jest ograniczony parametrem $L$ i~nie zależy od rozmiaru wejścia.
-  \item Jeżeli długość najdłuższego wspólnego prefiksu sufiksów jednego kubełka
-  nie przekracza $L$, to uporządkowywane są one efektywnym algorytmem
-  sortowania ciągu znaków (\emph{multikey quicksort}).
-\end{enumerate}
- 
- 
-\section{Algorytm \emph{two-stage}}
-
-Hideo Itoh i~Hozumi Tanaka zaproponowali w~pracy \cite{IT} algorytm tworzenia
-tablic sufiksów o~nazwie \emph{two-stage}. Algorytm ten dzieli sufiksy na dwie
-kategorie: sufiksy typu $A$ to wszystkie sufiksy $S_i$ spełniające nierówność $x[i] > x[i+1]$,
-sufiksy typu $B$ to sufiksy spełniające nierówność $x[i] \leq x[i+1]$.
- 
-Algorytm rozpoczyna swoje działanie od obliczenia \SA{1}. Początek i~koniec
-każdej grupy zapamiętywany jest w~tablicach $\mathit{head}$ i~$\mathit{tail}$. Długość tych tablic odpowiada wielkości słownika symboli.
-Sufiksy w~każdej \emph{1-grupie} są uporządkowywane w~taki sposób, żeby sufiksy typu $A$
-były przed sufiksami typu $B$. Wynika to z~tego, że jeżeli sufiksy $S_i$ typu $A$ i~$S_j$ typu $B$ mają wspólny prefiks długości jednego symbolu, to sufiks $S_i$ poprzedza sufiks $S_j$ w~porządku leksykograficznym. Indeksy pierwszych sufiksów typu $B$ każdej
-grupy zapamiętywane są w~tablicy $\mathit{part}$ długości $\sigma$.
-Kolejnym krokiem algorytmu jest sortowanie sufiksów typu $B$ wewnątrz każdej
-grupy. Autorzy pracy \cite{IT} sugerują użycie do tego celu algorytmu
-\cite{bentley}, nie jest to jednak konieczne i~można do tego celu użyć innego
-algorytmu sortowania ciągów znaków. 
-
-
-Następnie ustalany jest porządek sufiksów typu $A$. Tablica \SA{} przeglądana
-jest od lewej do prawej, znajdując wartości $i=\mathit{SA}[j], j=0,1,\ldots,n-1$. Jeżeli
-$S_{i-1}$ jest jeszcze nieuporządkowanym sufiksem typu $A$, to umieszczany jest
-na początku grupy do której należy. Odpowiednia wartość w~tablicy \emph{head} jest potem
-inkrementowana. Po jednokrotnym przejrzeniu \SA{} sufiksy są już w~pełni
-posortowane, co kończy algorytm (przykład na rysunku~\ref{rys:it}).
-
-\begin{figure}[ht]
-        \begin{center} \small
-            \begin{tabular}{r c c c c c c c c c c c c l}                           
-                 & 0  & 1  & 2  & 3  & 4  & 5   & 6  & 7  & 8  & 9  & 10 & 11       \\ \cmidrule{2-13} 
-         $x$ = [ & b  & a  & d  & d  & a  & d   & d  & a  & c  & c  & a  &
-         $\dollar$ & ] \\ type = [ & A  & B  & B  & A  & B  & B   & A  & B  & B  & A  & A  & B    & ] \\ \addlinespace[1em]
-	
-       \multicolumn{14}{c}{\emph{1-sort}}\\
-       \SA{} = [ & 11 & (-- & 1  & 4  & 7) & (--) & (-- & 8) & (-- & --  & 2  & 5)   & ] \\
-        type = [ & B  & A  & B  & B  & B  & A   & A  & B  & A  & A  & B  & B    & ] \\ \addlinespace[1em]
-	
-       \multicolumn{14}{c}{sortowanie sufiksów typu $B$} \\
-       \SA{} = [ & 11 & (-- & 7  & 4  & 1) & (--) & (-- & 8) & (-- & --  & 5  & 2)   & ] \\ \addlinespace[1em]
-	
-       \multicolumn{14}{c}{wstawianie sufiksów typu $A$}\\
-       \SA{} = [ & 11 & 10 & 7  & 4  & 1  & --   & --  & 8  & --  & --  & 5  & 2   & ] \\
-       \SA{} = [ & 11 & 10 & 7  & 4  & 1  & --   & 9  & 8  & --  & --  & 5  & 2   & ] \\
-       \SA{} = [ & 11 & 10 & 7  & 4  & 1  & --   & 9  & 8  & 6  & --  & 5  & 2   & ] \\
-       \SA{} = [ & 11 & 10 & 7  & 4  & 1  & --   & 9  & 8  & 6  & 3  & 5  & 2   & ] \\
-       \SA{} = [ & 11 & 10 & 7  & 4  & 1  & 0   & 9  & 8  & 6  & 3  & 5  & 2   & ] \\
-            \end{tabular}            
-        \end{center}                         
-    \caption{Przebieg algorytmu \emph{two-stage} dla słowa ,,baddaddacca''.
-    Nieuporządkowane sufiksy typu $A$ oznaczane są znakiem ,,--''. Źródło:
-    opracowanie własne na podstawie \cite{taxonomy}.}%
-    \label{rys:it}
-\end{figure}
-
-
-\section{Algorytm \emph{improved two-stage}}
-
-Algorytm \emph{improved two-stage} opisany został w~pracy \cite{MP}, której
-autorami są Simon Puglisi i~Michael Maniscalco.
-Kwestia autorstwa tego algorytmu pozostaje niejasna, metoda ta posiada aż trzy niezależne
-implementacje powstałe przed publikacją artykułu:
 \begin{itemize}
-	\item \emph{archon } [\ref{archon}] autorstwa Dimy Małyszewa,
-	\item \emph{divsufsort} [\ref{libdivsufsort}] której autorem jest Yuta Mori,
-	\item \emph{msufsort} [\ref{msufsort}] autorstwa Michaela Maniscalco.
+  \item \textbf{/app} - zawiera kod \'zródłowy oraz konfiguracje narzędzi użytych przez aplikację
+  kliencką,
+  \item \textbf{/sever} - zawiera kod \'zródłowy oraz konfigurację narzędzi użytych przez aplikację
+  serwerową dokonującej przetwarzania tęczówki,
+  \item \textbf{/thesis} - zawiera kod \'zródłowy pracy dyplomowej w formacie \textit{*.tex}
 \end{itemize}
-Wymienione implementacje algorytmu \emph{improved two-stage} napisane zostały w~języku \texttt{C++}. 
 
-Na początku sufiksy są dzielone na dwie kategorie: sufiksy typu $A$ to sufiksy
-$S_i$ spełniające nierówność $S_i > S_{i+1}$, sufiksy typu $B$ to sufiksy
-spełniające nierówność $S_i \leq S_{i+1}$. Sufiks o~identyfikatorze $n-1$ należy
-do obu grup. Następnie, sufiksy $S_i$ typu $B$ których następny sufiks $S_{i+1}$ jest typu $A$ oznaczane są jako
-sufiksy typu $B^*$. 
+Używając takiego podziału, łatwo odnale\'z\'c miejsce odpowiadające za szukaną funkcjonalnoś\'c.
+W głównym folderze projektu znajduje się również plik \textit{README.md}, w którym opisane zostały
+instrukcje dotyczące uruchomienia projektu.
 
-Kolejnym krokiem algorytmu jest znalezienie granic grup które powstałyby po
-\emph{2-sortowaniu}. Następnie tworzony jest \emph{2-porządek} sufiksów typu
-$B^*$. \emph{2-sortowanie} wszystkich sufiksów nie jest konieczne w~tym
-momencie, a~jego pominięcie zmniejsza czas działania algorytmu.
-Sufiksy typu $B^*$ należące do jednej grupy są sortowane zgodnie z~metodami
-przedstawionymi w~pracach \cite{bentley, MF} i~umieszczane na początkowych
-pozycjach wewnątrz kubełka w~tablicy \SA{}. 
+\subsection{Struktura projektu aplikacji klienckiej}
 
-Porządek sufiksów typu $B$ ustalany jest poprzez przeglądanie tablicy \SA{} od
-prawej do lewej. Dla każdego sufiksu $\mathit{SA}[i]$ odczytanego podczas
-przeglądania tablicy sufiks $\mathit{SA}[i]-1$ jest wstawiany na ostatnią pustą
-pozycję wewnątrz swojej grupy jeżeli jest sufiksem typu $B$.
+\begin{itemize}
+  \item \textbf{/dist} - zawiera kod wynikowy wygenerowany przez Webpack,
+  \item \textbf{/src/js} - zawiera kod \'zródłowy napisany w JavaScript,
+  \begin{itemize}
+    \item \textbf{actions} - folder dla akcji używanych przez bibliotekę Redux,
+    \item \textbf{api} - folder zawierający funkcje pomocnicze wysyłające zapytania do serwera o odpowiednie algorytmy
+    przetwarzania tęczówki,
+    \item \textbf{components} - folder zawierający komponenty uniwersalne dla całej aplikacji,
+    \item \textbf{constants} - folder zawierający pliki eksportujący stałe używane przez resztę kodu,
+    \item \textbf{helpers} - folder zawierający funkcje pomocnicze,
+    \item \textbf{reducers} - folder w którym definiowane są konsekwencje akcji (Redux)
+    \item \textbf{stateMachine} - folder w którym znajduje się opis interfejsu użytkownika za pomocą
+    maszyny stanów (xState)
+    \item \textbf{store} - folder definiujący scentralizowany stan aplikacji (Redux)
+    \item \textbf{views} - folder zawierający implementacje poszczególnych widoków dla obu trybów działania aplikacji
+  \end{itemize}
+  \item \textbf{/webpack} - zawiera pliki konfiguracyjne Webpacka opisujące sposób przetwarzania kodu \'zródłowego.
+\end{itemize}
 
-Wstawianie sufiksów typu $A$ wykonywane jest w~sposób identyczny jak w~algorytmie
-\emph{two-stage} (przykład przedstawiono na rysunku \ref{rys:div}).
+\subsection{Struktura projektu aplikacji serwerowej}
 
-\begin{figure}[t]
-        \begin{center}\small  
-            \begin{tabular}{r c c c c c c c c c c c c c c l}                           
-                 & 0   & 1  & 2   & 3      & 4  & 5 & 6  & 7      & 8   & 9  & 10 & 11    & 12  & 13      \\\cmidrule{2-15} 
-         $x$ = [ & e   & d  & a   & b      & d  & c & c  & d      & e   & e  &
-         d  & a     & b   & $\dollar$ & ] \\ type = [ & A   & A  & B   & $B^*$  & A  & B & B  & $B^*$  & A   & A  & A  & $B^*$ & A   &      &  ] \\ \addlinespace[1em]
-	\multicolumn{16}{c}{Obliczanie wielkości \emph{2-grup}}\\
-      \SA{2} = [ & --  & (-- & --) & --     & --  & -- & --  & (--     & --) & --  & -- & (--    & --)  & --    & ] \\ \addlinespace[1em]
-    \multicolumn{16}{c}{Sortowanie sufiksów typu $B^*$} \\
-       \SA{} = [ & --   & 11 & --   & --      & 3  & -- & --  & --      & --   & --  & 7  & --     & --   & --    & ] \\ \addlinespace[1em]  
-	\multicolumn{16}{c}{Wstawianie sufiksów typu B}\\
-       \SA{} = [ & --   & 11 & --   & --      & 3  & -- & 6  & --      & --   & --  & 7  & --     & --   & --    & ] \\  
-       \SA{} = [ & --   & 11 & --   & --      & 3  & 5 & 6  & --      & --   & --  & 7  & --     & --   & --    & ] \\  
-       \SA{} = [ & --   & 11 & 2   & --      & 3  & 5 & 6  & --      & --   & --  & 7  & --     & --   & --    & ] \\ \addlinespace[1em]
-	\multicolumn{16}{c}{Wstawianie sufiksów typu A}\\
-       \SA{} = [ & 13  & 11 & 2   & --      & 3  & 5 & 6  & --      & --   & --  & 7  & --     & --   & --    & ] \\  
-       \SA{} = [ & 13  & 11 & 2   & 12     & 3  & 5 & 6  & --      & --   & --  & 7  & --     & --   & --    & ] \\  
-       \SA{} = [ & 13  & 11 & 2   & 12     & 3  & 5 & 6  & 10     & --   & --  & 7  & --     & --   & --    & ] \\  
-       \SA{} = [ & 13  & 11 & 2   & 12     & 3  & 5 & 6  & 10     & 1   & --  & 7  & --     & --   & --    & ] \\  
-       \SA{} = [ & 13  & 11 & 2   & 12     & 3  & 5 & 6  & 10     & 1   & 4  & 7  & --     & --   & --    & ] \\  
-       \SA{} = [ & 13  & 11 & 2   & 12     & 3  & 5 & 6  & 10     & 1   & 4  & 7  & 9     & --   & --    & ] \\  
-       \SA{} = [ & 13  & 11 & 2   & 12     & 3  & 5 & 6  & 10     & 1   & 4  & 7  & 9     & 0   & --    & ] \\  
-       \SA{} = [ & 13  & 11 & 2   & 12     & 3  & 5 & 6  & 10     & 1   & 4  & 7  & 9     & 0   & 8    & ] \\  
-            \end{tabular}            
-        \end{center}                         
-    \caption{Przebieg algorytmu \emph{divsufsort} dla słowa ,,edabdccdeedab''.
- 			Źródło: opracowanie własne na podstawie \cite{div}.}%
-    \label{rys:div}
-\end{figure}
+\begin{itemize}
+  \item \textbf{/.venv} - folder zawierający wirtualne środowisko projektu wraz z potrzebnymi
+  bibliotekami,
+  \item \textbf{/const} - folder zawierający stałe używane przez resztę kodu,
+  \item \textbf{/processing} - folder zawierający implementacje algorytmów dla poszczególnych etapów
+  procesu,
+  \item \textbf{/resources} - folder zawierający kod definiujący strukturę stworzonego API,
+  kod eksponujący na zewnątrz algorytmy zaimplementowane w folderze \textit{processing},
+  \item \textbf{/temp} - folder tymczasowy zawierający wyniki etapów procesu w postaci zdję\'c,
+  \item \textbf{/utils} - folder zawierający funkcje pomocnicze.
+\end{itemize}
 
+\section{Działanie aplikacji}
 
-\section{Algorytm \emph{bpr}}
+W tej części rozdziału przedstawiony zostanie opis interfejsu użytkownika za pomocą
+maszyny stanów, a także opisane zostaną poszczególne widoki aplikacji oraz jej możliwości.
 
-Klaus-Bernd Schürmann w~pracy \cite{schurmann-phd} zaproponował algorytm
-\emph{bpr} (\emph{bucket pointer refinement}, polepszanie wskaźników na
-kubełki). Algorytm ten jest poprawioną wersją metody przedstawionej w~pracy
-\cite{bpr-old} napisanej przez Klausa-Bernda Schürmanna i~Jensa Stoye. Kod
-algorytmu \emph{bpr} w~języku \texttt{C++} dostępny jest na stronie [\ref{bpr-code}].
+\subsection{Opis widoków aplikacji za pomocą grafu}
 
-Pierwszym krokiem algorytmu jest posortowanie sufiksów według $q$-pierwszych
-znaków, czyli \emph{q-sortowanie}. Wartość parametru $q$ obliczana jest na
-podstawie liczby różnych symboli (czyli wielkości alfabetu) w~ciągu wejściowym, jej wartość maleje wraz ze
-wzrostem wielkości słownika sekwencji wejściowej. Następnie obliczana jest
-przybliżona odwrotna tablica sufiksów \ISA{} (kubełki identyfikowane są pozycją
-ich ostatniego elementu w~przybliżonej tablicy sufiksów), nazywana w~pracy
-\cite{schurmann-phd} \emph{tablicą wskaźników na kubełki}.
+\subsection{Opis interfejsu aplikacji}
 
-Algorytm \emph{bpr} działa według schematu \emph{polepszania kubełków wgłąb} i~korzysta z~techniki \emph{pull}. Sufiksy $S_i$ i~$S_j$ należące
-do jednej \emph{h-grupy} porównywane są poprzez porównanie wartości
-\ISA{}$[h + i]$ i~\ISA{}$[h + j]$.
+Wszystkie zrzuty ekranu aplikacji, do których odwołuje się poniższy opis można znale\'z\'c w dodatku
+\ref{appendix:appScreenShots} na stronach \pageref{fig:homeScreen} - \pageref{fig:batchResults}. \newline
 
-Każda ze znalezionych na początku grup sortowana jest algorytmem \emph{ternary
-split quicksort} \cite{bentley-sort}. Parametr $h$ przyjmuje początkowo
-wartość $q$. Algorytm ten wybiera jeden z~sufiksów danej grupy jako element
-osiowy (\english{pivot}) $S_p$ o~wartości klucza $K_p = \textit{ISA}[h + p]$. Sufiksy danej grupy dzielone są na trzy
-podgrupy: sufiksy o~wartości klucza mniejszej, równej lub większej niż $K_p$.
-Każda z~tych podgrup jest następnie w~ten sam sposób sortowana, przy czym
-dla grupy sufiksów o~wartości klucza równej elementowi osiowemu wartość
-parametru $h$ zwiększana jest o~$q$, ponieważ wszystkie jej sufiksy mają
-wspólny prefiks długości $h + q$. Wynika to z~tego, że elementy kubełka o~wspólnym prefiksie długości $h$ sortowane są na podstawie pozycji ich
-\emph{h-następników}, dla których nie znamy długości wspólnego prefiksu.
-Wiadomo tylko tyle, że były posortowane na początku działania algorytmu według
-$q$ pierwszych znaków. Podobnie jak w~algorytmie \emph{qsufsort}, równa wartość
-klucza $\textit{ISA}[h + i]$ i~$\textit{ISA}[h + j]$ oznacza że sufiksy $S_i$ i~$S_j$ mają wspólny prefiks długości $h+q$. Fundamentalna różnica między
-algorytmami \emph{bpr} i~\emph{qsufsort} polega na tym, że pierwszy z~nich
-realizuje schemat \emph{polepszania kubełków wgłąb}, a~drugi \emph{polepszania
-wszerz}. Dzięki temu, algorytm \emph{qsufsort} w~kolejnej iteracji może
-podwajać wartość parametru $h$.
+Po uruchomieniu aplikacji oczom użytkownika ukazuje się ekran startowy \ref{fig:homeScreen} witający użytkownika
+i proszący go o wybranie jednego z dwóch trybów działania aplikacji.\newline
 
-Istotną cechą algorytmu \emph{bpr} jest to, że po każdym podziale grupy na
-podgrupy wykonywana jest aktualizacja wpisów w~tablicy \ISA{} odpowiadających
-jej elementom, zgodnie ze wzorem $\textit{ISA}[i] =$ \emph{pozycja
-ostatniego elementu podgrupy}. Na rysunku \ref{rys:bpr} przedstawiony został
-przebieg działania algorytmu \emph{bpr} na przykładzie ciągu ,,DEBDEBDEA''.
+Wybranie trybu krokowego przenosi użytkownika do kreatora, który przeprowadzi go przez proces
+rozpoznawania tęczówki. Wszystkie kroki kreatora widoczne są w górnej części widoku. Aktywny krok
+jest zawsze oznaczony kolorem niebieskim. Pierwszym krokiem kreatora jest wybranie obrazu, który chcemy
+podda\'c przetwarzaniu (rysunek \ref{fig:processingImageSelectionScreen}). W celu wyboru użytkownik może klikną\'c w wyświetlone pole lub
+przeciągną\'c na nie wybrany obraz. Po lewo od kreatora znajduje się rozwijane menu, które
+pozwala użytkonikowi na przełączenie się w inny tryb lub przejście do ekranu domowego w każdym
+momencie działania aplikacji. Przejście pomiędzy trybami jest równoznaczne z wykasowaniem
+dotychczasowo wybranych informacji w poprzednio aktywnym trybie.
 
-\begin{figure}[t]
-    \begin{center}\small
-    \begin{tabular}{r c c c c c c c c c l}
-                     &  0   &      1      &      2      &      3      &     4      &      5      &     6      &      7      &      8      &     \\ \cmidrule{2-10} 
-               $x=[$ &  D   &      E      &      B      &      D      &     E      &      B      &     D      &      E      &      A      & ]   \\ \addlinespace[.5em] 
-                                                  \multicolumn{11}{c}{Podział na kubełki, $q=2$}                                                \\ 
-                     &  A   &  \multicolumn{2}{c}{BD}   &         \multicolumn{3}{c}{DE}         &     EA     &  \multicolumn{2}{c}{EB}   &     \\ 
-     $\textit{SA}=[$ &  8   & \textbf{(2} & \textbf{5)} &     (0      &     3      &     6)      &     7      &     (1      &     4)      & $]$ \\ 
-    $\textit{ISA}=[$ &  5   &      8      &      2      &      5      & \textbf{8} &      2      &     5      & \textbf{6}  &      0      & $]$ \\ \addlinespace[.5em] 
-                                                  \multicolumn{11}{c}{Po posortowaniu kubełka BD}                                               \\ 
-     $\textit{SA}=[$ &  8   &      5      &      2      & \textbf{(0} & \textbf{3} & \textbf{6)} &     7      &     (1      &     4)      & $]$ \\ 
-    $\textit{ISA}=[$ &  5   &      8      & \textbf{2}  &      5      &     8      & \textbf{1}  &     5      &      6      & \textbf{0}  & $]$ \\ \addlinespace[.5em] 
-                                                  \multicolumn{11}{c}{Po posortowaniu kubełka DE}                                               \\ 
-     $\textit{SA}=[$ &  8   &      5      &      2      &      6      &     3      &      0      &     7      & \textbf{(1} & \textbf{4)} & $]$ \\ 
-    $\textit{ISA}=[$ &  5   &      8      &      2      & \textbf{4}  &     8      &      1      & \textbf{3} &      6      &      0      & $]$ \\ \addlinespace[.5em] 
-                                         \multicolumn{11}{c}{Po posortowaniu kubełka EB, koniec algorytmu}                                      \\ 
-     $\textit{SA}=[$ &  8   &      5      &      2      &      6      &     3      &      0      &     7      &      4      &      1      & $]$ \\ 
-    $\textit{ISA}=[$ &  5   &      8      &      2      &      4      &     7      &      1      &     3      &      6      &      0      & $]$ \\ 
-    \end{tabular}
-    \end{center}
+Kliknięcie przycisku ``Next'' spowoduje przejście do kolejnego kroku kreatora Jeżeli użytkownik
+nie wybrał obrazu, kreator nie przejdzie do następnego kroku i poinformuje użytkownika o konieczności
+wyboru obrazu.\newline
 
-    \caption{Przebieg algorytmu \emph{bpr} dla słowa ,,DEBDEBDEA''. Elementy
-    wyróżnione w~tablicy \emph{SA} przeznaczone do uporządkowania w~danym
-    kroku, elementy wyróżnione w~tablicy \ISA{} to klucze wykorzystywane 
-   do sortowania kubełka. Źródło: opracowanie własne na podstawie
-   \cite{schurmann-phd}.}\label{rys:bpr}
-\end{figure}
+Następnym krokiem kreatora jest przetwarzanie wstępne (rysunek \ref{fig:preprocessingScreen}). Widok ten
+przedstawia użytkownikowi obecny stan wybranego obrazu po lewej stronie oraz formularz pozwalający
+na kontrolowanie metody przetwarzania i jej paramterów po prawej stronie. Pod obrazem dostępny jest
+przycisk ``Save", którego kliknięcie poprosi użytkownika o wybranie miejsca, w którym wyświetlony obraz
+ma zosta\'c zapisany. Kliknięcie przycisku ``Process'' znajdującego się pod formularzem skutkuje
+zaaplikowaniem wybranego algorytmu z wybranymi parametrami. Jeżeli przycisk ``Process'' został wciśnięty
+chociaż jeden raz, to pojawi się przycisk ``Revert last'', którego kliknięcie powoduje cofnięcie się
+do poprzedniego stanu obrazu. Zmiana wybranego algorytmu skutkuje również zmianą dostępnych
+do modyfikacji paramterów (rysunek \ref{fig:preprocessingOtherMethod}).
 
+Na samym dole widoku dostępne są dwa przyciski. Przycisk ``Next'', podobnie
+jak poprzednio, powoduje przejście do następnego kroku kreatora, a przycisk ``Previous'' do poprzedniego
+kroku kreatora. Przejście do poprzedniego kroku kasuje wszelkie zapisane informacje związane z aktualnym
+krokiem. W tym kroku kreatora możliwe jest przejście do kolejnego kroku nie uruchamiając żadnego z
+algorytmów przetwarzania wstępnego.\newline
+
+Kolejne kroki kreatora funkcjonują w bardzo podobny sposób. Różnicą może by\'c iloś\'c wyświetlanych
+obrazów. Jeżeli wymagane jest wyświetlenie informacji o kilku obrazach, to prezentowane są one w formie
+zakładek. Sytuację taką można zaobserwowa\'c w widoku procesu normalizacji (rysunek \ref{fig:normScreen}),
+gdzie możliwy jest podgląd przed i po normalizacji oryginalnego obrazu, maski oraz maski nałożonej na
+zdjęcie.\newline
+
+Następnie przechodzimy do kodowania, którego widok ma taką samą strukturę jak widoki przetwarzania
+wstępnego czy normalizacji, ale pozwala na podgląd innych obrazów oraz na wybór innych metod.\newline
+
+Kolejnym krokiem po kodowaniu jest wybór obrazów, do których chcemy spróbowa\'c dopasowa\'c obraz
+wybrany w kroku pierwszym (rysunek \ref{fig:matchingImagesScreen}). W celu wyboru obrazu należy
+uży\'c przycisku znajdującego się w górnej częsci ekranu. Możliwe jest wybranie wielu obrazów na raz.\newline
+
+Po zatwierdzeniu obrazów użytkownik zostaje przeniesiony do widoku dopasowania, gdzie ponownie
+może wybra\'c paramtery i metodę dla danego etapu procesu. Kliknięcie przycisku ``Next'' w tym widoku
+uruchamia proces, na który składa się przetworzenie wszystkich wybranych obrazów w dokładnie
+ten sam sposób, co obraz wybrany w kroku pierwszym oraz przeprowadzenie operacji dopasowania.
+Ponieważ przetwarzanie kilku obrazów może potrwa\'c pewien czas, użytkownik przenoszony jest do
+nowego ekranu (rysunek \ref{fig:matchingProcessing}), gdzie wyświetlana jest mu informacja o obecnym
+stanie aplikacji wraz z animowaną ikoną, która zapewnia, że aplikacja nie zacięła się.

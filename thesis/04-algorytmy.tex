@@ -250,13 +250,36 @@ transformacja przykładowej maski wyglądałaby następująco:
   $0|1|1|0|0|1 \rightarrow 00|11|11|00|00|11$
 \end{figure}
 
-Dorzuc przyklad?
-
 \begin{figure}[!ht]
   \centering
   \makebox[\textwidth]{\includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{images/encoding/gabor.png}}
   \caption{Ilustracja procesu kodowania}
   \label{fig:gaborEncoding}
+\end{figure}
+
+Na rysunku \ref{fig:gaborExample} przestawiony został przykładowy wynik procesu kodowania zaimplementowanego
+w tej pracy.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{images/encoding/norm.png}
+    \caption{Znormalizowany obraz tęczówki}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{images/encoding/normMask.png}
+    \caption{Znormalizowana maska zakłóceń}
+  \end{subfigure}
+  \begin{subfigure}[b]{1\textwidth}
+    \includegraphics[width=\textwidth]{images/encoding/encoded.png}
+    \caption{Wzór tęczówki obrazu znormalizowanego}
+  \end{subfigure}
+  \begin{subfigure}[b]{\textwidth}
+    \includegraphics[width=\textwidth]{images/encoding/encodedMask.png}
+    \caption{Dostosowana maska zakłóceń do nowego rozmiaru}
+  \end{subfigure}
+  \caption{Wyniki przykładowego kodowania za pomocą filtrów Gabora.}
+  \label{fig:gaborExample}
 \end{figure}
 
 \section{Dopasowanie}

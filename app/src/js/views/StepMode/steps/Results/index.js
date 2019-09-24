@@ -21,6 +21,7 @@ export const Results = (props) => {
   };
 
   const onPreviousTransition = () => {
+    dispatch(clearStepData(STEP_STEPS.PROCESSING));
     dispatch(clearStepData(stepId));
   };
 

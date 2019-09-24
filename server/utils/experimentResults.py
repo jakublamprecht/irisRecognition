@@ -16,7 +16,7 @@ def getFullPath(el):
 
 allCasiaFiles = list(map(getFullPath, os.listdir(CASIA)))
 
-results = matchMultipleToMultiple(allCasiaFiles, allCasiaFiles, processConfig)
+results = matchMultipleToMultiple(allCasiaFiles[0:300], allCasiaFiles[0:300], processConfig)
 
 for dump, processingResult in results.items():
     if 'images' in processingResult['processingImageData']:

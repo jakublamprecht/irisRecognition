@@ -5,10 +5,6 @@ const initialState = {
   matchingImages: [],
   configFile: '',
   results: {},
-  resultPreview: {
-    processingImageOriginalPath: '',
-    matchingImageOriginalPath: '',
-  },
 };
 
 export const batchModeReducer = (state = initialState, action) => {

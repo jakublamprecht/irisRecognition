@@ -53,7 +53,7 @@ export const stepModeStates = {
     },
     [STEP_STEPS.RESULTS_PREVIEW]: {
       on: {
-        [WIZARD_TRANSITIONS.PREVIOUS]: STEP_STEPS.RESULTS_PREVIEW,
+        [WIZARD_TRANSITIONS.PREVIOUS]: STEP_STEPS.MATCHING,
       },
     },
   },

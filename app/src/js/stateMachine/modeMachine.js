@@ -32,7 +32,6 @@ export const modeMachine = Machine({
       exit: ['flushBatchModeState'],
       on: {
         [MODE_TRANSITIONS.STEP_MODE_SELECTED]: MODE_STATES.STEP_MODE,
-        [MODE_TRANSITIONS.HISTORY_MODE_SELECTED]: MODE_STATES.HISTORY_MODE,
       },
       ...batchModeStates,
     },
