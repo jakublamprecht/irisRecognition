@@ -2,13 +2,30 @@
 
 % [DW] Cytowania normalnie, bez dodatkowych nawiasów; poprawiłem niektóre, zrób pozostałe.
 
-Ogolny opis pracy - wstep do tematyki + motywacja wyboru tematu.
+Wraz ze zwiększeniem stopnia informatyzacji na świecie zwiększa się również iloś\'c przechowywanych przez
+systemy informatyczne danych, w tym również tych poufnych, do których dostęp powinny mie\'c tylko
+określone osoby. W związku z tym zapotrzebowanie na systemy weryfikacji i identyfikacji rośnie. Metody
+uwierzytelniania można podzieli\'c ze względu na element użyty do przeprowadzenia procesu:
+
+\begin{itemize}
+  \item metody wykorzystujące informacje, do których dostęp mają wyłącznie osoby uprawnione (np. hasło, pin),
+  \item metody wykorzystujące przedmiot w którego posiadaniu są jedynie osoby uprawnione,
+  \item metody wykorzystujące cechy fizyczne osób uprawnionych.
+\end{itemize}
+
+Z wymienionych metod najbezpieczniejszymi są te ostatnie, inaczej zwane metodami biometrycznymi.
+Twórcy systemów wykorzystujących te metody poszukują cech fizycznych człowieka, które pozwalają na
+nieinwazyjne, odporne na oszustwa uwierzytelnienie. Jedną z najbardziej obiecujących cech
+w świecie biometrii jest tęczówka, której rozpoznawanie jest przedmiotem niniejszej pracy. Mimo, że
+tęczówka nie jest cechą idealną ze względu na przykładowo koszty wdrożenia takiego systemu,
+to systemy wykorzystujące tę cechę biometryczną charakteryzują się niskim współczynnikiem nieprawidłowej
+identyfikacji.
 
 \section{Cel i~zakres pracy}
 
 Celem tej pracy było zaprojektowanie i stworzenie aplikacji pozwalającej na przeprowadzenie procesu
 rozpoznawania tęczówki oka oraz przegląd literatury i implementacja algorytmów normalizacji,
-enkodowania oraz dopasowania tęczówki. Jednym z wymagań dla tworzonego programu, było aby działał
+enkodowania oraz dopasowania tęczówki. Jednym z wymagań dla tworzonego programu było, aby działał
 on w dwóch trybach:
 
 \begin{itemize}
@@ -26,5 +43,13 @@ który miał zachęcać do korzystania z aplikacji.
 
 \section{Struktura pracy}
 
-Opis poszczególnych rozdziałów - zrób jak już wymyślisz rozdziały.
+Struktura pracy jest następująca. Rozdział drugi poświęcony został wstępowi do zagadnienia
+rozpoznawania tęczówki. Zawiera on ogólne informacje o historii, anatomii oka i jego właściowościom
+biometrycznym oraz zastosowaniom biometrycznym tęczówki. Traktuje on również ogólnie o procesie
+przetwarzania obrazu tęczówki. W kolejnym rozdziale opisane zostały technologie użyte w celu stworzenia
+aplikacji, a także opis jej działania i funkcjonalności. Rodział czwarty jest w całości poświęcony
+algorytmom normalizacji, kodowania oraz dopasowania i zasadzie ich działania. Piąty Rozdział
+przedstawia informacje na temat eksperymentu przeprowadzonego z wykorzystaniem wytworzonej
+aplikacji i jego wyników. Rozdział szósty stanowi podsumowanie pracy i wskazuje potencjalne
+kierunki dalszego jej rozwoju.
 

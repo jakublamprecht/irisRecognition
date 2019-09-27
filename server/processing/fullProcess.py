@@ -5,7 +5,7 @@ from utils.getNewFilePath import getNewFilePath
 from utils.processConfig import getMethodHandlerAndMethodParams
 import cv2
 
-def processSingleImage(imagePath, processConfig):
+def processSingleImage(imagePath, processConfig, cachedResults=False):
     orgImage = cv2.imread(imagePath, cv2.CV_8UC1)
     image = orgImage.copy()
 
@@ -39,7 +39,14 @@ def processSingleImage(imagePath, processConfig):
     segmentationArgs = processConfig[processSteps.SEGMENTATION]
     segmentationMethod = METHODS[processSteps.SEGMENTATION]
 
-    segmentationResults, mask, maskPreview = segmentationMethod(image, **segmentationArgs)
+    if (cachedResults and imagePath in cachedResults):
+        print('Getting cached results for {}'.format(imagePath))
+        currentCache = cachedResults[imagePath]['processingImageData']
+        segmentationResults = currentCache['segmentationResults']
+        mask = cv2.imread(currentCache['imagePaths']['mask'], cv2.CV_8UC1)
+        maskPreview = cv2.imread(currentCache['imagePaths']['imageMasked'], cv2.CV_8UC1)
+    else:
+        segmentationResults, mask, maskPreview = segmentationMethod(image, **segmentationArgs)
 
     maskPath = getNewFilePath(proxyImagePath, 'segmentation-mask')
     maskPreviewPath = getNewFilePath(proxyImagePath, 'segmentation-mask-preview')

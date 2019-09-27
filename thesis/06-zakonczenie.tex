@@ -1,1 +1,36 @@
 \chapter{Podsumowanie i kierunki dalszego rozwoju}
+
+Głównym celem pracy było wytworzenie aplikacji pozwalającej użytkownikowi na przeprowadzenie
+procesu rozpoznawania tęczówki wraz z możliwością kontroli użytych metod oraz paramterów. W pracy
+zaimplementowane zostały algorytmy zaproponowane przez Johna Daugmana \cite{DaugmanHowIrisRecognitionWorks}:
+normalizacja metodą ``Rubber sheet model'', kodowanie z wykorzystaniem jednowymiarowych filtrów
+Gabora oraz dopasowanie z wykorzystaniem odległości Hamminga.\newline
+
+Kolejnym wymaganiem było stworzenie przejrzystego interfejsu użytkownika. W tym celu podzielono
+system na dwie aplikacje - aplikację wykonującą przetwarzanie i obliczenia (napisaną w Pythonie z
+wykorzystaniem biblioteki OpenCV) oraz aplikację kliencką pozwalającą użytkownikowi kontrolowanie
+procesu oraz prezentację wyników (stworzoną w technologiach internetowych).\newline
+
+Stworzenie zaawansowanego interfejsu użytkownika od podstaw oraz zapewnienie komunikacji z aplikacją
+przetwarzającą było dużym wyzwaniem z uwagi na dużą iloś\'c wyprodukowanego kodu oraz potencjalną
+błędogennoś\'c wynikającą z liczności widoków aplikacji. Dodatkowym czynnikiem utrudniającym
+implementajcę systemu była integracja z istniejącymi algorytmami segmentacji.\newline
+
+W końcowym etapie pracy przeprowadzony został eksperyment sprawdzający jakoś\'c działania
+systemu z użyciem różnych wartości parametrów dla poszczególnych metod. Za wartości domyślne
+przyjęte zostały wartości zaproponowane przez Maseka w jego pracy \cite{masek}. Wyniki
+eksperymentu wykazały bardzo dobrą jakoś\'c działania systemu, w tym prawdopodobieństwo
+błędnego zaakceptowania identyfikowanej tęczówki na poziomie 0.0001.\newline
+
+\noindent
+Poniżej przedstawione zostały potencjalne kierunki dalszego rozwoju niniejszej pracy:
+
+\begin{itemize}
+  \item Implementacja kolejnych metod normalizacji, kodowania oraz dopasowania,
+  \item Poprawa jakości oraz szybkości działania algorytmów segmentacji,
+  \item Zapewnienie możliwości kodowania tęczówki za pomocą wielu filtrów Gabora
+  \item Poprawa komunikatów o błędach w aplikacji
+  \item Stworzenie widoku historii operacji dla trybu krokowego
+  \item Adaptacja aplikacji klienckiej i przetwarzającej w celu przeniesienia
+  aplikacji przetwarzającej na system mikroprocesorowy.
+\end{itemize}

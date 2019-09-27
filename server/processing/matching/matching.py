@@ -26,7 +26,7 @@ def matchSingleToMultiple(irisTemplate, maskTemplate, matchingImages, processCon
 
     return results
 
-def matchMultipleToMultiple(processingImages, matchingImages, processConfig):
+def matchMultipleToMultiple(processingImages, matchingImages, processConfig, cachedResults=False):
     processingData = {
         'processingImages': {},
         'matchingImages': {}
@@ -42,7 +42,7 @@ def matchMultipleToMultiple(processingImages, matchingImages, processConfig):
         if processingImage in processingData['processingImages']:
             pass
         else:
-            result = processSingleImage(processingImage, processConfig)
+            result = processSingleImage(processingImage, processConfig, cachedResults)
             processingData['processingImages'][processingImage] = result
         indexFullProcess = indexFullProcess + 1
 
@@ -53,7 +53,7 @@ def matchMultipleToMultiple(processingImages, matchingImages, processConfig):
         elif matchingImage in processingData['matchingImages']:
             pass
         else:
-            result = processSingleImage(matchingImage, processConfig)
+            result = processSingleImage(matchingImage, processConfig, cachedResults)
             processingData['matchingImages'][matchingImage] = result
         indexFullMatching = indexFullMatching + 1
 

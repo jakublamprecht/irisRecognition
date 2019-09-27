@@ -263,12 +263,13 @@ instrukcje dotyczące uruchomienia projektu.
 W tej części rozdziału przedstawiony zostanie opis interfejsu użytkownika za pomocą
 maszyny stanów, a także opisane zostaną poszczególne widoki aplikacji oraz jej możliwości.
 
-\subsection{Opis widoków aplikacji za pomocą grafu}
-
 \subsection{Opis interfejsu aplikacji}
 
-Wszystkie zrzuty ekranu aplikacji, do których odwołuje się poniższy opis można znale\'z\'c w dodatku
-\ref{appendix:appScreenShots} na stronach \pageref{fig:homeScreen} - \pageref{fig:batchResults}. \newline
+\noindent Wszystkie zrzuty ekranu aplikacji, do których odwołuje się poniższy opis można znale\'z\'c w dodatku
+\ref{appendix:appScreenShots} na stronach \pageref{fig:homeScreen} - \pageref{fig:batchSingleEntryResult}. \newline
+
+\vspace{-20pt}
+\paragraph{Tryb krokowy\newline}
 
 Po uruchomieniu aplikacji oczom użytkownika ukazuje się ekran startowy \ref{fig:homeScreen} witający użytkownika
 i proszący go o wybranie jednego z dwóch trybów działania aplikacji.\newline
@@ -316,9 +317,113 @@ wybrany w kroku pierwszym (rysunek \ref{fig:matchingImagesScreen}). W celu wybor
 uży\'c przycisku znajdującego się w górnej częsci ekranu. Możliwe jest wybranie wielu obrazów na raz.\newline
 
 Po zatwierdzeniu obrazów użytkownik zostaje przeniesiony do widoku dopasowania, gdzie ponownie
-może wybra\'c paramtery i metodę dla danego etapu procesu. Kliknięcie przycisku ``Next'' w tym widoku
+może wybra\'c metodę oraz jej parametry. Kliknięcie przycisku ``Next'' w tym widoku
 uruchamia proces, na który składa się przetworzenie wszystkich wybranych obrazów w dokładnie
 ten sam sposób, co obraz wybrany w kroku pierwszym oraz przeprowadzenie operacji dopasowania.
 Ponieważ przetwarzanie kilku obrazów może potrwa\'c pewien czas, użytkownik przenoszony jest do
 nowego ekranu (rysunek \ref{fig:matchingProcessing}), gdzie wyświetlana jest mu informacja o obecnym
 stanie aplikacji wraz z animowaną ikoną, która zapewnia, że aplikacja nie zacięła się.
+
+W wypadku, gdy przetwarzanie zostanie przerwane z powodu błędu, użytkownik przeniesiony zostanie do ekranu
+dopasowania. Jeżeli natomiast przetwarzanie zakończy się sukcesem, użytkownik przeniesiony zostanie
+do widoku prezentującego wyniki \ref{fig:stepResultsScreen}. Pierwszym z elementów tego widoku
+jest przycisk umożliwiający zapisanie konfiguracji użytej do przetworzenia obrazów w postaci pliku
+o rozszerzeniu JSON (JavaScript Object Notation), który może zosta\'c użyty pó\'zniej w trybie
+wsadowym. Plik ten ma następującą strukturę:
+
+\begin{verbatim}
+  {
+    "PREPROCESSING":[
+      {
+        "method":"GAUSS",
+        "methodParams":{
+          "kernelWidth":3,
+          "kernelHeight":3,
+          "sigmaX":0,
+          "sigmaY":0,
+        }
+      }
+    ],
+    "SEGMENTATION":{
+       "segmentationMethod":"Daugman",
+       "noiseMethod":"none"
+    },
+    "NORMALIZATION":{
+       "method":"DAUGMAN",
+       "methodParams":{
+          "width":260,
+          "height":32
+       }
+    },
+    "ENCODING":{
+       "method":"LOG_GABOR",
+       "methodParams":{
+          "minWaveLength":18,
+          "sigmaOnf":0.5
+       }
+    },
+    "MATCHING":{
+       "method":"HAMMING",
+       "methodParams":{
+          "acceptedHammingDist":0.35,
+          "shiftsNumber":8
+       }
+    }
+ }
+\end{verbatim}
+
+Zapisanie konfiguracji procesu do pliku pozwala użytkownikowi na eksperymentację z wartościami poszczególnych
+paramterów w trybie krokowym, a nastepnie przejście do trybu wsadowego, gdzie może przeprowadzi\'c ten proces
+dla większego zbioru obrazów.\newline
+
+Poniżej przycisku zapisującego konfigurację wyświetlane są informacje o wynikach dopasowania
+dla poszczególnych obrazów. Pokazują one podstawowe informacje, tj.: ścieżki do plików,
+miniaturki obrazów oraz wynik dopasowania. Jeżeli użytkownik chce pozna\'c więcej szczegółów, może
+uży\'c przycisku ``See more''. Kliknięcie go powoduje otwarcie nowego okna dialogowego, w którym
+przedstawione zostaje dokładniejsze zestawienie danych (rysunek \ref{fig:stepResultPreview}).
+W lewym górnym rogu prezentowane są informacje o etapie dopasowania. Wyświetlana jest informacja
+o tym czy obrazy przedstawiają tę samą tęczówkę, najmniejsza wartoś\'c obliczonej odległości Hamminga
+oraz informacje o tym w którym przesunięciu udało się znale\'z\'c najlepsze dopasowanie.
+Po prawej stronie widoczny jest przycisk ``Show all values'', którego kliknięcie powoduje
+pojawienie się tabeli zawierającej zestawienie wszystkich obliczonych wartości odległości Hamminga
+(rysunek \ref{fig:stepResultHDTable}).
+
+Pod wynikami procesu dopasowania wyświetlone zostaje zestawienie porównujące w jaki sposób
+proces przebiegał dla obu obrazów, w tym obrazy:
+
+\begin{itemize}
+  \item oryginalne,
+  \item po przetwarzaniu wstępnym,
+  \item po segmentacji wraz z informacjami o współrzędnych i promieniach okręgów tęczówki i \'zrenicy,
+  \item po normalizacji,
+  \item po kodowaniu.
+\end{itemize}
+
+\paragraph{Tryb wsadowy\newline}
+
+W przypadku wybrania trybu wsadowego użytkownik również przenoszony jest do podobnego kreatora,
+jak w przypadku trybu krokowego. Składa się on jednak z odmiennych etapów.\newline
+
+Pierwszym z nich
+jest wybór obrazów, które chcemy przetworzy\'c w ramach procesu (rysunek \ref{fig:batchFiles}).
+Drugi krok jest bardzo podobny do poprzedniego i również prosi użytkownika o wybranie listy obrazów.
+Następny etap oczekuje od użytkownika wskazania pliku konfiguracyjnego definiującego metody oraz
+parametry, jakie mają by\'c użyte w trakcie procesu (rysuenk \ref{fig:batchConfig}).\newline
+
+Kliknięcie
+przycisku ``Next'' w tym kroku powoduje uruchomienie procesu. Polega on na wykonaniu wszystkich etapów
+procesu dla wszystkich obrazów z obu list, a następnie porównaniu każdego obrazu z piewrszej listy
+z każdym obrazem z drugiej listy. W trakcie trwania obliczeń, użytkownikowi ponownie przedstawiwany
+jest widok jak na rysunku \ref{fig:preprocessingScreen}. Zakończenie przetwarzania przenosi użytkownika
+do widoku podglądu wyników (rysunek \ref{fig:batchResults}), który jest podobny do podglądu w trybie krokowym. Tym razem dla każdego
+z obrazów z listy pierwszej wyświetlana jest składana sekcja zawierająca wyniki dla każdego obrazu
+z listy drugiej. Użytkownik ponownie może klikną\'c przycisk ``See more'' w celu uzyskania większej
+liczby informacji, tak samo jak w trybie krokowym.\newpage
+
+\subsection{Opis widoków aplikacji za pomocą grafu}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth,height=\textheight, keepaspectratio]{images/widokiMgr.png}
+    \caption{Diagram widoków i przejś\'c aplikacji.}
+\end{figure}

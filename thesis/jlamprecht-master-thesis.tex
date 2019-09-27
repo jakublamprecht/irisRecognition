@@ -16,6 +16,7 @@
 \usepackage{amsmath}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage[table]{xcolor}
 \renewcommand{\listalgorithmcfname}{Lista algorytmów}
 \renewcommand{\algorithmcfname}{Algorytm}
 
@@ -41,6 +42,10 @@
 \thispagestyle{empty}\vspace*{\fill}%
 \begin{center}Tutaj przychodzi karta pracy dyplomowej;\\oryginał wstawiamy do wersji dla archiwum PP, w pozostałych kopiach wstawiamy ksero.\end{center}%
 \vfill\cleardoublepage%
+
+\thispagestyle{empty}
+\input{00-streszczenie.tex}
+\vfill\cleardoublepage
 
 % Table of contents.
 \pagenumbering{Roman}\pagestyle{ppfcmthesis}%
