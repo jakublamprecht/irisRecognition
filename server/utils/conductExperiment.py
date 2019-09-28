@@ -22,25 +22,27 @@ with open(cachedParabolicResultsPath) as parabolicFile:
     cachedParabolicResults = json.load(parabolicFile)
 
 experimentDirectoriesNone = [
-    'daugmanNoneMasekHigherHD',
-    'daugmanNoneMasekLowerHD',
-    'daugmanNoneMasekHalfHD',
-    'daugmanNoneMasekLowerNormSize',
-    'daugmanNoneMasekHigherNormSize',
-    'daugmanNoneMasekLowerSigma',
-    'daugmanNoneMasekHigherSigma',
-    'daugmanNoneMasekLowerShifts'
+    # 'daugmanNoneMasekHigherHD',
+    # 'daugmanNoneMasekLowerHD',
+    # 'daugmanNoneMasekHalfHD',
+    # 'daugmanNoneMasekLowerNormSize',
+    # 'daugmanNoneMasekHigherNormSize',
+    # 'daugmanNoneMasekLowerSigma',
+    # 'daugmanNoneMasekHigherSigma',
+    # 'daugmanNoneMasekLowerShifts'
+    'daugmanNoneMasekEvenLowerShifts'
 ]
 
 experimentDirectoriesParabolic = [
-    'daugmanParabolicMasekHigherHD',
-    'daugmanParabolicMasekLowerHD',
-    'daugmanParabolicMasekHalfHD',
-    'daugmanParabolicMasekLowerNormSize',
-    'daugmanParabolicMasekHigherNormSize',
-    'daugmanParabolicMasekLowerSigma',
-    'daugmanParabolicMasekHigherSigma',
-    'daugmanParabolicMasekLowerShifts'
+    # 'daugmanParabolicMasekHigherHD',
+    # 'daugmanParabolicMasekLowerHD',
+    # 'daugmanParabolicMasekHalfHD',
+    # 'daugmanParabolicMasekLowerNormSize',
+    # 'daugmanParabolicMasekHigherNormSize',
+    # 'daugmanParabolicMasekLowerSigma',
+    # 'daugmanParabolicMasekHigherSigma',
+    # 'daugmanParabolicMasekLowerShifts'
+    'daugmanParabolicMasekEvenLowerShifts'
 ]
 
 for directory in experimentDirectoriesNone:

@@ -52,11 +52,13 @@ gdzie:\\
 
 Za najlepsze rozwiązanie systemu biometrycznego można uzna\'c takie, które jednocześnie zapewnia
 najmniejszą wartoś\'c obu tych współczynników (z naciskiem na FAR). Takie podejście pozwala zachowa\'c balans między bezpieczeństwem
-systemu, a jego użyteczńością.
+systemu, a jego użyteczńością. Dodatkowo wyznacza się współczynnik EER \textit{(ang. Equal Error Rate)}, który jest równy
+FAR lub FRR w momencie, gdy oba te wska\'zniki są sobie równe. Pozwala on na jednoznaczne porównanie systemów
+biometrycznych pod względem jakości działania.
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.7\textwidth]{images/experiment/frrfardiagram.jpg}
+  \includegraphics[width=0.7\textwidth]{images/experiment/FARFRRERR.png}
   \caption{Balans między współczynnikami FAR oraz FRR.}
 \end{figure}
 
@@ -71,9 +73,9 @@ metod wykorzystano te zaproponowane w swojej pracy przez Maseka \cite{masek}, kt
 przypadki w eksperymencie pokazują odchylenia od tych wartości. Poniżej przedstawiono zestawienie parametrów podstawowych:
 
 \begin{itemize}
-  \item normalizacja - rozdzielczoś\'c kątowa równa 260, rozdzielczoś\'c promieniowa równa 32 (odpowiednio szerokoś\'c i wysokoś\'c obrazu)
-  \item kodowanie - częstotliwoś\'c środkowa filtru równa 18 pikseli, przepustowoś\'c $\sigma/f$ wynosząca 0.5,
-  \item dopasowanie - próg odległości Hamminga równy 0.35, iloś\'c przesunię\'c wynosząca 8.
+  \item normalizacja - rozdzielczoś\'c kątowa równa 240, rozdzielczoś\'c promieniowa równa 32 (odpowiednio szerokoś\'c i wysokoś\'c obrazu)
+  \item kodowanie - częstotliwoś\'c środkowa filtru równa 18 pikseli, przepustowoś\'c $\mathit{\sigma/f}$ wynosząca 0.5,
+  \item dopasowanie - próg odległości Hamminga równy 0.35, liczba przesunię\'c wynosząca 8.
 \end{itemize}
 
 Do przeprowadzenia eksperymentu wykorzystana została baza danych zdję\'c oczu CASIA w wersji pierwszej [zasób: \ref{web:CASIA}].
@@ -107,7 +109,18 @@ obrazów uwzględniona została w trakcie obliczania współczynników FAR oraz 
 
 \section{Wyniki eksperymentu}
 
+Tak jak wcześniej wspomniano, w ramach eksperymentu wykorzystano 300 obrazów, które poddano procesowi
+w kilku różnych konfiguracjach. W procesie rozpoznawania porównano każdy obraz z każdym innym, co dało
+łącznie 90000 prób identyfikacji.
 
+W przypadku wykorzystania metody Daugmana wraz z aproksymacją powiek za pomocą paraboli zaobserwowane
+zostały problemy w działaniu algorytmu znajdowania powiek, które skutkowały niepoprawnym generowaniem maski.
+Tych przypadków nie uwzględniano w obliczeniach, w związku z czym łączna liczba prób identyfikacji dla tej
+konfiguracji zmalała do wartości 87023.\newline
+
+\noindent
+Poniżej przedstawione zostały wartości obliczonych współczynników dla domyślnych parametrów
+procesu opisanych w poprzedniej części rozdziału:
 
 \rowcolors{2}{gray!10}{white}
 \begin{table}[ht]
@@ -123,163 +136,228 @@ obrazów uwzględniona została w trakcie obliczania współczynników FAR oraz 
   \caption{Porównanie współczynników FAR i FRR dla różnych metod wykrywania powiek.}
 \end{table}
 
-Wszystkie dalsze sa segmentacja metoda daugmana.
+Uzyskane wyniki współczynnika FAR są bardzo bliskie zera z dokładnością do czwartego miejsca
+po przecinku. Wynik ten jest wysoce zadawalający, ponieważ sugeruje to wysoką odpornoś\'c systemu
+na błędną identyfikację użtkownika. Obliczony współczynnik FRR jest wyższy niż FAR i oscyluje
+około wartości 0.008. Biorąc pod uwagę mniejsze znaczenie tego współczynnika dla bezpieczeństwa
+systemu również jest to zadawalający wynik.\newline
 
-Brak wykrywania powiek:
+\noindent
+W ramach eksperymentu sprawdzono również wartości wska\'zników FAR oraz FRR przy zmianie:
 
-\rowcolors{2}{gray!10}{white}
-\begin{table}[ht]
-  \centering
-  \begin{tabular}{c|c|c}
-    \rowcolor{gray!20}
-    Próg odległości Hamminga & FAR & FRR \\
-    \hline\hline
-    0.25 & 0.0000 & 0.0198 \\
-    \hline
-    0.35 & 0.0000 & 0.0094 \\
-    \hline
-    0.45 & 0.0282 & 0.0004 \\
-    \hline
-    0.5 & 0.9698 & 0.0000 \\
-  \end{tabular}
-  \caption{Porównanie współczynników FAR i FRR dla różnych wartości progowych odległości Hamminga
-  przy braku wykrywania powiek.}
-\end{table}
+\begin{itemize}
+  \item wartości progu odległości Hamminga w procesie dopasowania,
+  \item liczby przesunię\'c wykonywanych w procesie dopasowania,
+  \item wartości rozdzielczości kątowej i promieniowej w procesie normalizacji,
+  \item wartości parametru $\mathit{\sigma/f}$ filtru Gabora w procesie kodowania.
+\end{itemize}
 
-Aproksymacja parabola:
+\noindent
+Poniżej przedstawione zostały zestawienia obliczonych metryk przy zmianie progu decyzyjnego
+w procesie dopasowania:
 
-\rowcolors{2}{gray!10}{white}
-\begin{table}[ht]
-  \centering
-  \begin{tabular}{c|c|c}
-    \rowcolor{gray!20}
-    Próg odległości Hamminga & FAR & FRR \\
-    \hline\hline
-    0.25 & 0.0000 & 0.0196 \\
-    \hline
-    0.35 & 0.0002 & 0.0077 \\
-    \hline
-    0.45 & 0.0387 & 0.0003 \\
-    \hline
-    0.5 & 0.9702 & 0.0000 \\
-  \end{tabular}
-  \caption{Porównanie współczynników FAR i FRR dla różnych wartości progowych odległości Hamminga
-  z wykorzystaniem aproksymacji parabolicznej do wykrywania powiek.}
-\end{table}
+\begin{itemize}
+  \item bez wykrywania powiek
 
-Przesuniecia - dla aproksymacji parabola
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c}
+      \rowcolor{gray!20}
+      Próg odległości Hamminga & FAR & FRR \\
+      \hline\hline
+      0.25 & 0.0000 & 0.0198 \\
+      \hline
+      0.35 & 0.0000 & 0.0094 \\
+      \hline
+      0.45 & 0.0282 & 0.0004 \\
+      \hline
+      0.5 & 0.9698 & 0.0000 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różnych wartości progowych odległości Hamminga
+    przy braku wykrywania powiek.}
+  \end{table}
 
-Brak wykrywania powiek:
+  \item z wykrywaniem powiek z użyciem aproksymacji za pomocą paraboli
 
-\rowcolors{2}{gray!10}{white}
-\begin{table}[ht]
-  \centering
-  \begin{tabular}{c|c|c}
-    \rowcolor{gray!20}
-    Liczba przesunię\'c & FAR & FRR \\
-    \hline\hline
-    3 & 0.0003 & 0.0098 \\
-    \hline
-    8 & 0.0000 & 0.0094 \\
-  \end{tabular}
-  \caption{Porównanie współczynników FAR i FRR dla różej ilości przesunię\'c wzoru tęczówki w procesie dopasowania
-  przy braku wykrywania powiek.}
-\end{table}
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c}
+      \rowcolor{gray!20}
+      Próg odległości Hamminga & FAR & FRR \\
+      \hline\hline
+      0.25 & 0.0000 & 0.0196 \\
+      \hline
+      0.35 & 0.0002 & 0.0077 \\
+      \hline
+      0.45 & 0.0387 & 0.0003 \\
+      \hline
+      0.5 & 0.9702 & 0.0000 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różnych wartości progowych odległości Hamminga
+    z wykorzystaniem aproksymacji parabolicznej do wykrywania powiek.}
+  \end{table}
+\end{itemize}
 
-Aproksymacja parabola:
+Jak wida\'c przypadek w którym nie jest generowana maska dla powiek daje nieznacznie lepsze wyniki
+współczynnika FAR niż konfiguracja uwzględniająca je w masce. Może by\'c to spowodowane niespójnościami
+w procesie wyznaczania paraboli odcinających tęczówkę między obrazami tej samej tęczówki. Odwrotną sytuację
+obserwujemy w przypadku współczynnika FRR - lepsze wyniki uzyskujemy przy uwzględnieniu powiek w procesie.
+Warto zauważy\'c prawie niezauważalną zmianę współczynnika FAR przy zmniejszeniu wartości progu do wartości 0.25.
+W wyniku tej zmiany parametru zauważamy natomiast wzrost współczynnika FRR. Ze względu na dążenie do balansu
+między wartościami tych współczynników, lepszym wyborem jest wartoś\'c 0.35.
 
-\rowcolors{2}{gray!10}{white}
-\begin{table}[ht]
-  \centering
-  \begin{tabular}{c|c|c}
-    \rowcolor{gray!20}
-    Liczba przesunię\'c & FAR & FRR \\
-    \hline\hline
-    3 & 0.0001 & 0.0082 \\
-    \hline
-    8 & 0.0002 & 0.0077 \\
-  \end{tabular}
-  \caption{Porównanie współczynników FAR i FRR dla różej ilości przesunię\'c wzoru tęczówki w procesie dopasowania
-  z wykorzystaniem aproksymacji parabolicznej do wykrywania powiek.}
-\end{table}
+Zwiększając wartoś\'c progu decyzyjnego zauważamy drastyczny wzrost współczynnika FAR. Związane jest to ze zbliżaniem
+się do wartości 0.5 progu, dla której obserwujemy praktycznie stuprocentową szansę na nieprawidłowe rozpoznanie.
+Związane jest to z definicją odległości Hamminga oraz reprezentacją tęczówki za pomocą ciągu bitów. W ciągu bitowym
+istnieje 50\% szans, że na danym miejscu wystąpi wartoś\'c 1 lub 0. Ponieważ dla dwóch niezależnych tęczówek
+ich reprezentacja powinna by\'c kompletnie losowa, odległoś\'c Hamminga między nimi będzie wynosi\'c właśnie 0.5.
+Jeżeli między dwoma wzorami występuje natomiast pewna korelacja, wówczas wartoś\'c ta spada.\newline
 
-Rozmiar obrazu znormalizowanego:
+\noindent
+Poniżej przedstawione zostały zestawienia obliczonych metryk przy zmianie liczby przesunię\'c bitowych
+wzoru tęczówki w procesie dopasowania:
 
-Brak wykrywania powiek:
+\begin{itemize}
 
-\rowcolors{2}{gray!10}{white}
-\begin{table}[ht]
-  \centering
-  \begin{tabular}{c|c|c|c}
-    \rowcolor{gray!20}
-    Rozdzielczoś\'c kątowa & Rozdzielczoś\'c promieniowa & FAR & FRR \\
-    \hline\hline
-    120 & 16 & 0.0027 & 0.0073 \\
-    \hline
-    240 & 32 & 0.0000 & 0.0094 \\
-    \hline
-    360 & 64 & 0.0000 & 0.0109 \\
-  \end{tabular}
-  \caption{Porównanie współczynników FAR i FRR dla różnych rozmiarów obrazu znormalizowanego
-  przy braku wykrywania powiek.}
-\end{table}
+  \item bez wykrywania powiek:
 
-Aproksymacja parabolą:
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c}
+      \rowcolor{gray!20}
+      Liczba przesunię\'c & FAR & FRR \\
+      \hline\hline
+      1 & 0.0000 & 0.0111 \\
+      \hline
+      3 & 0.0000 & 0.0098 \\
+      \hline
+      8 & 0.0000 & 0.0094 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różej liczby przesunię\'c wzoru tęczówki w procesie dopasowania
+    przy braku wykrywania powiek.}
+  \end{table}
 
-\rowcolors{2}{gray!10}{white}
-\begin{table}[ht]
-  \centering
-  \begin{tabular}{c|c|c|c}
-    \rowcolor{gray!20}
-    Rozdzielczoś\'c kątowa & Rozdzielczoś\'c promieniowa & FAR & FRR \\
-    \hline\hline
-    120 & 16 & 0.0035 & 0.0065 \\
-    \hline
-    240 & 32 & 0.0002 & 0.0077 \\
-    \hline
-    360 & 64 & 0.0001 & 0.0091 \\
-  \end{tabular}
-  \caption{Porównanie współczynników FAR i FRR dla różnych rozmiarów obrazu znormalizowanego
-  z wykorzystaniem aproksymacji parabolicznej do wykrywania powiek.}
-\end{table}
+  \item z wykrywaniem powiek z użyciem aproksymacji za pomocą paraboli
 
-Wartoś\'c parametru $\sigma/f$
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c}
+      \rowcolor{gray!20}
+      Liczba przesunię\'c & FAR & FRR \\
+      \hline\hline
+      1 & 0.0000 & 0.0096 \\
+      \hline
+      3 & 0.0001 & 0.0082 \\
+      \hline
+      8 & 0.0002 & 0.0077 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różej liczby przesunię\'c wzoru tęczówki w procesie dopasowania
+    z wykorzystaniem aproksymacji parabolicznej do wykrywania powiek.}
+  \end{table}
+\end{itemize}
 
-Brak wykrywania powiek:
+Jak wida\'c na powyższych zestawieniach zmiana liczby przesunię\'c w nieznacznym stopniu wpływa
+na wska\'znik FAR, natomiast zwiększanie liczby wykonywanych przesunię\'c bitowych zmniejsza wartoś\'c
+wspólczynnika FRR. Duże znaczenie dla optymalnej liczby przesunię\'c ma jakoś\'c wykonanych zdję\'c tęczówki
+oraz potencjalna rotacja oka w trakcie pobierania zdjęcia.
 
-\rowcolors{2}{gray!10}{white}
-\begin{table}[ht]
-  \centering
-  \begin{tabular}{c|c|c}
-    \rowcolor{gray!20}
-    $\sigma/f$ & FAR & FRR \\
-    \hline\hline
-    0.3 & 0.0003 & 0.0080 \\
-    \hline
-    0.5 & 0.0000 & 0.0094 \\
-    \hline
-    0.75 & 0.0000 & 0.0100 \\
-  \end{tabular}
-  \caption{Porównanie współczynników FAR i FRR dla różnych wartości parametru $\sigma/f$ filtru Gabora
-  przy braku wykrywania powiek.}
-\end{table}
+\noindent
+Poniżej przedstawiono zestawienie metryk przy zmianach rozmiaru obrazu znormalizowanego:
 
+\begin{itemize}
+ \item brak wykrywania powiek:
 
-Aproksymacja parabola:
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c|c}
+      \rowcolor{gray!20}
+      Rozdzielczoś\'c kątowa & Rozdzielczoś\'c promieniowa & FAR & FRR \\
+      \hline\hline
+      120 & 16 & 0.0027 & 0.0073 \\
+      \hline
+      240 & 32 & 0.0000 & 0.0094 \\
+      \hline
+      360 & 64 & 0.0000 & 0.0109 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różnych rozmiarów obrazu znormalizowanego
+    przy braku wykrywania powiek.}
+  \end{table}
 
-\rowcolors{2}{gray!10}{white}
-\begin{table}[ht]
-  \centering
-  \begin{tabular}{c|c|c}
-    \rowcolor{gray!20}
-    $\sigma/f$ & FAR & FRR \\
-    \hline\hline
-    0.3 & 0.0009 & 0.0069 \\
-    \hline
-    0.5 & 0.0002 & 0.0077 \\
-    \hline
-    0.75 & 0.0008 & 0.0084 \\
-  \end{tabular}
-  \caption{Porównanie współczynników FAR i FRR dla różnych wartości parametru $\sigma/f$ filtru Gabora
-  z wykorzystaniem aproksymacji parabolicznej do wykrywania powiek.}
-\end{table}
+  \item z wykrywaniem powiek z użyciem aproksymacji za pomocą paraboli
+
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c|c}
+      \rowcolor{gray!20}
+      Rozdzielczoś\'c kątowa & Rozdzielczoś\'c promieniowa & FAR & FRR \\
+      \hline\hline
+      120 & 16 & 0.0035 & 0.0065 \\
+      \hline
+      240 & 32 & 0.0002 & 0.0077 \\
+      \hline
+      360 & 64 & 0.0001 & 0.0091 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różnych rozmiarów obrazu znormalizowanego
+    z wykorzystaniem aproksymacji parabolicznej do wykrywania powiek.}
+  \end{table}
+\end{itemize}
+
+Jak wida\'c najlepszy balans między dwoma współczynnikami przy zmianie rozmiaru obrazu znormalizowanego
+można zauważy\'c dla rozmiaru pośredniego. Wyższa wartoś\'c współczynnika FAR dla mniejszej rozdzielczości
+kątowej może wynika\'c z niewystarczającej ilości informacji zapisanych w znormalizowanym obrazie. Zwiększenie
+rozdzielczości powoduje natomiast wzrost współczynnika FRR, co może by\'c spowodowane nadreprezentacją pewnych
+cech we wzorze tęczówki.\newline
+
+\noindent
+Poniżej przedstawiono zestawienie metryk przy zmianach parametru $\sigma/f$ filtru Gabora używanego
+w procesie kodowania:
+
+\begin{itemize}
+
+  \item brak wykrywania powiek:
+
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c}
+      \rowcolor{gray!20}
+      $\mathit{\sigma/f}$ & FAR & FRR \\
+      \hline\hline
+      0.3 & 0.0003 & 0.0080 \\
+      \hline
+      0.5 & 0.0000 & 0.0094 \\
+      \hline
+      0.75 & 0.0000 & 0.0100 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różnych wartości parametru $\mathit{\sigma/f}$ filtru Gabora
+    przy braku wykrywania powiek.}
+  \end{table}
+
+  \item z wykrywaniem powiek z użyciem aproksymacji za pomocą paraboli
+
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c}
+      \rowcolor{gray!20}
+      $\mathit{\sigma/f}$ & FAR & FRR \\
+      \hline\hline
+      0.3 & 0.0009 & 0.0069 \\
+      \hline
+      0.5 & 0.0002 & 0.0077 \\
+      \hline
+      0.75 & 0.0008 & 0.0084 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różnych wartości parametru $\mathit{\sigma/f}$ filtru Gabora
+    z wykorzystaniem aproksymacji parabolicznej do wykrywania powiek.}
+  \end{table}
+\end{itemize}
+
+Niestety z powyższych pomiarów nie można wyciągną\'c jednoznaczych wniosków na temat wpływu tego
+paramteru na wartoś\'c współczynników FAR oraz FRR.

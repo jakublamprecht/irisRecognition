@@ -28,11 +28,11 @@ jest kontrolowanie strumienia światła dostającego się przez \'zrenicę do ok
 rozkurczanie swoich mięśni. Bierze ona również udział w procesie akomodacji oka odpowiedzialnym
 za ostre widzenie. Dzięki zawartemu w jej komórkach barwnikowi - \textit{melaninie}, może ona przyjmowa\'c różne kolory.
 Kolor tęczówki najcześciej jest pomijany w procesie rozpoznawania ze względu na liczne możliwości
-jego zaburzenia przykładowo w wyniku chorób, lub zmian hormonalnych regulujących stężenie melaniny.
+jego zaburzenia przykładowo w wyniku chorób lub zmian hormonalnych regulujących stężenie melaniny.
 
 Patrząc na obraz tęczówki (rysunek \ref{fig:irisExample}) możemy dostrzec jej charakterystyczną teksturę. Wynika ona z ułożenia
 beleczek i zatok na jej powierzchni. Tęczówka kształtuje się od trzeciego do ósmego miesiąca życia
-płodu i po tym procesie pozostaje niezmienna do końca życia (zakładając brak chorób).
+płodowego i pozostaje niezmienna do końca życia (zakładając brak chorób).
 W wyniku zgonu ulega zniszczeniu w ciągu pięciu sekund.
 
 \begin{figure}[ht]
@@ -54,7 +54,7 @@ wymagania:
   \item trwałoś\'c i niezmiennoś\'c - cecha powinna by\'c niezmienna w trakcie życia,
   \item szybkoś\'c i skutecznoś\'c działania systemu opartego o cechę,
   \item akceptowalnoś\'c społeczna,
-  \item możliwoś\'c oszukania systemu.
+  \item niemożliwoś\'c podrobienia.
 \end{itemize}
 
 Tęczówka spełnia powyższe wymagania w stopniu bardzo dobrym. Większoś\'c populacji posiada
@@ -65,34 +65,61 @@ Tak jak wcześniej zostało to wspomniane, tęczówka kształtuje się na etapie
 przez resztę życia. Dzięki rozszerzaniu i kurczeniu się w celu kontrolowania przepływu światła w zależności
 od oświetlenia otoczenia, oszukanie systemu przez zdjęcie jest mocno utrudnione. Dodatkowym atutem
 jest fakt, że tęczówka jest dobrze chronionym, a jednocześnie dobrze widocznym organem, co ułatwia
-pobranie obrazu.
+pobranie obrazu.\newline
 
+\noindent
 Poniżej wymienione zostały wady tęczówki jako cechy biometrycznej:
 
 \begin{itemize}
-  \item jest stosunkowo mała, co znacznie zmniejsza dystans z jakiego można pobra\'c o niej informacje
+  \item jest stosunkowo mała, co znacznie zmniejsza dystans z jakiego można pobra\'c o niej informacje,
   \item znajduje się za wilgotną, zakrzywioną i odbijającą światło powierzchnią, co może potencjalnie
-  wprowadza\'c zakłócenia w pobieranym obrazie
+  wprowadza\'c zakłócenia w pobieranym obrazie,
   \item jest umiejscowiona na ruchomej gałce ocznej, która umiejscowiona jest na ruchomej głowie, co może
-  wprowadza\'c liczne niespójności rotacji między obrazami tej samej tęczówki
-  \item częściowo zasłonięta przez powieki oraz rzęsy
+  wprowadza\'c liczne niespójności rotacji między obrazami tej samej tęczówki,
+  \item częściowo zasłonięta przez powieki oraz rzęsy,
 \end{itemize}
 
-Na rysunku poniżej (\ref{fig:irisBiometricsComparison}) przedstawione zostało porównanie tęczówki
+W tabeli poniżej (\ref{tab:irisBiometricsComparison}) przedstawione zostało porównanie tęczówki
 z innymi cechami biometrycznymi w ramach wyżej wymienionych wymagań:
 
-\begin{figure}[ht]
+\begin{table}[h]
   \centering
-  \includegraphics[width=0.8\textwidth]{images/intro/biometricsProperties.png}
-  \caption{Porównanie cech biometrycznych \cite{IntroToBiometricRecognition}. Legenda: H - spełnione w wysokim
+  \begin{tabular}{|l|>{\centering}p{1cm}|>{\centering}p{1cm}|>{\centering}p{1cm}|>{\centering}p{1cm}|>{\centering}p{1cm}|>{\centering}p{1cm}|>{\centering}p{1cm}| }
+    \hline
+    \rowcolor{gray!20}
+    Cecha biometryczna & \rotatebox{90}{Uniwersalnoś\'c} & \rotatebox{90}{Unikalnoś\'c} & \rotatebox{90}{Trwałoś\'c} & \rotatebox{90}{Mierzalnoś\'c} & \rotatebox{90}{skutecznoś\'c} & \rotatebox{90}{Akceptowalnoś\'c} \rotatebox{90}{społeczna} & \rotatebox{90}{Niemożliwoś\'c} \rotatebox{90}{podrobienia} \tabularnewline
+    \hline\hline
+    DNA & H & H & H & L & H & L & L \tabularnewline
+    \hline
+    Ucho & M & M & H & M & M & H & M \tabularnewline
+    \hline
+    Twarz & H & L & M & H & L & H & H \tabularnewline
+    \hline
+    Odciski palców & M & H & H & M & H & M & M \tabularnewline
+    \hline
+    Geometria dłoni & M & M & M & H & M & M & M \tabularnewline
+    \hline
+    Rozkład żył dłoni & M & M & M & M & M & M & L \tabularnewline
+    \hline
+    \rowcolor{yellow!50}
+    Tęczówka & H & H & H & M & H & L & L \tabularnewline
+    \hline
+    Siatkówka & H & H & M & L & H & L & L \tabularnewline
+    \hline
+    Podpis & L & L & L & H & L & H & H \tabularnewline
+    \hline
+    Głos & M & L & L & M & L & H & H \tabularnewline
+    \hline
+  \end{tabular}
+  \caption{Porównanie cech biometrycznych (na podstawie pozycji \cite{IntroToBiometricRecognition}). Legenda: H - spełnione w wysokim
   stopniu, M - spełnione w średnim stopniu, L - spełnione w niskim stopniu.}
-  \label{fig:irisBiometricsComparison}
-\end{figure}
+  \label{tab:irisBiometricsComparison}
+\end{table}
 
 \section{Opis procesu rozpoznawania}
 
 \noindent
-Proces rozpoznawania tęczówki (rysunek \ref{fig:processDiagram}) można rozbi\'c na kilka etapów:
+Proces rozpoznawania tęczówki (rysunek \ref{fig:processDiagram}) można podzieli\'c na kilka etapów:
 
 \begin{itemize}
   \item pobranie obrazu tęczówki,
@@ -112,10 +139,10 @@ Proces rozpoznawania tęczówki (rysunek \ref{fig:processDiagram}) można rozbi\
 Pobranie obrazu tęczówki może wydawa\'c się stosunkowo proste, jednak zdecydowanie takie nie
 jest. Zdjęcia tęczówki wykonywane w świetle widzialnym dają dobre wyniki dla tęczówek o jasnych
 kolorach, natomiast podejście to może zawieś\'c w przypadku ciemnych kolorów tęczówek ze względu
-na niski kontrast zdjęcia, co może prowadzi\'c do zlania się \'zrenicy i tęczówki w jedną całoś\'c.
+na niski kontrast zdjęcia. Może to prowadzi\'c do zlania się \'zrenicy i tęczówki w jedną całoś\'c.
 Uniemożliwiłoby to wyodrębnienie tych dwóch elementów w etapie segmentacji.
 
-Pobieranie obrazu w świetle widocznym może również prowadzi\'c do zmian szerokości tęczówki w trakcie
+Pobieranie obrazu w świetle widzialnym może również prowadzi\'c do zmian szerokości tęczówki w trakcie
 pobierania zdję\'c (różnica w oświetleniu między przetwarzaniem tęczówki w celu zapisania użytkownika
 do bazy danych, a w momencie weryfikacji tożsamości), co może negatywnie wpływa\'c na działanie
 systemu. Dodatkową wadą takiego podejścia jest występowanie w obrazie odbi\'c światła.
@@ -141,9 +168,10 @@ zapewniają widocznoś\'c struktury tęczówki zarówno dla tych o jasnych, jak 
 \end{figure}
 
 
-Następnym etapem jest proces segmentacji, w wyniku którego określane są parametry okręgów
+Następnie obraz poddawany jest procesowi segmentacji, którego zadaniem jest wydzielenie tęczówki z obrazu
+całego oka. W tym celu określane są parametry okręgów
 tęczówki oraz \'zrenicy takie jak ich punkty środkowe oraz promienie. Często w ramach segmentacji
-wykonywane jest również poszukiwanie powiek oraz innych zakłóceń na obrazie np. rzęs o których informacje
+wykonywane jest również poszukiwanie powiek oraz innych zakłóceń na obrazie np. rzęs. Piksele im odpowiadające
 zapisywane są w masce zakłóceń określającej które fragmenty obrazu są znaczące dla procesu rozpoznawania,
 a które nie. Algorytmy te działają w większości w oparciu o metody wykrywania krawędzi.
 Metody segmentacji nie są przedmiotem niniejszej pracy i nie zostały w niej opisane.\newline
@@ -151,8 +179,12 @@ Metody segmentacji nie są przedmiotem niniejszej pracy i nie zostały w niej op
 Znając parametry \'zrenicy oraz tęczówki możliwe jest wyodrębnienie z obrazu tylko i wyłącznie
 punktów należących do tęczówki i zignorowanie reszty punktów obrazu. Wiedząc które piksele obrazu
 reprezentują tęczówkę, możliwe jest przejście do kolejnego etapu, czyli ekstrakcji cech charakterystycznych
-opisujących daną tęczówkę i zakodowania tych informacji w pewnej postaci. Posta\'c ta powinna umożliwia\'c
-porównanie dwóch reprezentacji tęczówek i podjęcie decyzji o dopasowaniu bąd\'z niedopasowaniu.
+opisujących daną tęczówkę i zakodowania tych informacji w pewnej postaci. Dokonywane jest to w etapie kodowania
+tęczówki. Posta\'c ta powinna umożliwia\'c porównanie dwóch reprezentacji tęczówek i podjęcie decyzji o dopasowaniu
+bąd\'z niedopasowaniu.
+
+Aby umożliwi\'c porównanie dwóch tęczówek należy zapewni\'c jednolity rozmiar
+ich obrazów lub reprezentacji. W tym celu obrazy poddawane są procesowi normalizacji.
 
 Tak jak wcześniej zostało wspomniane, pierwszym, pionierskim systemem rozpoznawania tęczówki był
 system opracowany przez Johna Daugmana \cite{DaugmanHowIrisRecognitionWorks}. Nie jest to jednak
@@ -183,7 +215,9 @@ zabezpieczenia przed nielegalnym przekroczeniem granicy. Rozwiązania takie zost
 w Stanach Zdjednoczonych, Kanadzie, Wielkiej Brytanii czy Holandii.
 
 Jednym z największych zastosowań jest projekt Aadhaar w Indiach, którego celem było wprowadzenie
-unikalnego identyfikatora tożsamości dla obywateli Indii. Identyfikator ten bazowany był na danych
+unikalnego identyfikatora tożsamości dla obywateli Indii. Zgodnie ze stroną zawierającą statystyki na
+temat tego projektu (zasób \ref{web:aadhaar}), liczba wygenerowanych identyfikatorów wynosi 1 224 576 859.
+Identyfikator ten bazowany jest na danych
 osobistych oraz danych biometrycznych - między innymi wzorze tęczówki. Celem projektu jest zebranie
 informacji, w tym wzorów tęczówki, wszystkich obywateli Indii \cite{DaugmanIndia}. Projekt powstał w
 celu poprawy systemu przydzielania świadczeń socjalnych i innych programów pomocy przez redukcję oszustw.

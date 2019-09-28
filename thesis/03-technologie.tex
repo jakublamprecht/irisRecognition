@@ -2,7 +2,7 @@
 
 Częśc wymagań wobec tej pracy dotyczyła nie tylko algorytmów i procesu rozpoznawania
 tęczówki, ale także sposobu w jaki aplikacja została stworzona i w jaki sposób jest
-ona użytkowana. Aplikacja miała by przyjazna dla użytkowników i pozwala\'c na działanie
+ona użytkowana. Aplikacja miała by\'c przyjazna dla użytkowników i umożliwia\'c działanie
 w trybie krokowym. Miała pozwala\'c również na proste rozszerzanie jej o kolejne
 metody. Wymagania te w duży sposób wpłynęły na wybór technologii użytych w tej pracy,
 które opisane zostaną w dalszej części tego rozdziału.
@@ -12,7 +12,7 @@ które opisane zostaną w dalszej części tego rozdziału.
 Ponieważ praca jest ściśle związana z przetwarzaniem obrazu, w tym wypadku obrazu oka
 w celu analizy tęczówki, zdecydowano się na użycie biblioteki OpenCV. Upraszcza ona pracę
 z obrazem oraz operacje na nim w znacznym stopniu, a także dostarcza wiele gotowych
-funkcji, które przyspieszają tempo tworzenia eplikacji.\newline
+funkcji, które zwiększają tempo tworzenia eplikacji.\newline
 
 Dużą wagę w pracy należało poświęci\'c części klienckiej, w celu stworzenia przejrzystego i
 przyjaznego interfejsu użytkownika. Wiele aplikacji zaniedbuje ten aspekt, w wyniku czego
@@ -113,15 +113,15 @@ zwyczajnych, wieloplatformowych aplikacji desktopowych dzięki takim narzędziom
 pracy \textbf{Electron}. Jest to biblioteka, która używa NodeJS oraz Chromium do stworzenia jednolitego
 środowiska uruchomieniowego. Dzięki takiemu połączeniu możliwe jest wygenerowanie okna aplikacji, które
 w rzeczywistości jest procesem Chromium przedstawiającym konkretną stronę internetową. Dodatkowo wykorzystanie
-NodeJS pozwala na dostęp oraz modyfikację systemu plików użytkownika aplikacji, dzięki czemu możliwe przetwarzanie,
-usuwanie i modyfikowanie plików bez potrzeby przeysłania ich na jakikolwiek serwer. Jest to nieosiągalne
+NodeJS pozwala na dostęp oraz modyfikację systemu plików użytkownika aplikacji, dzięki czemu możliwe jest przetwarzanie,
+usuwanie i modyfikowanie plików bez potrzeby przesyłania ich na jakikolwiek serwer. Jest to nieosiągalne
 przy użyciu przeglądarkowej implementacji języka JavaScript.\newline
 
 Tworzenie aplikacji korzystając z podstawowych możliwości HTML, CSS oraz JS zapewne zajęłoby
 bardzo dużo czasu, dlatego w świecie technologii internetowych powstaje wiele bibliotek
 ułatwiających tworzenie skomplikowanych i interaktywnych aplikacji. Jedną z nich jest
 \textbf{React}, który został użyty w tej pracy. Jest to biblioteka JavaScript umożliwiająca
-tworzenie interfejsów użytkownika. Każdy interfejs można rozłoży\'c na poszczególne bloki
+tworzenie interfejsów użytkownika. Każdy interfejs można podzieli\'c na poszczególne bloki
 odpowiadające za pewną funkcjonalnoś\'c np. wyświetlenie obrazu, zebranie danych od użytkownika,
 czy przełączenie między dwoma widokami. Bloki te nazywa się komponentami i mogą by\'c one wykorzystywane
 wielokrotnie w różnych miejscach aplikacji. Tworzenie reużywalnych komponentów jest podstawą
@@ -153,8 +153,8 @@ Każdy z tych trybów składa się z kilku kroków, np. tryb krokowy składa si�
   \item prezentacja wyników.
 \end{itemize}
 
-Dla każdego z tych kroków konieczne będzie stworzenie innego widoku, ponieważ każdy z nich będzie wyglądał
-nieco inaczej. W aplikacji złożonej z tak wielu widoków prosto o problemy związane z przejściami między nimi,
+Dla każdego z tych nich konieczne będzie stworzenie osobnego widoku, ponieważ każdy z nich będzie składał
+się z odmiennych elementów. W aplikacji złożonej z tak wielu widoków prosto o problemy związane z przejściami między nimi,
 które mogą skutkowa\'c nieprzewidywalnymi błędami, np. załadowanie widoku normalizacji przed widokiem segmentacji
 może skutkowa\'c błędem krytycznym aplikacji. W celu uniknięcia takich błędów interfejs użytkownika można
 opisa\'c w postaci automatu skończonego, w którym stanami są poszczególne widoki, a zmiana widoku definiowana
@@ -176,8 +176,9 @@ a manualne utrzymywanie informacji o nich oraz ich wersjach byłoby niemożliwe.
 został menadżer pakietów \textbf{Yarn} umożliwiający prostą instalację bibliotek i narzędzi, który automatycznie
 zapisuje zainstalowane paczki oraz ich wersje jako zależności projektu w plikach \textit{package.json} oraz
 \textit{yarn.lock}. Dzięki korzystaniu z Yarna wszystkie zależności i biblioteki można zainstalowa\'c wywołując
-w folderze zawierającym plik \textit{package.json} komendę \texttt{yarn install}.
+w folderze zawierającym plik \textit{package.json} komendę \texttt{yarn install}.\newline
 
+\noindent
 W ramach pracy wykorzystane zostały również inne narzędzia, do których wyboru przyczyniła się wyłącznie
 osobista preferencja:
 
@@ -271,7 +272,7 @@ maszyny stanów, a także opisane zostaną poszczególne widoki aplikacji oraz j
 \vspace{-20pt}
 \paragraph{Tryb krokowy\newline}
 
-Po uruchomieniu aplikacji oczom użytkownika ukazuje się ekran startowy \ref{fig:homeScreen} witający użytkownika
+Po uruchomieniu aplikacji oczom użytkownika ukazuje się ekran startowy (rysunek \ref{fig:homeScreen}) witający użytkownika
 i proszący go o wybranie jednego z dwóch trybów działania aplikacji.\newline
 
 Wybranie trybu krokowego przenosi użytkownika do kreatora, który przeprowadzi go przez proces
@@ -283,7 +284,7 @@ pozwala użytkonikowi na przełączenie się w inny tryb lub przejście do ekran
 momencie działania aplikacji. Przejście pomiędzy trybami jest równoznaczne z wykasowaniem
 dotychczasowo wybranych informacji w poprzednio aktywnym trybie.
 
-Kliknięcie przycisku ``Next'' spowoduje przejście do kolejnego kroku kreatora Jeżeli użytkownik
+Kliknięcie przycisku ``Next'' spowoduje przejście do kolejnego kroku kreatora. Jeżeli użytkownik
 nie wybrał obrazu, kreator nie przejdzie do następnego kroku i poinformuje użytkownika o konieczności
 wyboru obrazu.\newline
 
@@ -306,10 +307,10 @@ algorytmów przetwarzania wstępnego.\newline
 Kolejne kroki kreatora funkcjonują w bardzo podobny sposób. Różnicą może by\'c iloś\'c wyświetlanych
 obrazów. Jeżeli wymagane jest wyświetlenie informacji o kilku obrazach, to prezentowane są one w formie
 zakładek. Sytuację taką można zaobserwowa\'c w widoku procesu normalizacji (rysunek \ref{fig:normScreen}),
-gdzie możliwy jest podgląd przed i po normalizacji oryginalnego obrazu, maski oraz maski nałożonej na
-zdjęcie.\newline
+gdzie możliwy jest podgląd oryginalnego obrazu, maski oraz maski nałożonej na
+zdjęcie zarówno przed i po przeprowadzeniu procesu normalizacji.\newline
 
-Następnie przechodzimy do kodowania, którego widok ma taką samą strukturę jak widoki przetwarzania
+Następnie przechodzimy do kodowania, którego widok ma taką samą strukturę, jak widoki przetwarzania
 wstępnego czy normalizacji, ale pozwala na podgląd innych obrazów oraz na wybór innych metod.\newline
 
 Kolejnym krokiem po kodowaniu jest wybór obrazów, do których chcemy spróbowa\'c dopasowa\'c obraz
@@ -326,7 +327,7 @@ stanie aplikacji wraz z animowaną ikoną, która zapewnia, że aplikacja nie za
 
 W wypadku, gdy przetwarzanie zostanie przerwane z powodu błędu, użytkownik przeniesiony zostanie do ekranu
 dopasowania. Jeżeli natomiast przetwarzanie zakończy się sukcesem, użytkownik przeniesiony zostanie
-do widoku prezentującego wyniki \ref{fig:stepResultsScreen}. Pierwszym z elementów tego widoku
+do widoku prezentującego wyniki (rysunek \ref{fig:stepResultsScreen}). Pierwszym z elementów tego widoku
 jest przycisk umożliwiający zapisanie konfiguracji użytej do przetworzenia obrazów w postaci pliku
 o rozszerzeniu JSON (JavaScript Object Notation), który może zosta\'c użyty pó\'zniej w trybie
 wsadowym. Plik ten ma następującą strukturę:
@@ -383,7 +384,7 @@ uży\'c przycisku ``See more''. Kliknięcie go powoduje otwarcie nowego okna dia
 przedstawione zostaje dokładniejsze zestawienie danych (rysunek \ref{fig:stepResultPreview}).
 W lewym górnym rogu prezentowane są informacje o etapie dopasowania. Wyświetlana jest informacja
 o tym czy obrazy przedstawiają tę samą tęczówkę, najmniejsza wartoś\'c obliczonej odległości Hamminga
-oraz informacje o tym w którym przesunięciu udało się znale\'z\'c najlepsze dopasowanie.
+oraz informację o tym, w którym przesunięciu znaleziono najlepsze dopasowanie.
 Po prawej stronie widoczny jest przycisk ``Show all values'', którego kliknięcie powoduje
 pojawienie się tabeli zawierającej zestawienie wszystkich obliczonych wartości odległości Hamminga
 (rysunek \ref{fig:stepResultHDTable}).

@@ -37,10 +37,10 @@ przetwarzania wstępnego przeniesiona została do implementacji poszczególnych 
 a użytkownikowi udostępnione zostały wyłącznie uniwersalne algorytmy takie jak:
 
 \begin{itemize}
-  \item filtr Gaussa
-  \item filtr medianowy
-  \item normalizacja histogramu
-  \item filter2D
+  \item filtr Gaussa,
+  \item filtr medianowy,
+  \item normalizacja histogramu,
+  \item filtr uśredniający.
 \end{itemize}
 
 Implementacje tych alogrytmów wykorzystują podstawowe funkcje z biblioteki OpenCV takie jak:
@@ -113,11 +113,11 @@ o stałych wymiarach.
 \begin{figure}[ht]
   \includegraphics[width=0.8\textwidth]{images/normalization/schemaOffCenter.png}
   \centering
-  \caption{Model normalizacji Daugmana z uwzględnieniem niewspółosiowości tęczówki i \'zrenicy \cite{aliasingIris}}
+  \caption{Model normalizacji Daugmana z uwzględnieniem przesunięcia między środkiem tęczówki i \'zrenicy \cite{aliasingIris}}
   \label{fig:daugmanDiagramOffCenter}
 \end{figure}
 
-Uwzględnienie tej niewspółosiowości polega na wyznaczeniu wartości odległości między granicami
+Uwzględnienie przesunięcia między środkami polega na wyznaczeniu wartości odległości między granicami
 \'zrenicy i tęczówki dla każdego rozpatrywanego kąta \cite{masek} zgodnie z równaniami \ref{eq:normRemap}.
 
 \begin{equation}
@@ -197,8 +197,8 @@ przepustowoś\'c filtru określana jest przez szerokoś\'c wykorzystanej funkcji
 Jedną z wad filtrów Gabora jest występowanie niezerowej składowej stałej dla przepustowości
 większej niż jedna oktawa \cite{FieldGaborOctave}. Zerową składową stałą dla każdej przepustowości
 można natomiast otrzyma\'c przez zastosowanie filtru, którego charakterystyka częstotliwościowa
-amplitudowa ma rozkład Gaussowski nie w skali liniowej, a w skali logarytmicznej. Charakterystyka
-częstotliwościowa amplitudowa takiego filtru jest opisana równaniem \ref{eq:logGabor}:
+ma rozkład Gaussowski nie w skali liniowej, a w skali logarytmicznej. Charakterystyka
+częstotliwościowa takiego filtru jest opisana równaniem \ref{eq:logGabor}:
 
 \begin{equation}
   \mathit{G(f)} = \exp\left(
@@ -216,8 +216,8 @@ gdzie:\\
 \indent $f_{0}$ - częstotliwoś\'c środkowa filtra,\\
 \indent $\sigma$ - przepustowoś\'c filtra.\newline
 
-W celu zakodowania cech charakterystycznych znormalizowanego obrazu tęczówki, dla każdego wiersza
-obrazu obliczany jest jego splot z falkami Log Gabora. Jeżeli moduł wyniku splotu w danym punkcie
+W celu zakodowania cech charakterystycznych tęczówki, dla każdego wiersza obrazu znormalizowanego (odpowiadającemu pojedyńczemu
+okręgowi tęczówki) obliczany jest jego splot z falkami Log Gabora. Jeżeli moduł wyniku splotu w danym punkcie
 jest bardzo blisko zera, wówczas informacja fazowa jest nieznacząca, a punkt ten oznaczany jest w
 masce zakłóceń jako bit nieznaczący.
 
@@ -230,7 +230,7 @@ Przykładowy proces kodowania przedstawiony został na rysunku \ref{fig:gaborEnc
 \begin{figure}[ht]
   \centering
   \includegraphics{images/encoding/quantization.png}
-  \caption{Ilustracja procesu kwantyzacji}
+  \caption{Ilustracja procesu kwantyzacji.}
   \label{fig:encodingQuant}
 \end{figure}
 
@@ -253,7 +253,7 @@ transformacja przykładowej maski wyglądałaby następująco:
 \begin{figure}[!ht]
   \centering
   \makebox[\textwidth]{\includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{images/encoding/gabor.png}}
-  \caption{Ilustracja procesu kodowania}
+  \caption{Ilustracja procesu kodowania \cite{masek}.}
   \label{fig:gaborEncoding}
 \end{figure}
 
@@ -307,8 +307,8 @@ gdzie:\\
 \indent $\oplus$ - operator alternatywy rozłącznej.\newline
 
 Warto wspomnie\'c, że dzięki wykorzystaniu operacji alternatywy rozłącznej obliczanie odległości
-Hamminga jest bardzo efektywne czasowo, dzięki czemu całościowy czas rozpoznawania tęczówki zajmuje
-znacznie mniej czasu.
+Hamminga jest bardzo efektywne czasowo. Dzięki temu obliczanie nawet wielu odległości Hamminga nie powoduje
+nadmiernego wydłużenia czasu trwania procesu rozpoznawania tęczówki.
 
 W trakcie procesu kodowania oprócz wzoru tęczówki tworzony jest także wzór dla maski zakłóceń.
 Zawiera on informacje o tym, które bity we wzorze tęczówki reprezentują tęczówkę i powinny by\'c
@@ -353,7 +353,7 @@ zobrazowany został na rysunku \ref{fig:matchingShifting}
 \end{figure}
 
 W zależności od tego ile bitów koduje pojedyńczy punkt siatkówki, tyle bitów zmienia swoje miejsca
-w trakcie pojedyńczego przesunięcia. Liczba przesuniętych bitów zależy od ilości filtrów Gabora
+w trakcie pojedyńczego przesunięcia. Liczba przesuniętych bitów zależy od liczby filtrów Gabora
 użytych w procesie kodowania, ponieważ każdy z takich filtrów wygeneruje dwa bity reprezentujące
 pojedyńczy punkt siatkówki.
 
