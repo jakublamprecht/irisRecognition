@@ -11,6 +11,7 @@ opencv-python-headless = "*"
 numpy = "*"
 flask-restful = "*"
 scipy = "*"
+pyinstaller = "*"
 
 [requires]
 python_version = "3.7"

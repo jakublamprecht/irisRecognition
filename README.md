@@ -81,3 +81,26 @@ W przypadku pracy w trybie deweloperskim polecam zakomentowac w pliku `electron.
 
 > **WARNING**: Pliki wykonujące eksperyment znajdują się w katalogu `utils` i wymagają istnienia plików `results.json`, `metrics.json`, `config.json`. Config może
 byc wygenerowany w trybie krokowym, a pozostale pliki moga byc puste. Korzystają one takze ze spłaszczonej struktury bazy danych CASIA (możliwe do uzyskania w wyniku uruchomienia skryptu `flattenCasia.py`).
+
+## Wydawanie aplikacji
+
+Po wprowadzeniu zmian aplikacji, w celu wygenerowania pliku wykonywalnego, należy zbudowac zarówno aplikację serwerową jak i electronową.
+
+W celu zbudowania aplikacji serwerowej należy wywołac w folderze *server* komendy:
+
+```
+pipenv shell
+pyinstaller engine.py
+```
+
+W wyniku ich działania powstanie folder dist, który będzie zawierał wykonywalny plik aplikacji serwerowej.
+
+W celu zbudowania aplikacji electronowej należy w folderze app wywołac:
+
+```
+yarn app:package:windows
+```
+
+> Przed zbudowaniem aplikacji electronowej musi instniec zbudowana aplikacja pythonowa w folderze *server/dist*!
+
+Zbudowana aplikacja znajdzie się w folderze *releases*, w podfolderze zależnym od wybranej platformy.
