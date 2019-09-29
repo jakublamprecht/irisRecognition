@@ -1,0 +1,1875 @@
+\documentclass[10pt,polish,a4paper,oneside]{ppfcmthesis}
+
+\usepackage[utf8]{inputenc}
+\usepackage[OT4]{fontenc}
+
+
+
+\usepackage[widespace]{fourier}   \usepackage[scaled=0.875]{helvet} \renewcommand{\ttdefault}{lmtt}   \usepackage{booktabs}             \usepackage{multirow}
+\usepackage{algorithm2e}
+\usepackage{placeins}
+\usepackage{alltt}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[table]{xcolor}
+\renewcommand{\listalgorithmcfname}{Lista algorytmów}
+\renewcommand{\algorithmcfname}{Algorytm}
+
+\newcommand{\SA}[1]{$\mathit{SA}_{#1}$}
+\newcommand{\ISA}[1]{$\mathit{ISA}_{#1}$}
+\DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}
+\newcommand{\bigO}[0]{\mathcal{O}}
+\newcommand{\dollar}[0]{\$}
+
+\author{Jakub Lamprecht}
+
+\title{Badawczy system rozpoznawania wykorzystujący obraz tęczówki oka}
+
+\ppsupervisor{dr~inż.~Tomasz Piaścik}
+\ppyear{2019}      
+
+\begin{document}
+\frontmatter\pagestyle{empty}\maketitle\cleardoublepage 
+
+\thispagestyle{empty}\vspace*{\fill}\begin{center}Tutaj przychodzi karta pracy dyplomowej;\\oryginał wstawiamy do wersji dla archiwum PP, w pozostałych kopiach wstawiamy ksero.\end{center}\vfill\cleardoublepage 
+
+\thispagestyle{empty}
+\section*{Streszczenie}
+
+Celem niniejszej pracy dyplomowej była implementacja oraz analiza algorytmów normalizacji,
+kodowania oraz dopasowania w procesie rozpoznawania tęczówki. W ramach pracy powstała aplikacja
+pozwalająca na przeprowadzenie pełnego procesu rozpoznawania w trybie \textbf{krokowym} pozwalającym
+na kontrolowanie użytych metod oraz paramterów, a także w trybie \textbf{wsadowym} pozwalającym na przeprowadzenie
+procesu dla większego zbioru obrazów. W pracy zaimplementowane oraz opisane zostały algorytmy zaproponowane przez
+Johna Daugmana. W końcowej części pracy przeprowadzony został eksperyment sprawdzający jakoś\'c
+działania zaimplementowanego systemu poprzez obliczenie współczynników \textbf{FAR} \textit{(ang. False Acceptance Rate)}
+oraz \textbf{FRR} \textit{(ang. False Rejection Rate)}. Ważnym aspektem pracy było stworzenie
+przejrzystego interfejsu użytkownika, w związku z czym do jego implementacji użyto technologii
+internetowych w połączeniu z OpenCV.
+
+\section*{Abstract}
+
+The purpose of this dissertation was to implement and analyse normalisation, feature extraction
+and matching algorithms in the process of iris recognition. An application capable of performing
+the whole process of iris recognition has been developed as a part of this paper. Said application
+provides users with two modes - \textbf{step mode} which allows user to preview the results and control used
+methods and parameters in each step of the process and \textbf{batch mode} which provides the user
+with possibility of running the process on a bigger set of images. An implementation and analysis
+of John Daugman algorithms has been the focus of this paper. Lastly an accuracy check of the implemented
+system has been performed by calculating \textbf{FAR} \textit{(False Acceptance Rate)} and \textbf{FRR} \textit{(False Rejection Rate)}.
+Providing a user-friendly interface was an important part of created application, which is why
+web technologies have been integrated with Python and OpenCV powered backend application.
+ \vfill\cleardoublepage
+
+\pagenumbering{Roman}\pagestyle{ppfcmthesis}\tableofcontents* \cleardoublepage 
+
+\mainmatter \chapter{Wprowadzenie}
+
+
+
+Wraz ze zwiększeniem stopnia informatyzacji na świecie zwiększa się również iloś\'c przechowywanych przez
+systemy informatyczne danych, w tym również tych poufnych, do których dostęp powinny mie\'c tylko
+określone osoby. W związku z tym zapotrzebowanie na systemy weryfikacji i identyfikacji rośnie. Metody
+uwierzytelniania można podzieli\'c ze względu na element użyty do przeprowadzenia procesu:
+
+\begin{itemize}
+  \item metody wykorzystujące informacje, do których dostęp mają wyłącznie osoby uprawnione (np. hasło, pin),
+  \item metody wykorzystujące przedmiot w którego posiadaniu są jedynie osoby uprawnione,
+  \item metody wykorzystujące cechy fizyczne osób uprawnionych.
+\end{itemize}
+
+Z wymienionych metod najbezpieczniejszymi są te ostatnie, inaczej zwane metodami biometrycznymi.
+Twórcy systemów wykorzystujących te metody poszukują cech fizycznych człowieka, które pozwalają na
+nieinwazyjne, odporne na oszustwa uwierzytelnienie. Jedną z najbardziej obiecujących cech
+w świecie biometrii jest tęczówka, której rozpoznawanie jest przedmiotem niniejszej pracy. Mimo, że
+tęczówka nie jest cechą idealną ze względu na przykładowo koszty wdrożenia takiego systemu,
+to systemy wykorzystujące tę cechę biometryczną charakteryzują się niskim współczynnikiem nieprawidłowej
+identyfikacji.
+
+\section{Cel i~zakres pracy}
+
+Celem tej pracy było zaprojektowanie i stworzenie aplikacji pozwalającej na przeprowadzenie procesu
+rozpoznawania tęczówki oka oraz przegląd literatury i implementacja algorytmów normalizacji,
+kodowania oraz dopasowania tęczówki. Jednym z wymagań dla tworzonego programu było, aby działał
+on w dwóch trybach:
+
+\begin{itemize}
+    \item Krokowym - tryb umożliwiający użytkownikowi stopniowe przejście przez proces rozpoznawania
+    z możliwością wyboru metod oraz parametrów dla poszczególnych kroków, a także podglądu wyników dla
+    każdego z nich.
+
+    \item Wsadowym - tryb umożliwiający automatyczne przeprowadzenie procesu rozpoznawania opisanego przez
+    plik konfiguracyjny wygenerowany w trybie krokowym dla większego zbioru obrazów.
+\end{itemize}
+
+\noindent
+Ważnym aspektem dla tworzonej aplikacji była również użyteczność i przyjazność interfejsu użytkownika,
+który miał zachęcać do korzystania z aplikacji.
+
+\section{Struktura pracy}
+
+Struktura pracy jest następująca. Rozdział drugi poświęcony został wstępowi do tematu
+rozpoznawania tęczówki. Zawiera on ogólne informacje o historii zagadnienia, anatomii oka oraz właściowościach
+i zastosowaniach biometrycznych tęczówki. Traktuje on również ogólnie o procesie
+przetwarzania obrazu tęczówki. W kolejnym rozdziale opisane zostały technologie użyte w celu stworzenia
+aplikacji, a także opis jej działania i funkcjonalności. Rodział czwarty jest w całości poświęcony
+algorytmom normalizacji, kodowania oraz dopasowania i zasadzie ich działania. Piąty rozdział
+przedstawia informacje na temat eksperymentu przeprowadzonego z wykorzystaniem wytworzonej
+aplikacji oraz jego wyniki. Rozdział szósty stanowi podsumowanie pracy i wskazuje potencjalne
+kierunki dalszego jej rozwoju.
+
+ \chapter{Podstawy teoretyczne}
+
+Pierwsza wzmianka o użyciu tęczówki w celu identyfikacji jednostki datowana jest na rok
+1936, a autorem jej był okulista Frank Burch \cite{FBIGov}. W roku 1985 okuliści Leonard Flom oraz
+Aran Safir przedstawili tezę popartą badaniami klinicznymi, że w świecie nie istnieją dwie
+identyczne tęczówki, a w roku 1987 opatentowali pomysł Bruch'a. Nie byli oni jednak w
+stanie stworzy\'c systemu i algorytmów pozwalających na identyfikację osoby na podstawie
+obrazu tęczówki. W roku 1989, na ich prośbę, matematyk John Daugman stworzył algorytmy
+pozwalające na automatyczną identyfikację tęczówki, które następnie opatentował w roku 1994.
+\cite{Misztal2012}
+Algorytmy te są podwaliną większości rozwiąza\'n zastosowanych w systemach wykorzystujących
+obraz tęczówki oka. W dalszej części tego rozdziału przedstawione zostaną informacje teoretyczne
+pozwalające na zrozumienie jaką rolę odgrywa rozpoznawanie tęczówki w systemach biometrycznych.
+
+\section{Budowa tęczówki}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.7\textwidth]{images/intro/eyeStructure.png}
+  \caption{Schemat anatomiczny oka ludzkiego \cite{Czajka}.}
+  \label{fig:eyeStructure}
+\end{figure}
+
+Tęczówka jest umięśnioną częścią błony naczyniowej, która otacza otwór zwany \'zrenicą.
+Jej częś\'c obwodowa przechodzi w ciało rzęskowe utrzymujące soczewkę \cite{Czajka}. Z zewnątrz
+otoczona jest prze\'zroczystą rogówką pełniącą funkcję ochronną. Głównym zadaniem tęczówki
+jest kontrolowanie strumienia światła dostającego się przez \'zrenicę do oka przez kurczenie i
+rozkurczanie swoich mięśni. Bierze ona również udział w procesie akomodacji oka odpowiedzialnym
+za ostre widzenie. Dzięki zawartemu w jej komórkach barwnikowi - \textit{melaninie}, może ona przyjmowa\'c różne kolory.
+Kolor tęczówki najcześciej jest pomijany w procesie rozpoznawania ze względu na liczne możliwości
+jego zaburzenia przykładowo w wyniku chorób lub zmian hormonalnych regulujących stężenie melaniny.
+
+Patrząc na obraz tęczówki (rysunek \ref{fig:irisExample}) możemy dostrzec jej charakterystyczną teksturę. Wynika ona z ułożenia
+beleczek i zatok na jej powierzchni. Tęczówka kształtuje się od trzeciego do ósmego miesiąca życia
+płodowego i pozostaje niezmienna do końca życia (zakładając brak chorób).
+W wyniku zgonu ulega zniszczeniu w ciągu pięciu sekund.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.5\textwidth]{images/intro/irisExample.png}
+  \caption{Przykładowy obraz tęczówki oka.}
+  \label{fig:irisExample}
+\end{figure}
+
+\section{Tęczówka w biomterii}
+
+Aby cechy fizyczne były użyteczne z punktu widzenia biometrii powinny spełnia\'c następujące
+wymagania:
+
+\begin{itemize}
+  \item uniwersalnoś\'c - każdy człowiek powinien posiada\'c daną cechę,
+  \item unikalno\'c - cecha powinna by\'c unikalna dla każdej osoby,
+  \item mierzalnoś\'c - łatwoś\'c pobrania informacji,
+  \item trwałoś\'c i niezmiennoś\'c - cecha powinna by\'c niezmienna w trakcie życia,
+  \item szybkoś\'c i skutecznoś\'c działania systemu opartego o cechę,
+  \item akceptowalnoś\'c społeczna,
+  \item niemożliwoś\'c podrobienia.
+\end{itemize}
+
+Tęczówka spełnia powyższe wymagania w stopniu bardzo dobrym. Większoś\'c populacji posiada
+ją. Badania wykazują, że jest ona unikalna dla każdego człowieka, nawet dla bli\'zniąt jednojajowych.
+Co więcej, tęczówki oka lewgo i prawego u jednego człowieka również różnią się między sobą. Tęczówka zawiera
+wiele punktów charakterystycznych i detali, dzięki czemu rośnie skutecznoś\'c systemu opartego na jej obrazie.
+Tak jak wcześniej zostało to wspomniane, tęczówka kształtuje się na etapie płodu i pozostaje niezmienna
+przez resztę życia. Dzięki rozszerzaniu i kurczeniu się w celu kontrolowania przepływu światła w zależności
+od oświetlenia otoczenia, oszukanie systemu przez zdjęcie jest mocno utrudnione. Dodatkowym atutem
+jest fakt, że tęczówka jest dobrze chronionym, a jednocześnie dobrze widocznym organem, co ułatwia
+pobranie obrazu.\newline
+
+\noindent
+Poniżej wymienione zostały wady tęczówki jako cechy biometrycznej:
+
+\begin{itemize}
+  \item jest stosunkowo mała, co znacznie zmniejsza dystans z jakiego można pobra\'c o niej informacje,
+  \item znajduje się za wilgotną, zakrzywioną i odbijającą światło powierzchnią, co może potencjalnie
+  wprowadza\'c zakłócenia w pobieranym obrazie,
+  \item jest umiejscowiona na ruchomej gałce ocznej, która umiejscowiona jest na ruchomej głowie, co może
+  wprowadza\'c liczne niespójności rotacji między obrazami tej samej tęczówki,
+  \item częściowo zasłonięta przez powieki oraz rzęsy,
+\end{itemize}
+
+W tabeli poniżej (\ref{tab:irisBiometricsComparison}) przedstawione zostało porównanie tęczówki
+z innymi cechami biometrycznymi w ramach wyżej wymienionych wymagań:
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|l|>{\centering}p{1cm}|>{\centering}p{1cm}|>{\centering}p{1cm}|>{\centering}p{1cm}|>{\centering}p{1cm}|>{\centering}p{1cm}|>{\centering}p{1cm}| }
+    \hline
+    \rowcolor{gray!20}
+    Cecha biometryczna & \rotatebox{90}{Uniwersalnoś\'c} & \rotatebox{90}{Unikalnoś\'c} & \rotatebox{90}{Trwałoś\'c} & \rotatebox{90}{Mierzalnoś\'c} & \rotatebox{90}{skutecznoś\'c} & \rotatebox{90}{Akceptowalnoś\'c} \rotatebox{90}{społeczna} & \rotatebox{90}{Niemożliwoś\'c} \rotatebox{90}{podrobienia} \tabularnewline
+    \hline\hline
+    DNA & H & H & H & L & H & L & L \tabularnewline
+    \hline
+    Ucho & M & M & H & M & M & H & M \tabularnewline
+    \hline
+    Twarz & H & L & M & H & L & H & H \tabularnewline
+    \hline
+    Odciski palców & M & H & H & M & H & M & M \tabularnewline
+    \hline
+    Geometria dłoni & M & M & M & H & M & M & M \tabularnewline
+    \hline
+    Rozkład żył dłoni & M & M & M & M & M & M & L \tabularnewline
+    \hline
+    \rowcolor{yellow!50}
+    Tęczówka & H & H & H & M & H & L & L \tabularnewline
+    \hline
+    Siatkówka & H & H & M & L & H & L & L \tabularnewline
+    \hline
+    Podpis & L & L & L & H & L & H & H \tabularnewline
+    \hline
+    Głos & M & L & L & M & L & H & H \tabularnewline
+    \hline
+  \end{tabular}
+  \caption{Porównanie cech biometrycznych (na podstawie pozycji \cite{IntroToBiometricRecognition}). Legenda: H - spełnione w wysokim
+  stopniu, M - spełnione w średnim stopniu, L - spełnione w niskim stopniu.}
+  \label{tab:irisBiometricsComparison}
+\end{table}
+
+\section{Opis procesu rozpoznawania}
+
+\noindent
+Proces rozpoznawania tęczówki (rysunek \ref{fig:processDiagram}) można podzieli\'c na kilka etapów:
+
+\begin{itemize}
+  \item pobranie obrazu tęczówki,
+  \item segmentacja,
+  \item normalizacja,
+  \item detekcja cech charakterystycznych
+  \item dopasowanie
+\end{itemize}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/intro/processDiagram.png}
+  \caption{Diagram przedstawiający przebieg procesu rozpoznawania tęczówki}
+  \label{fig:processDiagram}
+\end{figure}
+
+Pobranie obrazu tęczówki może wydawa\'c się stosunkowo proste, jednak zdecydowanie takie nie
+jest. Zdjęcia tęczówki wykonywane w świetle widzialnym dają dobre wyniki dla tęczówek o jasnych
+kolorach, natomiast podejście to może zawieś\'c w przypadku ciemnych kolorów tęczówek ze względu
+na niski kontrast zdjęcia. Może to prowadzi\'c do zlania się \'zrenicy i tęczówki w jedną całoś\'c.
+Uniemożliwiłoby to wyodrębnienie tych dwóch elementów w etapie segmentacji.
+
+Pobieranie obrazu w świetle widzialnym może również prowadzi\'c do zmian szerokości tęczówki w trakcie
+pobierania zdję\'c (różnica w oświetleniu między przetwarzaniem tęczówki w celu zapisania użytkownika
+do bazy danych, a w momencie weryfikacji tożsamości), co może negatywnie wpływa\'c na działanie
+systemu. Dodatkową wadą takiego podejścia jest występowanie w obrazie odbi\'c światła.
+
+W celu wyeliminowania powyższych problemów zdjęcia tęczówki można wykonywa\'c w bliskiej podczerwieni \cite{IrisRecognitionPresentation},
+dzięki czemu uzyskane obrazy nie posiadają zakłóceń w postaci odbi\'c światła, a także
+zapewniają widocznoś\'c struktury tęczówki zarówno dla tych o jasnych, jak i ciemnych kolorach (rysunek \ref{fig:irisAcquisitionExample}).
+
+\begin{figure}[ht]
+  \centering
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/intro/eyeDaylight.png}
+    \caption{Obraz tęczówki w świetle widzialnym}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/intro/eyeInfraRed.png}
+    \caption{Obraz tęczówki w bliskiej podczerwieni}
+  \end{subfigure}
+  \caption{Róznice w pobieraniu obrazu tęczówki \cite{IrisRecognitionPresentation}.}
+  \label{fig:irisAcquisitionExample}
+\end{figure}
+
+
+Następnie obraz poddawany jest procesowi segmentacji, którego zadaniem jest wydzielenie tęczówki z obrazu
+całego oka. W tym celu określane są parametry okręgów
+tęczówki oraz \'zrenicy takie jak ich punkty środkowe oraz promienie. Często w ramach segmentacji
+wykonywane jest również poszukiwanie powiek oraz innych zakłóceń na obrazie np. rzęs. Piksele im odpowiadające
+zapisywane są w masce zakłóceń określającej które fragmenty obrazu są znaczące dla procesu rozpoznawania,
+a które nie. Algorytmy te działają w większości w oparciu o metody wykrywania krawędzi.
+Metody segmentacji nie są przedmiotem niniejszej pracy i nie zostały w niej opisane.\newline
+
+Znając parametry \'zrenicy oraz tęczówki możliwe jest wyodrębnienie z obrazu tylko i wyłącznie
+punktów należących do tęczówki i zignorowanie reszty punktów obrazu. Wiedząc które piksele obrazu
+reprezentują tęczówkę, możliwe jest przejście do kolejnego etapu, czyli ekstrakcji cech charakterystycznych
+opisujących daną tęczówkę i zakodowania tych informacji w pewnej postaci. Dokonywane jest to w etapie kodowania
+tęczówki. Posta\'c ta powinna umożliwia\'c porównanie dwóch reprezentacji tęczówek i podjęcie decyzji o dopasowaniu
+bąd\'z niedopasowaniu.
+
+Aby umożliwi\'c porównanie dwóch tęczówek należy zapewni\'c jednolity rozmiar
+ich obrazów lub reprezentacji. W tym celu obrazy poddawane są procesowi normalizacji.
+
+Tak jak wcześniej zostało wspomniane, pierwszym, pionierskim systemem rozpoznawania tęczówki był
+system opracowany przez Johna Daugmana \cite{DaugmanHowIrisRecognitionWorks}. Nie jest to jednak
+jedyna praca traktująca o rozpoznawaniu tęczówki. W swoich pracach alternatywne rozwiązania
+zaproponowali również Wildes \cite{Wildes} oraz Boles \cite{Boles}. W następnym rozdziale opisane
+zostały algorytmy autorstwa Daugmana oraz ich implementacje.
+
+\section{Zastosowania}
+
+Ze względu na dokładnoś\'c działania i koszty związane z wprowadzeniem tego typu systemu
+biometrycznego, zastosowania rozpoznawania tęczówki można znale\'z\'c głównie w systemach
+wymagających największego stopnia bezpieczeństwa.
+
+Jednym z sektorów w którym rozpoznawanie tęczówki znajduje miejsce jest bankowoś\'c. Banki
+przechowują wiele tajnych informacji, które przedstawiane są osobom tylko i wyłącznie
+po wcześniejszej weryfikacji tożsamości. Potencjalne naruszenia bezpieczeństwa mogłyby doprowadzi\'c
+do wycieku danych osobowych czy nawet kradzieży.
+
+Rozpoznawanie tęczówki znajduje również zastosowanie w sektorze zdrowia. Pozwala ono na dokładną
+identyfikację osoby i ustalenie statusu ubezpieczenia, a także prostsze odnalezienie kartoteki
+medycznej. Znalazły one zastosowanie w szpitalach w całym świecie w celu rozwiązania problemu z
+kradzieżami noworodków. Dostęp do sali w której znajduje się dziecko posiadają jedynie doktorzy,
+pielęgniarki oraz matka dziecka.
+
+Jednym z największych sektorów w których stosowane jest rozpoznawanie tęczówki jest kontrola graniczna
+oraz imigracyjna. W wielu krajach postanowiono uży\'c wzoru tęczówki przechowywanego w systemie jako głównego
+zabezpieczenia przed nielegalnym przekroczeniem granicy. Rozwiązania takie zostały zaimplementowane na lotniskach
+w Stanach Zdjednoczonych, Kanadzie, Wielkiej Brytanii czy Holandii.
+
+Jednym z największych zastosowań jest projekt Aadhaar w Indiach, którego celem było wprowadzenie
+unikalnego identyfikatora tożsamości dla obywateli Indii. Zgodnie ze stroną zawierającą statystyki na
+temat tego projektu (zasób \ref{web:aadhaar}), liczba wygenerowanych identyfikatorów wynosi 1 224 576 859.
+Identyfikator ten bazowany jest na danych
+osobistych oraz danych biometrycznych - między innymi wzorze tęczówki. Celem projektu jest zebranie
+informacji, w tym wzorów tęczówki, wszystkich obywateli Indii \cite{DaugmanIndia}. Projekt powstał w
+celu poprawy systemu przydzielania świadczeń socjalnych i innych programów pomocy przez redukcję oszustw.
+Podobne programy mające na celu stworzenie krajowego identyfikatora zawierającego dane biometryczne
+zostały rozpoczęte przez Indonezję oraz Singapur \cite{DaugmanApplications}.
+
+ \chapter{Opis technologii i aplikacji}
+
+Częśc wymagań wobec tej pracy dotyczyła nie tylko algorytmów i procesu rozpoznawania
+tęczówki, ale także sposobu w jaki aplikacja została stworzona i w jaki sposób jest
+ona użytkowana. Aplikacja miała by\'c przyjazna dla użytkowników i umożliwia\'c działanie
+w trybie krokowym. Miała pozwala\'c również na proste rozszerzanie jej o kolejne
+metody. Wymagania te w duży sposób wpłynęły na wybór technologii użytych w tej pracy,
+które opisane zostaną w dalszej części tego rozdziału.
+
+\section{Użyte technologie}
+
+Ponieważ praca jest ściśle związana z przetwarzaniem obrazu, w tym wypadku obrazu oka
+w celu analizy tęczówki, zdecydowano się na użycie biblioteki OpenCV. Upraszcza ona pracę
+z obrazem oraz operacje na nim w znacznym stopniu, a także dostarcza wiele gotowych
+funkcji, które zwiększają tempo tworzenia eplikacji.\newline
+
+Dużą wagę w pracy należało poświęci\'c części klienckiej, w celu stworzenia przejrzystego i
+przyjaznego interfejsu użytkownika. Wiele aplikacji zaniedbuje ten aspekt, w wyniku czego
+użytkownicy często gubią się w trakcie korzystania z aplikacji. Problem ten najczęściej próbuje
+się maskowa\'c przygotowaniem rozległej dokumentacji aplikacji i jej widoków, co nie poprawia
+w żaden sposób jakości korzystania z niej. Problemy te prowadzą do zniechęcenia i gorszej jakości
+doświadczenia użytkownika, co końcowo prowadzi do zaprzestania korzystania z aplikacji. Aby
+unikną\'c tych problemów postanowiono wykorzysta\'c technologie pozwalające na tworzenie
+zachęcających i interaktywnych interfejsów. Najlepiej w tym obszarze sprawdzają się technologie
+internetowe takie jak HTML (HyperText Markup Language), CSS (Cascading Style Sheets) oraz JS
+(JavaScript).
+
+Technologie te nie dają bezpośredniej możliwości użycia w nich bilbioteki OpenCV, nastomiast
+możliwe jest stworzenie dodatkowej warstwy, która wykonywałaby przetwarzanie obrazu z
+użyciem OpenCV, a następnie komunikowałaby się z interfejsem i przekazywała do niego
+wymagane dane. W związku z tym w pracy postanowiono uży\'c języka Python, który dostarcza wielu
+rozwiązań umożliwiających taką komunikację.\newline
+
+Zaprojektowanie aplikacji w ten sposób pozwala na rozdzielenie jej na warstwę prezentacyjną
+oraz warstwę logiki aplikacyjnej, co jest zgodne z dobrymi praktykami tworzenia oprogramowania.
+Pozwala to również na uniezależnienie tych warstw od siebie, dzięki czemu możliwe
+byłoby stworzenie wielu interfejsów korzystających z tego samego procesu przetwarzania obrazu.
+
+\subsection{Warstwa logiki aplikacji}
+
+Tak jak wcześniej wspomniano jako główny język programowania odpowiedzialny za warstwę logiki
+aplikacji, przetwarzanie obrazu oraz komunikację z interfejsem użytkownika wybrany został język
+Python w parze z biblioteką OpenCV.
+
+Tworzenie aplikacji internetowych z wykorzystaniem języka Python bez żadnej dodatkowej
+biblioteki byłoby zadaniem żmudnym oraz nie dostarczajacym żadnej dodatkowej wartości. W związaku
+z tym zdecydowano się na użycie biblioteki \textbf{Flask}, która dostarcza gotowych rozwiązań
+w świecie aplikacji internetowych, upraszcza projetkowanie systemu oraz dostarcza prosty w obsłudze
+sposób na komunikację z interfejsem użytkownika. Dodatkowo razem z biblioteką dostarczany jest
+deweloperski serwer WWW, dzięki czemu nie trzeba instalowa\'c i konfigurowa\'c żadnych innych zależności.
+\newline
+
+Najpopularniejszym sposobem komunikacji między serwerem a interfejsem użytkownika jest zaprojektowanie
+interfejsu programistycznego wykorzystującego protokół HTTP w architekturze REST (Representational State Transfer).
+Jego zadaniem jest zapewnienie aplikacji klienckiej zestawu usług wykonujących ściśle określone
+operacje zależne od użytej metody protokołu HTTP. REST zakłada, że każda z takich usług jest bezstanowa, a wynik jej działania jest w całości
+oparty o dane przychodzące wraz z zapytaniem. Każda z usług ma swój unikalny identyfikator w postaci
+adresu URL (Uniform Resource Locator) pod który aplikacja kliencka może wysyła\'c zapytania.
+
+Korzystanie z architektury REST wymusza dobre praktyki projektowania interfejsów programistycznych
+i jest lubianym wzorcem wśród programistów aplikacji internetowych ze względu na przejrzystoś\'c
+tworzonego kodu oraz poniekąd samodokumentujący się kod.
+W konteście aplikacji tworzonej w ramach niniejszej pracy, zastosowanie architektury REST pozwala
+na rozbicie całego procesu rozpoznawania tęczówki na mniejsze kroki odpowiadające poszczególnym
+etapom procesu lub nawet poszczególnym algorytmom. Takie rozbicie można uzyska\'c przez zdefiniowanie
+osobnej usługi dla każdego z zaimplementowanych algorytmów. Takie rozwiązanie zapewnia prostą skalowalnoś\'c,
+ponieważ dodanie kolejnego algorytmu wymaga jedynie dodania nowej usługi oraz zmiany adresu pod który
+wysyłane jest zapytanie.
+
+Biorąc pod uwagę te zalety w pracy zdecydowano
+się na użycie \textbf{Flask-RESTful}, które jest rozszerzeniem dla biblioteki Flask. Dostarcza
+ono szereg metod i uproszczeń w tworzeniu interfejsów w architekturze REST.\newline
+
+Oprócz wyżej wymienionych bibliotek należy zainstalowa\'c również wszelkie ich zależności, takie jak
+przykładowo biblioteka \textbf{Numpy} w przypadku OpenCV. Wraz z rozwojem aplikacji iloś\'c użytych
+bibliotek i zależności będzie tylko rosną\'c, co w dłuższym czasie spowoduje problemy z utrzymaniem
+informacji o tym jakie biblioteki i które ich wersje są wymagane do uruchomienia aplikacji. Często
+informacje te przechowywane są w postaci pliku tekstowego w katalogu projektu, jednak rozwiązanie to
+jest mało odporne na błąd ludzki, ponieważ nie trudno zapomnie\'c o aktualizacji takiego pliku.
+
+Dodatkowo pracując jednocześnie przy kilku projektach w języku Python może okaza\'c się, że kilka z
+nich wymaga dokładnie tej samej biblioteki, ale w różnych wersjach. Problem ten można rozwiąza\'c
+używając wirtualnych środowisk. Są to środowiska Pythona, które są odizolowane i niezależne od głównej
+instalacji Pythona. W rzeczywistości są to osobne foldery, w których instalowana jest odpowiednia wersja
+Pythona oraz wymagane biblioteki w odpowiednich wersjach.
+
+W celu rozwiązania tych problemów w pracy zdecydowano się na użycie narzędzia \textbf{Pipenv}.
+Umożliwia ono automatyczną generację writualnego środowiska wewnątrz projektu oraz automatyczne
+śledzenie zależności projektu i ich wersji. Informacje te przechowywane są w dwóch plikach
+\textit{Pipfile} oraz \textit{Pipfile.lock}, które są generowane, czytane oraz utrzymywane automatycznie.
+Poniżej przestawiono podstawowe komendy narzędzia Pipenv:
+
+\begin{description}
+  \item[pipenv install] - uruchomienie w katalogu projektu inicjalizuje środowisko wirtualne oraz pliki
+  \textit{Pipfile} i \textit{Pipfile.lock}
+
+  \item[pipenv install <packageName>] - instaluje paczkę wewnątrz środowiska wirtualnego
+
+  \item[pipenv shell] - uruchamia powłokę w której dostępny jest python oraz biblioteki zainstalowane
+  w środowisku wirutalnym
+\end{description}
+
+\subsection{Warstwa prezentacyjna}
+
+Tak jak wcześniej wspomniano, aplikacja kliencka napisana została z wykorzystaniem technologii
+internetowych takich jak HTML, CSS oraz JS. Aplikacje korzystające z tych technologii historycznie
+zwykle używane były wewnątrz przeglądarek. W ostatnich czasach technologie internetowe zyskują
+coraz większą popularnoś\'c, co przełożyło się również na rozwój dostępnych bibliotek oraz zwiększenie
+zasięgu problemów rozwiązywanych tymi technologiami.
+
+Obecnie aplikacje internetowe mogą przyjmowa\'c nie tylko posta\'c stron internetowych, ale także
+zwyczajnych, wieloplatformowych aplikacji desktopowych dzięki takim narzędziom jak użyty w niniejszej
+pracy \textbf{Electron}. Jest to biblioteka, która używa NodeJS oraz Chromium do stworzenia jednolitego
+środowiska uruchomieniowego. Dzięki takiemu połączeniu możliwe jest wygenerowanie okna aplikacji, które
+w rzeczywistości jest procesem Chromium przedstawiającym konkretną stronę internetową. Dodatkowo wykorzystanie
+NodeJS pozwala na dostęp oraz modyfikację systemu plików użytkownika aplikacji, dzięki czemu możliwe jest przetwarzanie,
+usuwanie i modyfikowanie plików bez potrzeby przesyłania ich na jakikolwiek serwer. Jest to nieosiągalne
+przy użyciu przeglądarkowej implementacji języka JavaScript.\newline
+
+Tworzenie aplikacji korzystając z podstawowych możliwości HTML, CSS oraz JS zapewne zajęłoby
+bardzo dużo czasu, dlatego w świecie technologii internetowych powstaje wiele bibliotek
+ułatwiających tworzenie skomplikowanych i interaktywnych aplikacji. Jedną z nich jest
+\textbf{React}, który został użyty w tej pracy. Jest to biblioteka JavaScript umożliwiająca
+tworzenie interfejsów użytkownika. Każdy interfejs można podzieli\'c na poszczególne bloki
+odpowiadające za pewną funkcjonalnoś\'c np. wyświetlenie obrazu, zebranie danych od użytkownika,
+czy przełączenie między dwoma widokami. Bloki te nazywa się komponentami i mogą by\'c one wykorzystywane
+wielokrotnie w różnych miejscach aplikacji. Tworzenie reużywalnych komponentów jest podstawą
+biblioteki React, co sprawia, że jest ona idealnym kandydatem do zbudowania interfejsu aplikacji
+niniejszej pracy.\newline
+
+Komponenty powinny by\'c w miarę możliwości od siebie niezależne, a ich implementacja powinna
+dokonywa\'c jedynie operacji wymaganych właśnie przez ten komponent. Każdy z komponentów cechuje
+pojęcie stanu - informacji opisujących stan komponentu w danym momencie. W momencie, gdy komponent
+nie jest wyświetlany, jest on niszczony, a wraz z nim jego stan, co pozwala na zwolnienie
+zajętej pamięci. Istnieją natomiast informacje, które są ważne dla działania całej aplikacji, z których
+korzysta wiele różnych komponentów w celu wyświetlenia danych, w związku z czym muszą by\'c przechowywane
+przez cały cykl życia aplikacji. Dokładnie taki przypadek można zaobserwowa\'c w niniejszej pracy, np.
+informacje o segmentacji obrazu tęczówki potrzebne będą nie tylko w celu wyświetlenia tych danych,
+ale także w celu wykorzystania ich w kolejnych etapach procesu przetwarzania. Do przechowywania danych
+poza komponentami użyta została biblioteka \textbf{Redux}.
+
+Jednym z wymogów postawionych przed aplikacją jest działanie w dwóch trybach: krokowym oraz wsadowym.
+Każdy z tych trybów składa się z kilku kroków, np. tryb krokowy składa się z następujących kroków:
+
+\begin{itemize}
+  \item wybór przetwarzanego obrazu,
+  \item przetwarzanie wstępne,
+  \item segmentacja,
+  \item normalizacja,
+  \item kodowanie,
+  \item wybór obrazów do procesu dopasowania,
+  \item dopasowanie,
+  \item prezentacja wyników.
+\end{itemize}
+
+Dla każdego z tych nich konieczne będzie stworzenie osobnego widoku, ponieważ każdy z nich będzie składał
+się z odmiennych elementów. W aplikacji złożonej z tak wielu widoków prosto o problemy związane z przejściami między nimi,
+które mogą skutkowa\'c nieprzewidywalnymi błędami, np. załadowanie widoku normalizacji przed widokiem segmentacji
+może skutkowa\'c błędem krytycznym aplikacji. W celu uniknięcia takich błędów interfejs użytkownika można
+opisa\'c w postaci automatu skończonego, w którym stanami są poszczególne widoki, a zmiana widoku definiowana
+jest przez odpowiednie przejścia. Zapewnia to przewidywalnoś\'c działania systemu i uodparnia go na
+błedy podobne do tych wspomnianych wcześniej. W celu opisu interfejsu aplikacji za pomocą automatu skończonego
+wykorzystana została biblioteka \textbf{xState}.\newline
+
+Częś\'c komponentów, która tworzy aplikację jest bardzo uniwersalna i powszechna w wielu innych zastosowaniach.
+Są to komponentu typu \textit{przycisk, link, lista elementów, tabela, ikona}. W związku z ich powszechnością
+powstało wiele bibliotek gotowych komponentów, dzięki czemu tworząc aplikację można skupi\'c się na logice
+biznesowej stojącej za aplikacją, zamiast na nowo implementowa\'c przykładowo działanie przycisku. Większoś\'c
+z tych bibliotek dodatkowo zapewnia podstawowe style, dzięki czemu aplikacje tworzone z ich wykorzystaniem
+wymagają mniejszego nakładu pracy, by aplikacja wyglądała zachęcająco. Aby zmniejszy\'c potrzebny nakład
+pracy do wytworzenia interfejsu użytkownika, w pracy użyta została biblioteka komponentów \textbf{Ant Design}.
+\newline
+
+Podobnie jak w przypadku Pythona, iloś\'c bibliotek i narzędzi używanych w ramach aplikacji jest bardzo duża,
+a manualne utrzymywanie informacji o nich oraz ich wersjach byłoby niemożliwe. W związku z tym wykorzystany
+został menadżer pakietów \textbf{Yarn} umożliwiający prostą instalację bibliotek i narzędzi, który automatycznie
+zapisuje zainstalowane paczki oraz ich wersje jako zależności projektu w plikach \textit{package.json} oraz
+\textit{yarn.lock}. Dzięki korzystaniu z Yarna wszystkie zależności i biblioteki można zainstalowa\'c wywołując
+w folderze zawierającym plik \textit{package.json} komendę \texttt{yarn install}.\newline
+
+\noindent
+W ramach pracy wykorzystane zostały również inne narzędzia, do których wyboru przyczyniła się wyłącznie
+osobista preferencja:
+
+\begin{description}
+  \item[Babel] - kompiler JavaScript, pozwalający na korzystanie z najnowszych oraz testowych funkcjonalności
+  JavaScript przez transformację kodu \'zródłowego w nowszej wersji do kodu wynikowego w starszej wersji.
+  \item[Styled Components] - biblioteka pozwalająca na definiowanie styli CSS dla poszczególnych komponentów
+  w plikach \'zródłowych o rozszerzeniu \textit{*.js}.
+  \item[Webpack] - narzędzie uruchamiające kompilatory kodu \'zródłowego przekształcające go do postaci rozumianej
+  przez przeglądarki oraz łączące wiele plików w pojedyńczy plik wynikowy.
+  \item[Axios] - biblioteka ułatwiająca wysyłanie zapytań do serwera.
+\end{description}
+
+\subsection{Inne technologie}
+
+Podczas pracy nad projektem używany był system kontroli wersji Git. W trakcie programowania
+często zachodzi potrzeba zmiany istniejącego i działającego kodu w celu dodania nowych funkcjonalności.
+Niezapisanie poprzedniej wersji kodu może skutkowa\'c niemożliwością powrotu do wersji przed
+wprowadzeniem zmian, tym samym generując dodatkową pracę wymaganą do naprawienia powstałych
+problemów. System kontroli wersji Git pozwala na zapisanie aktualnego stanu pracy w dowolnym momencie.
+Dzięki temu wprowadzanie zmian w działającym kodzie jest znacznie mniej ryzykowne, ze względu na
+możliwoś\'c powrotu do dowolnej poprzedniej wersji. Korzystając z tego systemu kontroli wersji uzyskujemy
+również dostęp do historii poszczególnych plików, a także możliwoś\'c dodawania komentarzy podczas zapisywania nowych wersji,
+dzięki czemu łatwiej zrozumie\'c co dane zmiany robią i dlaczego zostały wprowadzone.
+
+Dodatkowym atutem jest możliwoś\'c przechowywania całości projektu w zewnętrznym serwisie. Dzięki
+temu w razie awarii sprzętu, na którym tworzony jest projekt, w najgorszym wypadku stracona
+zostanie jedynie częś\'c pracy, a nie jej całoś\'c.
+
+\section{Struktura kodu}
+
+Struktura projektu podzielona została na trzy główne foldery:
+
+\begin{itemize}
+  \item \textbf{/app} - zawiera kod \'zródłowy oraz konfiguracje narzędzi użytych przez aplikację
+  kliencką,
+  \item \textbf{/sever} - zawiera kod \'zródłowy oraz konfigurację narzędzi użytych przez aplikację
+  serwerową dokonującej przetwarzania tęczówki,
+  \item \textbf{/thesis} - zawiera kod \'zródłowy pracy dyplomowej w formacie \textit{*.tex}
+\end{itemize}
+
+Używając takiego podziału, łatwo odnale\'z\'c miejsce odpowiadające za szukaną funkcjonalnoś\'c.
+W głównym folderze projektu znajduje się również plik \textit{README.md}, w którym opisane zostały
+instrukcje dotyczące uruchomienia projektu.
+
+\subsection{Struktura projektu aplikacji klienckiej}
+
+\begin{itemize}
+  \item \textbf{/dist} - zawiera kod wynikowy wygenerowany przez Webpack,
+  \item \textbf{/src/js} - zawiera kod \'zródłowy napisany w JavaScript,
+  \begin{itemize}
+    \item \textbf{actions} - folder dla akcji używanych przez bibliotekę Redux,
+    \item \textbf{api} - folder zawierający funkcje pomocnicze wysyłające zapytania do serwera o odpowiednie algorytmy
+    przetwarzania tęczówki,
+    \item \textbf{components} - folder zawierający komponenty uniwersalne dla całej aplikacji,
+    \item \textbf{constants} - folder zawierający pliki eksportujący stałe używane przez resztę kodu,
+    \item \textbf{helpers} - folder zawierający funkcje pomocnicze,
+    \item \textbf{reducers} - folder w którym definiowane są konsekwencje akcji (Redux)
+    \item \textbf{stateMachine} - folder w którym znajduje się opis interfejsu użytkownika za pomocą
+    maszyny stanów (xState)
+    \item \textbf{store} - folder definiujący scentralizowany stan aplikacji (Redux)
+    \item \textbf{views} - folder zawierający implementacje poszczególnych widoków dla obu trybów działania aplikacji
+  \end{itemize}
+  \item \textbf{/webpack} - zawiera pliki konfiguracyjne Webpacka opisujące sposób przetwarzania kodu \'zródłowego.
+\end{itemize}
+
+\subsection{Struktura projektu aplikacji serwerowej}
+
+\begin{itemize}
+  \item \textbf{/.venv} - folder zawierający wirtualne środowisko projektu wraz z potrzebnymi
+  bibliotekami,
+  \item \textbf{/const} - folder zawierający stałe używane przez resztę kodu,
+  \item \textbf{/processing} - folder zawierający implementacje algorytmów dla poszczególnych etapów
+  procesu,
+  \item \textbf{/resources} - folder zawierający kod definiujący strukturę stworzonego API,
+  kod eksponujący na zewnątrz algorytmy zaimplementowane w folderze \textit{processing},
+  \item \textbf{/temp} - folder tymczasowy zawierający wyniki etapów procesu w postaci zdję\'c,
+  \item \textbf{/utils} - folder zawierający funkcje pomocnicze.
+\end{itemize}
+
+\section{Działanie aplikacji}
+
+W tej części rozdziału przedstawiony zostanie opis interfejsu użytkownika za pomocą
+maszyny stanów, a także opisane zostaną poszczególne widoki aplikacji oraz jej możliwości.
+
+\subsection{Opis interfejsu aplikacji}
+
+\noindent Wszystkie zrzuty ekranu aplikacji, do których odwołuje się poniższy opis można znale\'z\'c w dodatku
+\ref{appendix:appScreenShots} na stronach \pageref{fig:homeScreen} - \pageref{fig:batchSingleEntryResult}. \newline
+
+\vspace{-20pt}
+\paragraph{Tryb krokowy\newline}
+
+Po uruchomieniu aplikacji oczom użytkownika ukazuje się ekran startowy (rysunek \ref{fig:homeScreen}) witający użytkownika
+i proszący go o wybranie jednego z dwóch trybów działania aplikacji.\newline
+
+Wybranie trybu krokowego przenosi użytkownika do kreatora, który przeprowadzi go przez proces
+rozpoznawania tęczówki. Wszystkie kroki kreatora widoczne są w górnej części widoku. Aktywny krok
+jest zawsze oznaczony kolorem niebieskim. Pierwszym krokiem kreatora jest wybranie obrazu, który chcemy
+podda\'c przetwarzaniu (rysunek \ref{fig:processingImageSelectionScreen}). W celu wyboru użytkownik może klikną\'c w wyświetlone pole lub
+przeciągną\'c na nie wybrany obraz. Po lewo od kreatora znajduje się rozwijane menu, które
+pozwala użytkonikowi na przełączenie się w inny tryb lub przejście do ekranu domowego w każdym
+momencie działania aplikacji. Przejście pomiędzy trybami jest równoznaczne z wykasowaniem
+dotychczasowo wybranych informacji w poprzednio aktywnym trybie.
+
+Kliknięcie przycisku ``Next'' spowoduje przejście do kolejnego kroku kreatora. Jeżeli użytkownik
+nie wybrał obrazu, kreator nie przejdzie do następnego kroku i poinformuje użytkownika o konieczności
+wyboru obrazu.\newline
+
+Następnym krokiem kreatora jest przetwarzanie wstępne (rysunek \ref{fig:preprocessingScreen}). Widok ten
+przedstawia użytkownikowi obecny stan wybranego obrazu po lewej stronie oraz formularz pozwalający
+na kontrolowanie metody przetwarzania i jej paramterów po prawej stronie. Pod obrazem dostępny jest
+przycisk ``Save", którego kliknięcie poprosi użytkownika o wybranie miejsca, w którym wyświetlony obraz
+ma zosta\'c zapisany. Kliknięcie przycisku ``Process'' znajdującego się pod formularzem skutkuje
+zaaplikowaniem wybranego algorytmu z wybranymi parametrami. Jeżeli przycisk ``Process'' został wciśnięty
+chociaż jeden raz, to pojawi się przycisk ``Revert last'', którego kliknięcie powoduje cofnięcie się
+do poprzedniego stanu obrazu. Zmiana wybranego algorytmu skutkuje również zmianą dostępnych
+do modyfikacji paramterów (rysunek \ref{fig:preprocessingOtherMethod}).
+
+Na samym dole widoku dostępne są dwa przyciski. Przycisk ``Next'', podobnie
+jak poprzednio, powoduje przejście do następnego kroku kreatora, a przycisk ``Previous'' do poprzedniego
+kroku kreatora. Przejście do poprzedniego kroku kasuje wszelkie zapisane informacje związane z aktualnym
+krokiem. W tym kroku kreatora możliwe jest przejście do kolejnego kroku nie uruchamiając żadnego z
+algorytmów przetwarzania wstępnego.\newline
+
+Kolejne kroki kreatora funkcjonują w bardzo podobny sposób. Różnicą może by\'c iloś\'c wyświetlanych
+obrazów. Jeżeli wymagane jest wyświetlenie informacji o kilku obrazach, to prezentowane są one w formie
+zakładek. Sytuację taką można zaobserwowa\'c w widoku procesu normalizacji (rysunek \ref{fig:normScreen}),
+gdzie możliwy jest podgląd oryginalnego obrazu, maski oraz maski nałożonej na
+zdjęcie zarówno przed i po przeprowadzeniu procesu normalizacji.\newline
+
+Następnie przechodzimy do kodowania, którego widok ma taką samą strukturę, jak widoki przetwarzania
+wstępnego czy normalizacji, ale pozwala na podgląd innych obrazów oraz na wybór innych metod.\newline
+
+Kolejnym krokiem po kodowaniu jest wybór obrazów, do których chcemy spróbowa\'c dopasowa\'c obraz
+wybrany w kroku pierwszym (rysunek \ref{fig:matchingImagesScreen}). W celu wyboru obrazu należy
+uży\'c przycisku znajdującego się w górnej częsci ekranu. Możliwe jest wybranie wielu obrazów na raz.\newline
+
+Po zatwierdzeniu obrazów użytkownik zostaje przeniesiony do widoku dopasowania, gdzie ponownie
+może wybra\'c metodę oraz jej parametry. Kliknięcie przycisku ``Next'' w tym widoku
+uruchamia proces, na który składa się przetworzenie wszystkich wybranych obrazów w dokładnie
+ten sam sposób, co obraz wybrany w kroku pierwszym oraz przeprowadzenie operacji dopasowania.
+Ponieważ przetwarzanie kilku obrazów może potrwa\'c pewien czas, użytkownik przenoszony jest do
+nowego ekranu (rysunek \ref{fig:matchingProcessing}), gdzie wyświetlana jest mu informacja o obecnym
+stanie aplikacji wraz z animowaną ikoną, która zapewnia, że aplikacja nie zacięła się.
+
+W wypadku, gdy przetwarzanie zostanie przerwane z powodu błędu, użytkownik przeniesiony zostanie do ekranu
+dopasowania. Jeżeli natomiast przetwarzanie zakończy się sukcesem, użytkownik przeniesiony zostanie
+do widoku prezentującego wyniki (rysunek \ref{fig:stepResultsScreen}). Pierwszym z elementów tego widoku
+jest przycisk umożliwiający zapisanie konfiguracji użytej do przetworzenia obrazów w postaci pliku
+o rozszerzeniu JSON (JavaScript Object Notation), który może zosta\'c użyty pó\'zniej w trybie
+wsadowym. Plik ten ma następującą strukturę:
+
+\begin{verbatim}
+  {
+    "PREPROCESSING":[
+      {
+        "method":"GAUSS",
+        "methodParams":{
+          "kernelWidth":3,
+          "kernelHeight":3,
+          "sigmaX":0,
+          "sigmaY":0,
+        }
+      }
+    ],
+    "SEGMENTATION":{
+       "segmentationMethod":"Daugman",
+       "noiseMethod":"none"
+    },
+    "NORMALIZATION":{
+       "method":"DAUGMAN",
+       "methodParams":{
+          "width":260,
+          "height":32
+       }
+    },
+    "ENCODING":{
+       "method":"LOG_GABOR",
+       "methodParams":{
+          "minWaveLength":18,
+          "sigmaOnf":0.5
+       }
+    },
+    "MATCHING":{
+       "method":"HAMMING",
+       "methodParams":{
+          "acceptedHammingDist":0.35,
+          "shiftsNumber":8
+       }
+    }
+ }
+\end{verbatim}
+
+Zapisanie konfiguracji procesu do pliku pozwala użytkownikowi na eksperymentację z wartościami poszczególnych
+paramterów w trybie krokowym, a nastepnie przejście do trybu wsadowego, gdzie może przeprowadzi\'c ten proces
+dla większego zbioru obrazów.\newline
+
+Poniżej przycisku zapisującego konfigurację wyświetlane są informacje o wynikach dopasowania
+dla poszczególnych obrazów. Pokazują one podstawowe informacje, tj.: ścieżki do plików,
+miniaturki obrazów oraz wynik dopasowania. Jeżeli użytkownik chce pozna\'c więcej szczegółów, może
+uży\'c przycisku ``See more''. Kliknięcie go powoduje otwarcie nowego okna dialogowego, w którym
+przedstawione zostaje dokładniejsze zestawienie danych (rysunek \ref{fig:stepResultPreview}).
+W lewym górnym rogu prezentowane są informacje o etapie dopasowania. Wyświetlana jest informacja
+o tym czy obrazy przedstawiają tę samą tęczówkę, najmniejsza wartoś\'c obliczonej odległości Hamminga
+oraz informację o tym, w którym przesunięciu znaleziono najlepsze dopasowanie.
+Po prawej stronie widoczny jest przycisk ``Show all values'', którego kliknięcie powoduje
+pojawienie się tabeli zawierającej zestawienie wszystkich obliczonych wartości odległości Hamminga
+(rysunek \ref{fig:stepResultHDTable}).
+
+Pod wynikami procesu dopasowania wyświetlone zostaje zestawienie porównujące w jaki sposób
+proces przebiegał dla obu obrazów, w tym obrazy:
+
+\begin{itemize}
+  \item oryginalne,
+  \item po przetwarzaniu wstępnym,
+  \item po segmentacji wraz z informacjami o współrzędnych i promieniach okręgów tęczówki i \'zrenicy,
+  \item po normalizacji,
+  \item po kodowaniu.
+\end{itemize}
+
+\paragraph{Tryb wsadowy\newline}
+
+W przypadku wybrania trybu wsadowego użytkownik również przenoszony jest do podobnego kreatora,
+jak w przypadku trybu krokowego. Składa się on jednak z odmiennych etapów.\newline
+
+Pierwszym z nich
+jest wybór obrazów, które chcemy przetworzy\'c w ramach procesu (rysunek \ref{fig:batchFiles}).
+Drugi krok jest bardzo podobny do poprzedniego i również prosi użytkownika o wybranie listy obrazów.
+Następny etap oczekuje od użytkownika wskazania pliku konfiguracyjnego definiującego metody oraz
+parametry, jakie mają by\'c użyte w trakcie procesu (rysuenk \ref{fig:batchConfig}).\newline
+
+Kliknięcie
+przycisku ``Next'' w tym kroku powoduje uruchomienie procesu. Polega on na wykonaniu wszystkich etapów
+procesu dla wszystkich obrazów z obu list, a następnie porównaniu każdego obrazu z piewrszej listy
+z każdym obrazem z drugiej listy. W trakcie trwania obliczeń, użytkownikowi ponownie przedstawiwany
+jest widok jak na rysunku \ref{fig:preprocessingScreen}. Zakończenie przetwarzania przenosi użytkownika
+do widoku podglądu wyników (rysunek \ref{fig:batchResults}), który jest podobny do podglądu w trybie krokowym. Tym razem dla każdego
+z obrazów z listy pierwszej wyświetlana jest składana sekcja zawierająca wyniki dla każdego obrazu
+z listy drugiej. Użytkownik ponownie może klikną\'c przycisk ``See more'' w celu uzyskania większej
+liczby informacji, tak samo jak w trybie krokowym.\newpage
+
+\subsection{Opis widoków aplikacji za pomocą grafu}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth,height=\textheight, keepaspectratio]{images/widokiMgr.png}
+    \caption{Diagram widoków i przejś\'c aplikacji.}
+\end{figure}
+ \chapter{Zaimplementowane algorytmy}
+
+Zgodnie z założeniami w niniejszej pracy zaimplementowane zostały rozwiązania dla następujących
+etapów procesu rozpoznawania tęczówki:
+
+\begin{itemize}
+  \item przetwarzanie wstępne,
+  \item normalizacja,
+  \item kodowanie,
+  \item dopasowanie.
+\end{itemize}
+
+\noindent
+Algorytmy segmentacji tęczówki oraz usuwania zakłóceń zostały pominięte, ponieważ były przedmiotem
+innej pracy dyplomowej. W dalszej części rozdziału opisane zostaną zaimplementowane algorytmy
+dla wyżej wymienionych etapów.
+
+\section{Przetwarzanie wstępne}
+
+Odpowiednie przygotowanie obrazu przed rozpoczęciem procesu rozpozanawania jest bardzo ważne. Pozwala
+ono na polepszenie jakości zdjęcia przez usunięcie zakłóceń czy poprawienie kontrastu, co znacznie
+wpływa na jakoś\'c działania całego systemu.\newline
+
+Różne metody segmentacji wymagają odmiennego wstępnego przygotowania obrazu. Często proces przygotowania
+obrazu różni się nawet dla poszczególnych etapów procesu segmentacji, tzn. innych operacji może wymaga\'c
+obraz w trakcie szukania parametrów źrenicy, a jeszcze innego w trakcie szukania parametrów tęczówki.
+Z tego względu przetwarzanie wstępne może byc doś\'c skomplikowane i składac się z wielu różnorodnych
+kroków.
+
+Ponieważ algorytmy segmentacji często polegają na konkretnych operacjach przygotowawczych, których może
+by\'c wiele, umożliwienie użytkownikowi ich parametryzacji bardzo skomplikowałoby interfejs aplikacji
+i znacznie pogorszyło by jego czytelnoś\'c, jednocześnie dając użytkownikowi niewiele pola do manipulacji
+tą częścią procesu.\newline
+
+Ze względu na zależnoś\'c procesu przygotowania obrazu od wybranego algorytmu segmentacji, implementacja
+przetwarzania wstępnego przeniesiona została do implementacji poszczególnych metod segmentacji,
+a użytkownikowi udostępnione zostały wyłącznie uniwersalne algorytmy takie jak:
+
+\begin{itemize}
+  \item filtr Gaussa,
+  \item filtr medianowy,
+  \item normalizacja histogramu,
+  \item filtr uśredniający.
+\end{itemize}
+
+Implementacje tych alogrytmów wykorzystują podstawowe funkcje z biblioteki OpenCV takie jak:
+\verb|GaussianBlur|, \verb|medianBlur|, \verb|equalizeHist| oraz \verb|filter2D|.
+
+\section{Normalizacja}
+
+Porównywanie tęczówki może by\'c problematyczne, ze względu na potencjalne niezgodności w
+wymiarach obrazu. Najczęstszą przyczyną tych niespójności jest zmiana rozmiaru tęczówki
+będąca wynikiem rozszerzania lub kurczenia się  \'zrenicy oka w zależności od intensywności
+oświetlenia w otoczeniu. Niespójności te mogą wynika\'c również z innych \'zródeł np. różna
+odległoś\'c w trakcie pobierania zdjęcia, różnice w obrocie kamery, inna rotacja oka, czy
+nawet nachylenie głowy w trakcie pobierania zdjęcia \cite{DaugmanHowIrisRecognitionWorks}.\newline
+
+W celu umożliwienia porównania dwóch obrazów, z których każde mogło by\'c zrobione w odmiennych
+warunkach, obraz poddaje się procesowi normalizacji, który ma za zadanie uspójni\'c rozmiary
+tęczówki w systemie.
+
+\noindent
+Ważną informacją dla procesu normalizacji jest także to, że środek \'zrenicy i tęczówki nie
+muszą znajdowa\'c się w tym samym punkcie, co musi by\'c wzięte pod uwagę przy opracowywaniu
+rozwiązania.\newline
+
+W aplikacji zdecydowano się na użycie normalizacji metodą Daugmana \cite{DaugmanHowIrisRecognitionWorks}, która polega na przekształceniu
+obrazu tęczówki z postaci pierścienia do postaci prostokąta przez zmianę układu współrzędnych, w którym
+prezentowane są wartości poszczególnych punktów tęczówki. Zmiana ta polega na przejściu z opisu
+wartości pikseli w kartezjańskim układzie współrzędnych $(x,y)$, do opisu za pomocą pary
+współrzędnych biegunowych $(r, \theta)$, gdzie r jest wartością z przedziału $[0,1]$, a $\theta$ jest kątem
+z przedziału $[0, 2\pi]$.\newline
+
+\begin{figure}[ht]
+  \includegraphics[width=0.8\textwidth]{images/normalization/schemaCenter.png}
+  \centering
+  \caption{Model normalizacji Daugmana \cite{masek}}
+  \label{fig:daugmanDiagram}
+\end{figure}
+
+Wybrany rozmiar prostokąta decyduje o ilości informacji znajdujących się w znormalizowanym obrazie.
+Wiersze w tak uzyskanym prostokącie można interpretowa\'c jako kolejne okręgi na obrazie tęczówki.
+Jak wida\'c na powyższym rysunku \ref{fig:daugmanDiagram}, wybrana wysokoś\'c prostokąta decyduje
+o ilości okręgów - rozdzielczoś\'c promieniowa , a szerokoś\'c prostokąta decyduje o rozdzielczości kątowej.\newline
+
+Przejście ze współrzędnych kartezjańskich $(x,y)$ do współrzędnych biegunowych $(r,\theta)$ opisane zostało
+przez Daugmana \cite{DaugmanHowIrisRecognitionWorks} równaniami \ref{eq:norm}:
+
+\begin{equation}
+  \begin{aligned}
+    &I(x(r,\theta), y(r,\theta)) \rightarrow I(r,\theta),
+    \\
+    \\
+    &x(r,\theta) = (1-r)x_{p}(\theta) + rx_{s}(\theta),
+    \\
+    &y(r,\theta) = (1-r)y_{p}(\theta) + ry_{s}(\theta),
+  \end{aligned}
+  \label{eq:norm}
+\end{equation}
+
+\noindent
+gdzie:\\
+\indent $x_{p}$, $y_{p}$ - współrzędne na okręgu granicznym \'zrenicy wzdłuż kierunku $\theta$,\\
+\indent $x_{s}$, $y_{s}$ - współrzędne na okręgu granicznym tęczówki wzdłuż kierunku $\theta$.\newline
+
+Tak jak wcześniej wspomniano, środki \'zrenicy i tęczówki nie zawsze znajdują się na jednej osi.
+Z tego względu wyznaczając kolejne punkty znormalizowanego obrazu należy uwzględni\'c różną odległoś\'c
+między granicą \'zrenicy a tęczówki w zależności od rozpatrywanego kąta $\theta$, co dobrze zobrazowane
+zostało na rysunku \ref{fig:daugmanDiagramOffCenter}. Niezależnie od tych różnic, wzdłuż każdego kierunku
+$\theta$ wybierana jest stała liczba punktów w taki sposób, aby otrzymany obraz był prostokątem
+o stałych wymiarach.
+
+\begin{figure}[ht]
+  \includegraphics[width=0.8\textwidth]{images/normalization/schemaOffCenter.png}
+  \centering
+  \caption{Model normalizacji Daugmana z uwzględnieniem przesunięcia między środkiem tęczówki i \'zrenicy \cite{aliasingIris}}
+  \label{fig:daugmanDiagramOffCenter}
+\end{figure}
+
+Uwzględnienie przesunięcia między środkami polega na wyznaczeniu wartości odległości między granicami
+\'zrenicy i tęczówki dla każdego rozpatrywanego kąta \cite{masek} zgodnie z równaniami \ref{eq:normRemap}.
+
+\begin{equation}
+  \begin{aligned}
+    &r^{\prime} = \sqrt{\alpha}\beta \pm \sqrt{\alpha\beta^{2} - \alpha - r_{I}^{2}},
+    \\
+    \\
+    &\alpha = o_{x}^{2} + o_{y}^{2},
+    \\
+    &\beta = \cos \left( \pi - \arctan \left( \frac{o_{y}}{o_{x}} \right) - \theta \right).
+  \end{aligned}
+  \label{eq:normRemap}
+\end{equation}
+
+\noindent
+gdzie:\\
+\indent $o_{x}, o_{y}$ - różnica położeń między środkiem \'zrenicy i tęczówki,\\
+\indent $r^{\prime}$ - odległoś\'c między granicą \'zrenicy, a granicą tęczówki pod kątem $\theta$,\\
+\indent $r_{I}$ - promień tęczówki\newline
+
+Jeżeli w procesie segmentacji wygenerowana została dodatkowo maska zawierająca informacje o
+zakłoceniach znajdujących się w obrębie tęczówki, takich jak powieki, czy rzęsy, wygenerowaną
+maskę również należy podda\'c procesowi normalizacji, aby umożliwi\'c korzystanie z niej podczas
+porównywania tęczówek. Przykład procesu normalizacji przedstawiony został na rysunku \ref{fig:normalizationExample}.
+
+\begin{figure}[ht]
+  \centering
+  \begin{subfigure}[b]{0.35\textwidth}
+    \includegraphics[width=\textwidth]{images/normalization/original.png}
+    \caption{Obraz oryginalny}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.35\textwidth}
+    \includegraphics[width=\textwidth]{images/normalization/mask.png}
+    \caption{Maska zakłóceń}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.35\textwidth}
+    \includegraphics[width=\textwidth]{images/normalization/irisNormalized.png}
+    \caption{Tęczówka po normalizacji}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.35\textwidth}
+    \includegraphics[width=\textwidth]{images/normalization/maskNormalized.png}
+    \caption{Maska zakłóceń po normalizacji}
+  \end{subfigure}
+  \caption{Przykład normalizacji metodą Daugmana}
+  \label{fig:normalizationExample}
+\end{figure}
+
+Takie rozwiązanie zapewnia odpornoś\'c na rozszerzanie i kurczenie się \'zrenicy, niewspółosiowoś\'c
+okręgów tęczówki i \'zrenicy a także różnicę położenia ich między różnymi obrazami. Metoda ta nie
+kompensuje jednak różnic rotacji tęczówki. Kompensacja ta jest natomiast zapewniana w procesie
+dopasowywania obrazów, który opisany został w pó\'zniejszej części tego rozdziału.
+
+\section{Kodowanie}
+
+Kodowanie tęczówki można rozumie\'c jako opis jej cech.
+Dobry algorytm ekstrakcji cech sprawi, że wynik miary dopasowania dla obrazów tej samej tęczówki
+będzie znajdował się w innym przedziale niż podczas porównywania obrazów dwóch
+różnych tęczówek. Dzięki temu w końcowym etapie procesu rozpoznawania możliwe jest podjęcie decyzji
+o rozpoznaniu bąd\'z nierozpoznaniu tęczówki.
+
+Aby zapewni\'c dobrą jakoś\'c identyfikacji tęczówki, proces kodowania powinien wyciąga\'c
+z obrazu tylko najważniejsze i najbardziej rozróżnialne jego cechy.
+Oppenheim i Lim \cite{OppenheimLim} pokazali w swojej pracy, że najważniejsze
+cechy obrazu niesie ze sobą widmo fazowe. Widmo amplitudowe zawiera
+informacje o mniej indywidualnych cechach, a także jest zależne od czynników zewnętrznych takich
+jak kontrast czy oświetlenie. Z tego względu podczas kodowania tęczówki wykorzystane
+powinno by\'c właśnie widmo fazowe obrazu. W celu jego uzyskania należy przenieś\'c znormalizowany
+obraz z dziedziny przestrzennej do dziedziny częstotliwości.\newline
+
+Daugman \cite{DaugmanHowIrisRecognitionWorks} w swojej pracy zaproponował użycie w tym celu
+filtrów Gabora, dzięki którym można uzyska\'c połączoną reprezentację obrazu w przestrzeni
+oraz częstotliwości. Filtry te powstają w wyniku modulacji sinusoidy oraz cosinusoidy za pomocą
+funkcji Gaussowskiej.
+Częstotliwoś\'c środkowa filtru wyznaczana jest przez częstotliwoś\'c sinusoidy, natomiast
+przepustowoś\'c filtru określana jest przez szerokoś\'c wykorzystanej funkcji Gaussowskiej.
+
+Jedną z wad filtrów Gabora jest występowanie niezerowej składowej stałej dla przepustowości
+większej niż jedna oktawa \cite{FieldGaborOctave}. Zerową składową stałą dla każdej przepustowości
+można natomiast otrzyma\'c przez zastosowanie filtru, którego charakterystyka częstotliwościowa
+ma rozkład Gaussowski nie w skali liniowej, a w skali logarytmicznej. Charakterystyka
+częstotliwościowa takiego filtru jest opisana równaniem \ref{eq:logGabor}:
+
+\begin{equation}
+  \mathit{G(f)} = \exp\left(
+  \frac{
+    -\left( \log\left( f / f_{0}\right)\right)^{2}
+  }{
+    2\left(\log\left( \sigma / f_{0}\right)\right)^{2}
+  }
+  \right),
+  \label{eq:logGabor}
+\end{equation}
+
+\noindent
+gdzie:\\
+\indent $f_{0}$ - częstotliwoś\'c środkowa filtra,\\
+\indent $\sigma$ - przepustowoś\'c filtra.\newline
+
+W celu zakodowania cech charakterystycznych tęczówki, dla każdego wiersza obrazu znormalizowanego (odpowiadającemu pojedyńczemu
+okręgowi tęczówki) obliczany jest jego splot z falkami Log Gabora. Jeżeli moduł wyniku splotu w danym punkcie
+jest bardzo blisko zera, wówczas informacja fazowa jest nieznacząca, a punkt ten oznaczany jest w
+masce zakłóceń jako bit nieznaczący.
+
+Wynik splotu obrazu z filtrem jest następnie poddawany kwantyzacji \cite{DaugmanHowIrisRecognitionWorks} do czterech wartości odpowiadających
+czterem \'cwiartkom płaszczyzny zespolonej przez sprawdzenie znaku częsci rzeczywistej i urojonej
+uzyskanego wyniku. Proces kwantyzacji przedstawiony jest na rysunku \ref{fig:encodingQuant}. W wyniku
+kwantyzacji znormalizowany obraz tęczówki przekształcany jest do wzoru tęczówki w postaci ciągu bitów.
+Przykładowy proces kodowania przedstawiony został na rysunku \ref{fig:gaborEncoding}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics{images/encoding/quantization.png}
+  \caption{Ilustracja procesu kwantyzacji.}
+  \label{fig:encodingQuant}
+\end{figure}
+
+W celu uzyskania większej ilości informacji o tęczówce możliwe jest zastosowanie kilku filtrów
+Gabora o różnych parametrach. Wówczas obraz poddawany jest splotowi z każdym z takich filtrów, w
+związku z czym powielana jest liczba bitów kodujących każdy punkt tęczówki.
+
+Z każdym punktem na obrazie tęczówki związana jest pojedyńcza wartoś\'c w masce zakłóceń. W wyniku
+procesu kodowania każdy element obrazu jest reprezentowany przez przynajmniej dwie wartości. W związku
+z tym należy zaktualizowa\'c maskę zakłóceń, aby miała ona ten sam rozmiar co otrzymany wzór tęczówki.
+W tym celu każdy bit w masce zakłóceń jest powielany tyle razy, ile wartości reprezentuje pojedyńczy
+punkt we wzorze tęczówki. Przykładowo, jeżeli w procesie kodowania wykorzystany został jeden filtr,
+transformacja przykładowej maski wyglądałaby następująco:
+
+\begin{figure}[ht]
+  \centering
+  $0|1|1|0|0|1 \rightarrow 00|11|11|00|00|11$
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \makebox[\textwidth]{\includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{images/encoding/gabor.png}}
+  \caption{Ilustracja procesu kodowania \cite{masek}.}
+  \label{fig:gaborEncoding}
+\end{figure}
+
+Na rysunku \ref{fig:gaborExample} przestawiony został przykładowy wynik procesu kodowania zaimplementowanego
+w tej pracy.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{images/encoding/norm.png}
+    \caption{Znormalizowany obraz tęczówki}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{images/encoding/normMask.png}
+    \caption{Znormalizowana maska zakłóceń}
+  \end{subfigure}
+  \begin{subfigure}[b]{1\textwidth}
+    \includegraphics[width=\textwidth]{images/encoding/encoded.png}
+    \caption{Wzór tęczówki obrazu znormalizowanego}
+  \end{subfigure}
+  \begin{subfigure}[b]{\textwidth}
+    \includegraphics[width=\textwidth]{images/encoding/encodedMask.png}
+    \caption{Dostosowana maska zakłóceń do nowego rozmiaru}
+  \end{subfigure}
+  \caption{Wyniki przykładowego kodowania za pomocą filtrów Gabora.}
+  \label{fig:gaborExample}
+\end{figure}
+
+\section{Dopasowanie}
+
+W procesie kodowania obraz tęczówki przekształcony zostaje do wzoru tęczówki w postaci ciągu bitowego,
+dzięki czemu porównanie dwóch obrazów tęczówek sprowadza się do porównania dwóch ciągów bitowych.
+Stopień różnicy między dwoma wzorami tęczówki, można określi\'c obliczając odległoś\'c Hamminga. Mówi
+ona o liczbie miejsc, w których dwa słowa bitowe przyjmują różne wartości.
+Ustalając pewien próg wartości odległości Hamminga można podją\'c decyzję, czy dwa dane ciągi
+reprezentują tę samą tęczówkę.
+
+Wyznaczenie progu dla odległości Hamminga zdefiniowanej w ten sposób zależałoby od długości
+porównywanych ciągów bitowych. Aby uniezależni\'c wartoś\'c progu od tej długości, miarę można
+zdefiniowa\'c jako sumę niezgodnych bitów podzieloną przez całkowitą liczbę bitów \ref{eq:basicHD}:
+
+\begin{equation}
+  \mathit{HD} = \frac{1}{N}\sum\limits_{j=1}^{N}X_{j} \oplus Y_{j},
+  \label{eq:basicHD}
+\end{equation}
+
+\noindent
+gdzie:\\
+\indent $X_{j}, Y_{j}$ reprezentują wartości bitów na miejscu $j$ w ciągach odpowiednio $X$ oraz $Y$,\\
+\indent $N$ - długoś\'c ciągów $X$ i $Y$,\\
+\indent $\oplus$ - operator alternatywy rozłącznej.\newline
+
+Warto wspomnie\'c, że dzięki wykorzystaniu operacji alternatywy rozłącznej obliczanie odległości
+Hamminga jest bardzo efektywne czasowo. Dzięki temu obliczanie nawet wielu odległości Hamminga nie powoduje
+nadmiernego wydłużenia czasu trwania procesu rozpoznawania tęczówki.
+
+W trakcie procesu kodowania oprócz wzoru tęczówki tworzony jest także wzór dla maski zakłóceń.
+Zawiera on informacje o tym, które bity we wzorze tęczówki reprezentują tęczówkę i powinny by\'c
+uwzględnione, a które bity reprezentują zakłócenia takie jak powieki, czy rzęsy i nie powinny by\'c
+porównywane w procesie dopasowywania.\\
+Jako że porównywane są dwa obrazy, generowane są również dwie maski zakłóceń i należy uwzględni\'c
+każdą z nich. Ponieważ elementy znaczące w masce zakłóceń oznaczone zostały kolorem białym, co odpowiada
+wartości $1$ w postaci bitowej. Ostateczną maskę dla procesu dopasowania można zdefiniowa\'c jako
+iloczyn logiczny tych dwóch masek - w ten sposób stworzony zostanie jeden ciąg bitowy reprezentujący
+bity znaczące za pomocą wartości $1$ oraz bity nieznaczące za pomocą wartości $0$.
+Równanie \ref{eq:maskedHD} przedstawia definicję odległości Hamminga z uwzględnieniem obu masek zakłóceń:
+
+\begin{equation}
+  \mathit{HD} = \frac{1}{\sum\limits_{j=1}^{N} \left( \mathit{Xm}_{j} \cap \mathit{Ym}_{j} \right) }
+       \sum\limits_{k=1}^{N} \left(X_{k} \oplus Y_{k} \right) \cap \left( \mathit{Xm}_{k} \cap \mathit{Ym}_{k} \right),
+  \label{eq:maskedHD}
+\end{equation}
+
+\noindent
+gdzie:\\
+\indent $X, Y$ - wzory tęczówki,\\
+\indent $\mathit{Xm}, \mathit{Ym}$ - wzory masek zakłóceń dla wzorów tęczówek $X, Y$,\\
+\indent $N$ - długoś\'c wzorów tęczówek i masek zakłóceń,\\
+\indent $\oplus$ - operator alternatywy rozłącznej,\\
+\indent $\cap$ - operator iloczynu logicznego.\newline
+
+Tak jak wcześniej wspomniano, poprzednie procesy w żaden sposób nie uwzględniały możliwości różnic
+w rotacji tęczówki na pobranych obrazach. W celu kompensacji tych niespójności podczas procesu
+dopasowania jeden z wzorów tęczówki poddawany jest przesunięciom bitowym, które odpowiadają rotacji
+tęczówki o kąt zależny od rozdzielczości kątowej wybranej podczas procesu normalizacji. Maska zakłóceń
+odpowiadająca temu wzorowi również poddawana jest tym przesunięciom.
+Jedno przesunięcie w procesie dopasowania odpowiada dwóm przesunięciom bitowym - jednemu w lewo i
+drugiemu w prawo, z których oba wykonywane są względem oryginalnego wzoru tęczówki. Proces ten
+zobrazowany został na rysunku \ref{fig:matchingShifting}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{images/matching/shifting.png}
+  \caption{Schemat przedstawiający pojedyńcze przesunięcie wzoru tęczówki. Przykład ten przedstawia
+  wzór do wygenerowania którego wykorzystany został jeden filtr Gabora \cite{masek}.}
+  \label{fig:matchingShifting}
+\end{figure}
+
+W zależności od tego ile bitów koduje pojedyńczy punkt siatkówki, tyle bitów zmienia swoje miejsca
+w trakcie pojedyńczego przesunięcia. Liczba przesuniętych bitów zależy od liczby filtrów Gabora
+użytych w procesie kodowania, ponieważ każdy z takich filtrów wygeneruje dwa bity reprezentujące
+pojedyńczy punkt siatkówki.
+
+Odległos\'c Hamminga obliczana jest dla każdego z tych przesunię\'c. Decyzja o tym, czy dwa wzory
+reprezentują tę samą tęczówkę podejmowana jest na podstawie najmniejszej uzyskanej wartości,
+która reprezentuje najlepsze dopasowanie dwóch wzorów. Liczba przesunię\'c potrzebna do kompensacji
+niespójności rotacji zależy od tego z jaką dokładnością kątową pobierane są zdjęcia tęczówki.
+ \chapter{Eksperyment}
+
+W końcowym etapie pracy postanowiono przeprowadzi\'c analizę jakościową zaimplementowanego
+systemu. W tym celu posłużono się i obliczono wartości dwóch najpopularniejszych współczynników
+używanych do oceny poprawności działania systemów biometrycznych:
+
+\begin{itemize}
+  \item FAR \textit{(ang. False Acceptance Rate)} - miara prawdopodobieństwa nieprawidłowego zaakceptowania
+  obrazu
+  \item FRR \textit{(ang. False Rejection Rate)} - miara prawdopodobieństwa nieprawidłowego odrzucenia
+  obrazu
+\end{itemize}
+
+W dalszej części tego rozdziału zawarty został opis eksperymentu oraz zasobów użytych do jego
+przeprowadzenia.
+
+\section{Wykorzystane wska\'zniki}
+
+Tak jak wspomniano we wstępie niniejszego rozdziału, do określenia dokładności działania zaimplementowanego
+systemu użyte zostały wska\'zniki FAR oraz FRR. \newline
+
+FAR \textit{(ang. False Acceptance Rate)} definiuje prawdopodobieństwo zaistnienia sytuacji, w której
+osoba nieautoryzowana może zosta\'c nieprawidłowo rozpoznana przez system biometryczny. Zwykle wska\'znik ten
+jest uważany za najważniejszy, ze względu na bezpośrednie opisywanie prawdopodobieństwa narusznia
+bezpieczeństwa systemu. Wska\'znik ten można zdefiniowa\'c w następujący sposób:
+
+\begin{equation}
+  \mathit{FAR} = \frac{N_{\mathit{fa}}}{N_{t}},
+\end{equation}
+
+\noindent
+gdzie:\\
+\indent $\mathit{FAR}$ - False Acceptance Rate,\\
+\indent $N_{\mathit{fa}}$ - liczba nieprawidłowo zaakceptowanych dopasowań,\\
+\indent $N_{t}$ - liczba wszystkich prób dopasowań.\newline
+
+Drugim wska\'znikiem wykorzystywanym do określenia jakości działania systemu jest FRR \textit{(ang. False Rejection Rate)}.
+Mówi on o prawdopodobieństwu nieprawidłowego odrzucenia osoby identyfikowanej. Jest to wska\'znik, który
+nie wskazuje wad w bezpieczeństwie działania systemu, natomiast może definiowa\'c to jak
+szybko będzie dany system działał oraz ilukrotnie potencjalny użytkownik będzie musiał powtórzy\'c
+proces autoryzacji. Wska\'znik ten można zdefiniowa\'c w sposób opisany przez poniższe równianie:
+
+\begin{equation}
+  \mathit{FRR} = \frac{N_{\mathit{fr}}}{N_{t}},
+\end{equation}
+
+\noindent
+gdzie:\\
+\indent $\mathit{FRR}$ - False Rejection Rate,\\
+\indent $N_{\mathit{fr}}$ - liczba nieprawidłowo odrzuconych dopasowań,\\
+\indent $N_{t}$ - liczba wszystkich prób dopasowań.\newline
+
+Za najlepsze rozwiązanie systemu biometrycznego można uzna\'c takie, które jednocześnie zapewnia
+najmniejszą wartoś\'c obu tych współczynników (z naciskiem na FAR). Takie podejście pozwala zachowa\'c balans między bezpieczeństwem
+systemu, a jego użyteczńością. Dodatkowo wyznacza się współczynnik EER \textit{(ang. Equal Error Rate)}, który jest równy
+FAR lub FRR w momencie, gdy oba te wska\'zniki są sobie równe. Pozwala on na jednoznaczne porównanie systemów
+biometrycznych pod względem jakości działania.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.7\textwidth]{images/experiment/FARFRRERR.png}
+  \caption{Balans między współczynnikami FAR oraz FRR.}
+\end{figure}
+
+\section{Opis eksperymentu}
+
+W celu określenia jakości działania zaimplementowanego systemu postanowiono obliczy\'c wartości powyżej opisanych wska\'zników
+przy użyciu różnych wartości parametrów metod poszczególnych etapów przetwarzania. We wszystkich przypadkach zdecydowano
+się na użycie metody segmentacji zaproponowanej przez Daugmana \cite{DaugmanHowIrisRecognitionWorks}, która na podstawie obserwacji
+określona została jako najlepiej działająca z tych dostępnych w aplikacji. Zastosowana została ona w dwóch wariantach:
+bez wykrywania powiek oraz wykrywaniem powiem przy użyciu aproksymacji parabolą. Jako podstawowe wartości parametrów
+metod wykorzystano te zaproponowane w swojej pracy przez Maseka \cite{masek}, który opisał je jako optymalne. Pozostałe
+przypadki w eksperymencie pokazują odchylenia od tych wartości. Poniżej przedstawiono zestawienie parametrów podstawowych:
+
+\begin{itemize}
+  \item normalizacja - rozdzielczoś\'c kątowa równa 240, rozdzielczoś\'c promieniowa równa 32 (odpowiednio szerokoś\'c i wysokoś\'c obrazu)
+  \item kodowanie - częstotliwoś\'c środkowa filtru równa 18 pikseli, przepustowoś\'c $\mathit{\sigma/f}$ wynosząca 0.5,
+  \item dopasowanie - próg odległości Hamminga równy 0.35, liczba przesunię\'c wynosząca 8.
+\end{itemize}
+
+Do przeprowadzenia eksperymentu wykorzystana została baza danych zdję\'c oczu CASIA w wersji pierwszej [zasób: \ref{web:CASIA}].
+Składa się ona z 756 obrazów przedstawiających 108 unikalnych tęczówek. Zdjęcia robione były obu oczom w dwóch
+sesjach. W ramach sesji pierwszej pobieranie były trzy, a w ramach drugiej sesji cztery zdjęcia. Wszystkie z nich
+są w formacie \textit{BMP} i mają rozdzielczoś\'c 320x280 pikseli. Na rysunku poniżej (rysunek \ref{fig:casiaExample})
+przedstawione zostały przykładowe obrazy z tej bazy:\newline
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[b]{\textwidth}
+    \centering
+    \includegraphics[width=0.45\textwidth]{images/experiment/CasiaExampleOneLeft.png}
+    \includegraphics[width=0.45\textwidth]{images/experiment/CasiaExampleOneRight.png}
+  \end{subfigure}
+  \begin{subfigure}[b]{\textwidth}
+    \centering
+    \includegraphics[width=0.45\textwidth]{images/experiment/CasiaExampleTwoLeft.png}
+    \includegraphics[width=0.45\textwidth]{images/experiment/CasiaExampleTwoRight.png}
+  \end{subfigure}
+  \caption{Przykładowe zdjęcia z bazy danych CASIA. Z lewej strony
+  znajduje się obraz pobrany w pierwszej sejsi, a zdrugiej strony obraz pobrany w drugiej sesji.}
+  \label{fig:casiaExample}
+\end{figure}
+
+Ze względu na problemy występujące podczas procesu segmentacji, eksperyment przeprowadzony został dla pierwszych
+300 obrazów znajdujących się w bazie danych odpowiadających 47 unikalnym tęczówkom. W trakcie eksperymentu
+pojawiły się także inne problemy związane z wyznaczaniem powiek, które skutkowały wyznaczeniem maski zakłóceń
+obejmującej cały obszar zdjęcia. W takich wypadkach obrazy nie były poddawane eksperymentowi, a liczba pominiętych
+obrazów uwzględniona została w trakcie obliczania współczynników FAR oraz FRR.
+
+\section{Wyniki eksperymentu}
+
+Tak jak wcześniej wspomniano, w ramach eksperymentu wykorzystano 300 obrazów, które poddano procesowi
+w kilku różnych konfiguracjach. W procesie rozpoznawania porównano każdy obraz z każdym innym, co dało
+łącznie 90000 prób identyfikacji.
+
+W przypadku wykorzystania metody Daugmana wraz z aproksymacją powiek za pomocą paraboli zaobserwowane
+zostały problemy w działaniu algorytmu znajdowania powiek, które skutkowały niepoprawnym generowaniem maski.
+Tych przypadków nie uwzględniano w obliczeniach, w związku z czym łączna liczba prób identyfikacji dla tej
+konfiguracji zmalała do wartości 87023.\newline
+
+\noindent
+Poniżej przedstawione zostały wartości obliczonych współczynników dla domyślnych parametrów
+procesu opisanych w poprzedniej części rozdziału:
+
+\rowcolors{2}{gray!10}{white}
+\begin{table}[ht]
+  \centering
+  \begin{tabular}{c|c|c|c}
+    \rowcolor{gray!20}
+    Metoda segmentacji & Metoda wykrywania powiek & FAR & FRR \\
+    \hline\hline
+    Daugman & Brak & 0.0000 & 0.0094 \\
+    \hline
+    Daugman & Aproksymacja parabolą & 0.0001 & 0.0076 \\
+  \end{tabular}
+  \caption{Porównanie współczynników FAR i FRR dla różnych metod wykrywania powiek.}
+\end{table}
+
+Uzyskane wyniki współczynnika FAR są bardzo bliskie zera z dokładnością do czwartego miejsca
+po przecinku. Wynik ten jest wysoce zadawalający, ponieważ sugeruje to wysoką odpornoś\'c systemu
+na błędną identyfikację użtkownika. Obliczony współczynnik FRR jest wyższy niż FAR i oscyluje
+około wartości 0.008. Biorąc pod uwagę mniejsze znaczenie tego współczynnika dla bezpieczeństwa
+systemu również jest to zadawalający wynik.\newline
+
+\noindent
+W ramach eksperymentu sprawdzono również wartości wska\'zników FAR oraz FRR przy zmianie:
+
+\begin{itemize}
+  \item wartości progu odległości Hamminga w procesie dopasowania,
+  \item liczby przesunię\'c wykonywanych w procesie dopasowania,
+  \item wartości rozdzielczości kątowej i promieniowej w procesie normalizacji,
+  \item wartości parametru $\mathit{\sigma/f}$ filtru Gabora w procesie kodowania.
+\end{itemize}
+
+\noindent
+Poniżej przedstawione zostały zestawienia obliczonych metryk przy zmianie progu decyzyjnego
+w procesie dopasowania:
+
+\begin{itemize}
+  \item bez wykrywania powiek
+
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c}
+      \rowcolor{gray!20}
+      Próg odległości Hamminga & FAR & FRR \\
+      \hline\hline
+      0.25 & 0.0000 & 0.0198 \\
+      \hline
+      0.35 & 0.0000 & 0.0094 \\
+      \hline
+      0.45 & 0.0282 & 0.0004 \\
+      \hline
+      0.5 & 0.9698 & 0.0000 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różnych wartości progowych odległości Hamminga
+    przy braku wykrywania powiek.}
+  \end{table}
+
+  \item z wykrywaniem powiek z użyciem aproksymacji za pomocą paraboli
+
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c}
+      \rowcolor{gray!20}
+      Próg odległości Hamminga & FAR & FRR \\
+      \hline\hline
+      0.25 & 0.0000 & 0.0196 \\
+      \hline
+      0.35 & 0.0002 & 0.0077 \\
+      \hline
+      0.45 & 0.0387 & 0.0003 \\
+      \hline
+      0.5 & 0.9702 & 0.0000 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różnych wartości progowych odległości Hamminga
+    z wykorzystaniem aproksymacji parabolicznej do wykrywania powiek.}
+  \end{table}
+\end{itemize}
+
+Jak wida\'c przypadek w którym nie jest generowana maska dla powiek daje nieznacznie lepsze wyniki
+współczynnika FAR niż konfiguracja uwzględniająca je w masce. Może by\'c to spowodowane niespójnościami
+w procesie wyznaczania paraboli odcinających tęczówkę między obrazami tej samej tęczówki. Odwrotną sytuację
+obserwujemy w przypadku współczynnika FRR - lepsze wyniki uzyskujemy przy uwzględnieniu powiek w procesie.
+Warto zauważy\'c prawie niezauważalną zmianę współczynnika FAR przy zmniejszeniu wartości progu do wartości 0.25.
+W wyniku tej zmiany parametru zauważamy natomiast wzrost współczynnika FRR. Ze względu na dążenie do balansu
+między wartościami tych współczynników, lepszym wyborem jest wartoś\'c 0.35.
+
+Zwiększając wartoś\'c progu decyzyjnego zauważamy drastyczny wzrost współczynnika FAR. Związane jest to ze zbliżaniem
+się do wartości 0.5 progu, dla której obserwujemy praktycznie stuprocentową szansę na nieprawidłowe rozpoznanie.
+Związane jest to z definicją odległości Hamminga oraz reprezentacją tęczówki za pomocą ciągu bitów. W ciągu bitowym
+istnieje 50\% szans, że na danym miejscu wystąpi wartoś\'c 1 lub 0. Ponieważ dla dwóch niezależnych tęczówek
+ich reprezentacja powinna by\'c kompletnie losowa, odległoś\'c Hamminga między nimi będzie wynosi\'c właśnie 0.5.
+Jeżeli między dwoma wzorami występuje natomiast pewna korelacja, wówczas wartoś\'c ta spada.\newline
+
+\noindent
+Poniżej przedstawione zostały zestawienia obliczonych metryk przy zmianie liczby przesunię\'c bitowych
+wzoru tęczówki w procesie dopasowania:
+
+\begin{itemize}
+
+  \item bez wykrywania powiek:
+
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c}
+      \rowcolor{gray!20}
+      Liczba przesunię\'c & FAR & FRR \\
+      \hline\hline
+      1 & 0.0000 & 0.0111 \\
+      \hline
+      3 & 0.0000 & 0.0098 \\
+      \hline
+      8 & 0.0000 & 0.0094 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różej liczby przesunię\'c wzoru tęczówki w procesie dopasowania
+    przy braku wykrywania powiek.}
+  \end{table}
+
+  \item z wykrywaniem powiek z użyciem aproksymacji za pomocą paraboli
+
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c}
+      \rowcolor{gray!20}
+      Liczba przesunię\'c & FAR & FRR \\
+      \hline\hline
+      1 & 0.0000 & 0.0096 \\
+      \hline
+      3 & 0.0001 & 0.0082 \\
+      \hline
+      8 & 0.0002 & 0.0077 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różej liczby przesunię\'c wzoru tęczówki w procesie dopasowania
+    z wykorzystaniem aproksymacji parabolicznej do wykrywania powiek.}
+  \end{table}
+\end{itemize}
+
+Jak wida\'c na powyższych zestawieniach zmiana liczby przesunię\'c w nieznacznym stopniu wpływa
+na wska\'znik FAR, natomiast zwiększanie liczby wykonywanych przesunię\'c bitowych zmniejsza wartoś\'c
+wspólczynnika FRR. Duże znaczenie dla optymalnej liczby przesunię\'c ma jakoś\'c wykonanych zdję\'c tęczówki
+oraz potencjalna rotacja oka w trakcie pobierania zdjęcia.
+
+\noindent
+Poniżej przedstawiono zestawienie metryk przy zmianach rozmiaru obrazu znormalizowanego:
+
+\begin{itemize}
+ \item brak wykrywania powiek:
+
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c|c}
+      \rowcolor{gray!20}
+      Rozdzielczoś\'c kątowa & Rozdzielczoś\'c promieniowa & FAR & FRR \\
+      \hline\hline
+      120 & 16 & 0.0027 & 0.0073 \\
+      \hline
+      240 & 32 & 0.0000 & 0.0094 \\
+      \hline
+      360 & 64 & 0.0000 & 0.0109 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różnych rozmiarów obrazu znormalizowanego
+    przy braku wykrywania powiek.}
+  \end{table}
+
+  \item z wykrywaniem powiek z użyciem aproksymacji za pomocą paraboli
+
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c|c}
+      \rowcolor{gray!20}
+      Rozdzielczoś\'c kątowa & Rozdzielczoś\'c promieniowa & FAR & FRR \\
+      \hline\hline
+      120 & 16 & 0.0035 & 0.0065 \\
+      \hline
+      240 & 32 & 0.0002 & 0.0077 \\
+      \hline
+      360 & 64 & 0.0001 & 0.0091 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różnych rozmiarów obrazu znormalizowanego
+    z wykorzystaniem aproksymacji parabolicznej do wykrywania powiek.}
+  \end{table}
+\end{itemize}
+
+Jak wida\'c najlepszy balans między dwoma współczynnikami przy zmianie rozmiaru obrazu znormalizowanego
+można zauważy\'c dla rozmiaru pośredniego. Wyższa wartoś\'c współczynnika FAR dla mniejszej rozdzielczości
+kątowej może wynika\'c z niewystarczającej ilości informacji zapisanych w znormalizowanym obrazie. Zwiększenie
+rozdzielczości powoduje natomiast wzrost współczynnika FRR, co może by\'c spowodowane nadreprezentacją pewnych
+cech we wzorze tęczówki.\newline
+
+\noindent
+Poniżej przedstawiono zestawienie metryk przy zmianach parametru $\sigma/f$ filtru Gabora używanego
+w procesie kodowania:
+
+\begin{itemize}
+
+  \item brak wykrywania powiek:
+
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c}
+      \rowcolor{gray!20}
+      $\mathit{\sigma/f}$ & FAR & FRR \\
+      \hline\hline
+      0.3 & 0.0003 & 0.0080 \\
+      \hline
+      0.5 & 0.0000 & 0.0094 \\
+      \hline
+      0.75 & 0.0000 & 0.0100 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różnych wartości parametru $\mathit{\sigma/f}$ filtru Gabora
+    przy braku wykrywania powiek.}
+  \end{table}
+
+  \item z wykrywaniem powiek z użyciem aproksymacji za pomocą paraboli
+
+  \rowcolors{2}{gray!10}{white}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c}
+      \rowcolor{gray!20}
+      $\mathit{\sigma/f}$ & FAR & FRR \\
+      \hline\hline
+      0.3 & 0.0009 & 0.0069 \\
+      \hline
+      0.5 & 0.0002 & 0.0077 \\
+      \hline
+      0.75 & 0.0008 & 0.0084 \\
+    \end{tabular}
+    \caption{Porównanie współczynników FAR i FRR dla różnych wartości parametru $\mathit{\sigma/f}$ filtru Gabora
+    z wykorzystaniem aproksymacji parabolicznej do wykrywania powiek.}
+  \end{table}
+\end{itemize}
+
+Niestety z powyższych pomiarów nie można wyciągną\'c jednoznaczych wniosków na temat wpływu tego
+paramteru na wartoś\'c współczynników FAR oraz FRR.
+ \chapter{Podsumowanie i kierunki dalszego rozwoju}
+
+Głównym celem pracy było wytworzenie aplikacji pozwalającej użytkownikowi na przeprowadzenie
+procesu rozpoznawania tęczówki wraz z możliwością kontroli użytych metod oraz paramterów. W pracy
+zaimplementowane zostały algorytmy zaproponowane przez Johna Daugmana \cite{DaugmanHowIrisRecognitionWorks}:
+normalizacja metodą ``Rubber sheet model'', kodowanie z wykorzystaniem jednowymiarowych filtrów
+Gabora oraz dopasowanie z wykorzystaniem odległości Hamminga.\newline
+
+Kolejnym wymaganiem było stworzenie przejrzystego interfejsu użytkownika. W tym celu podzielono
+system na dwie aplikacje - aplikację wykonującą przetwarzanie i obliczenia (napisaną w Pythonie z
+wykorzystaniem biblioteki OpenCV) oraz aplikację kliencką pozwalającą użytkownikowi kontrolowanie
+procesu oraz prezentację wyników (stworzoną w technologiach internetowych).\newline
+
+Stworzenie zaawansowanego interfejsu użytkownika od podstaw oraz zapewnienie komunikacji z aplikacją
+przetwarzającą było dużym wyzwaniem z uwagi na dużą iloś\'c wyprodukowanego kodu oraz potencjalną
+błędogennoś\'c wynikającą z liczności widoków aplikacji. Dodatkowym czynnikiem utrudniającym
+implementajcę systemu była integracja z istniejącymi algorytmami segmentacji.\newline
+
+W końcowym etapie pracy przeprowadzony został eksperyment sprawdzający jakoś\'c działania
+systemu z użyciem różnych wartości parametrów dla poszczególnych metod. Za wartości domyślne
+przyjęte zostały wartości zaproponowane przez Maseka w jego pracy \cite{masek}. Wyniki
+eksperymentu wykazały bardzo dobrą jakoś\'c działania systemu, w tym prawdopodobieństwo
+błędnego zaakceptowania identyfikowanej tęczówki na poziomie 0.0001.\newline
+
+\noindent
+Poniżej przedstawione zostały potencjalne kierunki dalszego rozwoju niniejszej pracy:
+
+\begin{itemize}
+  \item Implementacja kolejnych metod normalizacji, kodowania oraz dopasowania,
+  \item Poprawa jakości oraz szybkości działania algorytmów segmentacji,
+  \item Zapewnienie możliwości kodowania tęczówki za pomocą wielu filtrów Gabora
+  \item Poprawa komunikatów o błędach w aplikacji
+  \item Stworzenie widoku historii operacji dla trybu krokowego
+  \item Adaptacja aplikacji klienckiej i przetwarzającej w celu przeniesienia
+  aplikacji przetwarzającej na system mikroprocesorowy.
+  \item Dodanie integracji z bazą danych
+\end{itemize}
+ 
+
+
+\cleardoublepage\appendix 
+\chapter{Zrzuty ekranu interfejsu użytkownika}
+\label{appendix:appScreenShots}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/app/home.png}
+  \caption{Zrzut ekranu widoku startowego.}
+  \label{fig:homeScreen}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/app/step1.png}
+  \caption{Widok wyboru obrazu poddawanego procesowi.}
+  \label{fig:processingImageSelectionScreen}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.7\textwidth]{images/app/preprocessingOtherMethod.png}
+  \caption{Zmiana dostępnych paramterów po zmianie wybranej metody.}
+  \label{fig:preprocessingOtherMethod}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/app/preprocessing.png}
+  \caption{Widok kroku przetwarzania wstępnego.}
+  \label{fig:preprocessingScreen}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/app/normalization.png}
+  \caption{Zrzut ekranu widoku procesu normalizacji.}
+  \label{fig:normScreen}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/app/matchingImages.png}
+  \caption{Wybór obrazów do których chcemy dopasowa\'c przetwarzany obraz.}
+  \label{fig:matchingImagesScreen}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/app/matchingProgress.png}
+  \caption{Widok podczas przetwarzania obrazów oraz dopasowania.}
+  \label{fig:matchingProcessing}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/app/stepResults.png}
+  \caption{Widok prezentacji wyników przetwarzania.}
+  \label{fig:stepResultsScreen}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/app/resultsPreviewTable.png}
+  \caption{Przedstawienie obliczonych Odległości Hamminga dla wszystkich przesunię\'c.}
+  \label{fig:stepResultHDTable}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/app/resultsPreviewSegmentation.png}
+  \caption{Zestawienie wyników przetwarzania dla konkretnej pary obrazów.}
+  \label{fig:stepResultPreview}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/app/batchProcessing.png}
+  \caption{Wybór listy obrazów do przetwarzania w trybie wsadowym.}
+  \label{fig:batchFiles}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/app/batchConfigSelected.png}
+  \caption{Widok wyboru pliku konfiguracyjnego w trybie wsadowym.}
+  \label{fig:batchConfig}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/app/batchResults.png}
+  \caption{Podgląd wyników procesu w trybie wsadowym.}
+  \label{fig:batchResults}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/app/batchSingleResult.png}
+  \caption{Sekcja prezentująca wyniki procesu dla pojedyńczego obrazu.}
+  \label{fig:batchSingleEntryResult}
+\end{figure}
+ 
+\bibliographystyle{plain}{\raggedright\sloppy\small@misc{masek,
+    author = {Masek, Libor  },
+    title = {Recognition of Human Iris Patterns for Biometric Indetification},
+    year = {2003},
+    howpublished = {The University of Western Australia}
+}
+
+@article{DaugmanHowIrisRecognitionWorks,
+    author = {Daugman, J.},
+    title = {How Iris Recognition Works},
+    journal = {IEEE Trans. Cir. and Sys. for Video Technol.},
+    issue_date = {January 2004},
+    volume = {14},
+    number = {1},
+    month = jan,
+    year = {2004},
+    issn = {1051-8215},
+    pages = {21--30},
+    numpages = {10},
+    doi = {10.1109/TCSVT.2003.818350},
+    acmid = {2323547},
+    publisher = {IEEE Press},
+    address = {Piscataway, NJ, USA},
+}
+
+@INPROCEEDINGS{aliasingIris,
+    author={H. {Proenca} and L. A. {Alexandre}},
+    booktitle={2006 International Conference on Computational Intelligence and Security},
+    title={Iris Recognition: An Analysis of the Aliasing Problem in the Iris Normalization Stage},
+    year={2006},
+    volume={2},
+    number={},
+    pages={1771-1774},
+    keywords={biometrics (access control);eye;feature extraction;image recognition;image sampling;image segmentation;iris recognition;aliasing problem;iris normalization;image capture;iris image segmentation;double dimensionless pseudopolar coordinate system;image sampling;biometrics;Iris recognition;Proposals;Image sampling;Biometrics;Image analysis;Image recognition;Frequency;Image segmentation;Cameras;Informatics;iris normalization;aliasing;iris recognition;biometrics},
+    doi={10.1109/ICCIAS.2006.295366},
+    ISSN={},
+    month={Nov}
+}
+
+@article{FieldGaborOctave,
+    author = {David J. Field},
+    journal = {J. Opt. Soc. Am. A},
+    keywords = {Discrete Fourier transforms; Edge detection; Fourier transforms; Image analysis; Image processing; Visual system},
+    number = {12},
+    pages = {2379--2394},
+    publisher = {OSA},
+    title = {Relations between the statistics of natural images and the response properties of cortical cells},
+    volume = {4},
+    month = {Dec},
+    year = {1987},
+    doi = {10.1364/JOSAA.4.002379},
+    abstract = {The relative efficiency of any particular image-coding scheme should be defined only in relation to the class of images that the code is likely to encounter. To understand the representation of images by the mammalian visual system, it might therefore be useful to consider the statistics of images from the natural environment (i.e., images with trees, rocks, bushes, etc). In this study, various coding schemes are compared in relation to how they represent the information in such natural images. The coefficients of such codes are represented by arrays of mechanisms that respond to local regions of space, spatial frequency, and orientation (Gabor-like transforms). For many classes of image, such codes will not be an efficient means of representing information. However, the results obtained with six natural images suggest that the orientation and the spatial-frequency tuning of mammalian simple cells are well suited for coding the information in such images if the goal of the code is to convert higher-order redundancy (e.g., correlation between the intensities of neighboring pixels) into first-order redundancy (i.e., the response distribution of the coefficients). Such coding produces a relatively high signal-to-noise ratio and permits information to be transmitted with only a subset of the total number of cells. These results support Barlow's theory that the goal of natural vision is to represent the information in the natural environment with minimal redundancy.},
+}
+
+@ARTICLE{OppenheimLim,
+    author={A. V. {Oppenheim} and J. S. {Lim}},
+    journal={Proceedings of the IEEE},
+    title={The importance of phase in signals},
+    year={1981},
+    volume={69},
+    number={5},
+    pages={529-541},
+    keywords={Image reconstruction;Speech;Optical scattering;Fourier transforms;Crystallography;Acoustic scattering;X-ray scattering;X-ray diffraction;Prognostics and health management;Optical recording},
+    doi={10.1109/PROC.1981.12022},
+    ISSN={},
+    month={May}
+}
+
+@Inbook{Misztal2012,
+author="Misztal, Krzysztof
+and Saeed, Emil
+and Tabor, Jacek
+and Saeed, Khalid",
+editor="Saeed, Khalid
+and Nagashima, Tomomasa",
+title="Iris Pattern Recognition with a New Mathematical Model to Its Rotation Detection",
+bookTitle="Biometrics and Kansei Engineering",
+year="2012",
+publisher="Springer New York",
+address="New York, NY",
+pages="43--65",
+abstract="The work deals with the iris pattern recognition as one of the most popular automated biometric ways of individual identification. It is based on the acquired eye images in which we localize the region of interest -- the iris. This extremely data-rich biometric identifier is stable throughout human life and well protected as internal part of the eye. Moreover, it is genetic independent, so that we can use it to identify or verify people among huge population. This chapter will present the human vision nature focusing on defects and diseases that change the surface information of the iris. Also will be shown the main stream and the historical background of mathematical research resulting in a new algorithm for automatic iris feature extraction. A special attention is paid to the method developed to detect the iris rotation for accurate success rate under different destructive problems and environmental conditions. The obtained results after using the new mathematical model have proved the algorithm high success rate in iris pattern recognition.",
+isbn="978-1-4614-5608-7",
+doi="10.1007/978-1-4614-5608-7_3",
+}
+
+@misc{FBIGov,
+  author={National Science and Technology Council},
+  title={Iris Recognition},
+  note={ Dostępne pod adresem: \url{https://www.fbi.gov/file-repository/about-us-cjis-fingerprints_biometrics-biometric-center-of-excellences-iris-recognition.pdf/view}  [dostęp: 25 września 2019r.]}
+}
+
+@ARTICLE{IntroToBiometricRecognition,
+author={A. K. {Jain} and A. {Ross} and S. {Prabhakar}},
+journal={IEEE Transactions on Circuits and Systems for Video Technology},
+title={An introduction to biometric recognition},
+year={2004},
+volume={14},
+number={1},
+pages={4-20},
+keywords={biometrics (access control);data privacy;authorisation;telecommunication security;fingerprint identification;handwriting recognition;face recognition;speaker recognition;gesture recognition;biometric recognition;personal recognition schemes;legitimate user;secure access;biometrics;physiological characteristics;behavioral characteristics;privacy concerns;face recognition;fingerprint recognition;gait recognition;signature recognition;voice recognition;Biometrics;Character recognition;Fingerprint recognition;Robustness;Privacy;Humans;Law enforcement;Databases;Computer science;Pattern recognition},
+doi={10.1109/TCSVT.2003.818349},
+ISSN={},
+month={Jan},}
+
+@article{Czajka,
+author = {Czajka, Adam and Pacut, Andrzej},
+year = {2002},
+month = {01},
+pages = {5-18},
+title = {Biometria tęczówki oka},
+volume = {1/2002},
+journal = {Techniki Komputerowe, Biuletyn Informacyjny Instytutu Maszyn Matematycznych}
+}
+
+@misc{IrisRecognitionPresentation,
+  author={Eduard Bakštein},
+  title={Iris Recognition},
+  url={https://cw.fel.cvut.cz/old/_media/courses/a6m33bio/iris_1-4-2016.pdf},
+  note={Prezentacja. Dostępne pod adresem \url{https://cw.fel.cvut.cz/old/_media/courses/a6m33bio/iris_1-4-2016.pdf} [dostęp: 25 września 2019r.]}
+}
+
+@ARTICLE{Wildes,
+author={R. P. {Wildes}},
+journal={Proceedings of the IEEE},
+title={Iris recognition: an emerging biometric technology},
+year={1997},
+volume={85},
+number={9},
+pages={1348-1363},
+keywords={computer vision;biometrics (access control);pattern recognition;object recognition;eye;biometric technology;iris recognition;personal identification;noninvasive biometric assessment;machine vision;pattern recognition;object recognition;Iris recognition;Biometrics;Humans;Fingerprint recognition;Machine vision;Face recognition;Blood vessels;Shape;Face detection;Waveguide discontinuities},
+doi={10.1109/5.628669},
+ISSN={},
+month={Sep.},}
+
+@ARTICLE{Boles,
+author={W. W. {Boles} and B. {Boashash}},
+journal={IEEE Transactions on Signal Processing},
+title={A human identification technique using images of the iris and wavelet transform},
+year={1998},
+volume={46},
+number={4},
+pages={1185-1188},
+keywords={image recognition;eye;identification;wavelet transforms;image resolution;biometrics (access control);image representation;feature extraction;image matching;human identification technique;wavelet transform;human eye;iris recognition;resolution levels;concentric circles;one-dimensional signals;1D signals;model features;dissimilarity functions;computer vision-based techniques;zero-crossings;matching algorithm;iris patterns representation;Humans;Wavelet transforms;Data mining;Image recognition;Eyes;Signal resolution;Iris recognition;Feature extraction;Waveguide discontinuities;Lighting},
+doi={10.1109/78.668573},
+ISSN={},
+month={April},}
+
+@inproceedings{DaugmanIndia,
+  title={600 million citizens of India are now enrolled with biometric ID},
+  author={John Daugman},
+  year={2014}
+}
+
+@misc{DaugmanApplications,
+  author={John Daugman},
+  title={Major International Deployments of the Iris Recognition Algorithms: 1.5 Billion Persons},
+  note={Dostępne pod adresem: \url{https://www.cl.cam.ac.uk/~jgd1000/national-ID-deployments.html} [dostęp: 25 września 2019r.]}
+}
+
+ }
+
+\chapter*{Zasoby internetowe}\label{sect:web-resources}\phantomsection\addcontentsline{toc}{chapter}{Zasoby internetowe}
+
+\newcommand{\tturl}{\begingroup \urlstyle{tt}\Url}
+
+{\small
+\begin{enumerate}[{[}A{]}]
+	\item \label{doc:openCv} Dokumentacja OpenCV. \\
+    \tturl{https://docs.opencv.org}
+
+	\item \label{doc:python} Dokumentacja Python. \\
+    \tturl{https://docs.python.org/3/}
+
+	\item \label{doc:flask} Dokumentacja Flask. \\
+  \tturl{https://python101.readthedocs.io/pl/latest/webflask/}
+
+	\item \label{doc:pipenv} Dokumentacja Pipenv. \\
+  \tturl{https://docs.pipenv.org}
+
+	\item \label{tut:pipenv} Pipenv - zarządzanie zależnościami i środowiskami wirtualnymi w Pythonie. \\
+  \tturl{https://pymaniac.pl/python/pipenv/}
+
+	\item \label{doc:react} Dokumentacja React. \\
+  \tturl{https://pl.reactjs.org/docs/getting-started.html}
+
+	\item \label{doc:redux} Dokumentacja Redux. \\
+  \tturl{https://redux.js.org/}
+
+	\item \label{doc:xstate} Dokumentacja xState. \\
+  \tturl{https://xstate.js.org/docs/}
+
+	\item \label{doc:electron} Dokumentacja Electron. \\
+  \tturl{https://electronjs.org/}
+
+	\item \label{doc:antdesign} Dokumentacja Ant Design. \\
+  \tturl{https://ant.design/}
+
+	\item \label{web:CASIA} CASIA Database. \\
+  \tturl{http://biometrics.idealtest.org/dbDetailForUser.do?id=1}
+
+	\item \label{web:CASIA} Formatka LaTeX. \\
+  \tturl{https://github.com/politechnika/put-latex}
+
+  \item \label{web:masekImplementation} Implementacja algorytmów według Maseka. \\
+  \tturl{https://github.com/carandraug/PeterKovesiImage}
+
+  \item \label{web:gaborImpl} Przykład implementacji kodowania za pomocą filtrów Gabora. (Licencja MIT). \\
+  \tturl{https://github.com/thuyngch/Iris-Recognition}
+
+  \item \label{web:aadhaar} Statystyki projektu Aadhaar
+  \tturl{https://uidai.gov.in/aadhaar_dashboard}
+
+\end{enumerate}
+}
+ 
+\newpage
+\thispagestyle{empty}
+\listoffigures
+\vfill\cleardoublepage
+
+\newpage
+\thispagestyle{empty}
+\listoftables
+\vfill\cleardoublepage
+
+\ppcolophon
+
+
+\end{document}
